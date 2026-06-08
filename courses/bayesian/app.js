@@ -71,7 +71,7 @@ const LS = {
   set(k, v) { try { localStorage.setItem(k, JSON.stringify(v)); } catch (e) {} },
   del(k) { localStorage.removeItem(k); }
 };
-const KEY = { learn: PFX + "_learn", review: PFX + "_review", test: PFX + "_test" };
+const KEY = { learn: PFX + "_learn", reviews: PFX + "_reviews", test: PFX + "_test", reviewOld: PFX + "_review" };
 function showBanner(mode, text, btnLabel, onReset) {
   const el = $("#" + mode + "-banner"); el.innerHTML = "";
   const span = document.createElement("span"); span.textContent = text;
@@ -79,16 +79,47 @@ function showBanner(mode, text, btnLabel, onReset) {
   el.appendChild(span); el.appendChild(btn); el.classList.remove("hidden");
 }
 function hideBanner(mode) { $("#" + mode + "-banner").classList.add("hidden"); }
+/* plusieurs sessions de révision en parallèle : une par deck (signature = catégories choisies) */
+function sigOf(keys) { return [...keys].sort().join("|"); }
+function loadReviews() {
+  let m = LS.get(KEY.reviews);
+  if (!m || typeof m !== "object" || Array.isArray(m)) m = {};
+  const old = LS.get(KEY.reviewOld); // migration de l'ancienne session unique vers la map
+  if (old && old.queue && old.queue.length) {
+    const sig = "legacy:" + (old.label || "");
+    if (!m[sig]) m[sig] = { queue: old.queue, done: old.done || 0, total: old.total || old.queue.length, label: old.label || "—", keys: [], ts: 0 };
+    LS.del(KEY.reviewOld); LS.set(KEY.reviews, m);
+  }
+  return m;
+}
+function saveReviews(m) { LS.set(KEY.reviews, m); }
+function dropReview(sig) { const m = loadReviews(); delete m[sig]; saveReviews(m); }
+
 function renderHomeResume() {
-  const s = LS.get(KEY.review);
-  const el = $("#home-resume");
-  if (!el) return;
-  if (s && s.queue && s.queue.length) {
-    const remaining = s.queue.length, total = s.total || remaining;
-    $("#home-resume-info").textContent = `Deck : ${s.label || "—"} · il te reste ${remaining} carte(s) sur ${total}.`;
-    $("#home-resume-btn").textContent = `Continuer (${remaining}/${total})`;
-    el.classList.remove("hidden");
-  } else { el.classList.add("hidden"); }
+  const el = $("#home-resume"), list = $("#home-resume-list");
+  if (!el || !list) return;
+  const m = loadReviews();
+  const entries = Object.entries(m)
+    .map(([sig, s]) => [sig, s, fromIds(s && s.queue).length])
+    .filter(([, s, n]) => s && n > 0)
+    .sort((a, b) => (b[1].ts || 0) - (a[1].ts || 0));
+  list.innerHTML = "";
+  if (!entries.length) { el.classList.add("hidden"); return; }
+  entries.forEach(([sig, s, remaining]) => {
+    const total = s.total || remaining;
+    const row = document.createElement("div"); row.className = "resume-row";
+    const info = document.createElement("div"); info.className = "resume-info";
+    info.innerHTML = `<div class="resume-deck">${s.label || "—"}</div><div class="small muted">il te reste ${remaining} carte(s) sur ${total}</div>`;
+    const actions = document.createElement("div"); actions.className = "row";
+    const cont = document.createElement("button"); cont.textContent = `Continuer (${remaining}/${total})`;
+    cont.onclick = () => resumeReview(sig);
+    const drop = document.createElement("button"); drop.className = "ghost"; drop.textContent = "Abandonner";
+    drop.onclick = () => { dropReview(sig); renderHomeResume(); };
+    actions.appendChild(cont); actions.appendChild(drop);
+    row.appendChild(info); row.appendChild(actions);
+    list.appendChild(row);
+  });
+  el.classList.remove("hidden");
 }
 
 /* ---------- HOME wiring ---------- */
@@ -98,8 +129,6 @@ buildChips($("#cours-cats"), COURS_CATS);
 buildChips($("#exo-cats"), EXO_CATS);
 refreshChips();
 renderHomeResume();
-$("#home-resume-btn").onclick = () => enterReview();
-$("#home-resume-drop").onclick = () => { LS.del(KEY.review); renderHomeResume(); };
 $$("[data-pick]").forEach(a => a.onclick = e => { e.preventDefault(); const g = a.dataset.pick; (g === "cours" ? COURS_CATS : EXO_CATS).forEach(c => selected.add(c.key)); refreshChips(); });
 $$("[data-clear]").forEach(a => a.onclick = e => { e.preventDefault(); const g = a.dataset.clear; (g === "cours" ? COURS_CATS : EXO_CATS).forEach(c => selected.delete(c.key)); refreshChips(); });
 $("#pick-all").onclick = () => { selected = new Set(ALL_KEYS); refreshChips(); };
@@ -151,16 +180,33 @@ $("#learn-next").onclick = () => { L.i = (L.i + 1) % L.deck.length; L.rev = fals
 
 /* ====================== REVIEW ====================== */
 let R = { queue: [], total: 0, done: 0, rev: false };
-function saveReview() { if (R.queue && R.queue.length) LS.set(KEY.review, { queue: idsOf(R.queue), done: R.done, total: R.total, label: R.label }); else LS.del(KEY.review); }
-function startReview() { hideBanner("review"); const d = buildDeck(); R = { queue: d, total: d.length, done: 0, label: deckLabel(selected), rev: false }; $("#review-done").classList.add("hidden"); saveReview(); renderReview(); show("review"); }
+function saveReview() {
+  const m = loadReviews();
+  if (R.queue && R.queue.length) m[R.sig] = { queue: idsOf(R.queue), done: R.done, total: R.total, label: R.label, keys: R.keys, ts: Date.now() };
+  else delete m[R.sig];
+  saveReviews(m);
+}
+function startReview() {
+  hideBanner("review");
+  const d = buildDeck();
+  R = { queue: d, total: d.length, done: 0, label: deckLabel(selected), keys: [...selected], sig: sigOf(selected), rev: false };
+  $("#review-done").classList.add("hidden"); saveReview(); renderReview(); show("review");
+}
 function enterReview() {
-  const s = LS.get(KEY.review);
-  if (s && s.queue && fromIds(s.queue).length) {
-    R = { queue: fromIds(s.queue), total: s.total || s.queue.length, done: s.done || 0, label: s.label || "", rev: false };
+  const sig = sigOf(selected), s = loadReviews()[sig];
+  if (s && fromIds(s.queue).length) {
+    R = { queue: fromIds(s.queue), total: s.total || s.queue.length, done: s.done || 0, label: s.label || deckLabel(selected), keys: s.keys || [...selected], sig, rev: false };
     $("#review-done").classList.add("hidden"); renderReview(); show("review");
-    showBanner("review", "Reprise de ta session de révision (progression mémorisée).", "Recommencer",
-      () => { LS.del(KEY.review); startReview(); });
+    showBanner("review", "Reprise de ta révision de ce deck (progression mémorisée).", "Recommencer",
+      () => { dropReview(sig); startReview(); });
   } else { startReview(); }
+}
+function resumeReview(sig) {
+  const s = loadReviews()[sig];
+  if (!s || !fromIds(s.queue).length) { renderHomeResume(); return; }
+  if (s.keys && s.keys.length) { selected = new Set(s.keys); refreshChips(); }
+  R = { queue: fromIds(s.queue), total: s.total || s.queue.length, done: s.done || 0, label: s.label || "—", keys: s.keys || [], sig, rev: false };
+  hideBanner("review"); $("#review-done").classList.add("hidden"); renderReview(); show("review");
 }
 function renderReview() {
   saveReview();
