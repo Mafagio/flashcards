@@ -1,0 +1,87 @@
+[
+  {
+    "id": "m330-ch5-01",
+    "course": "MATH-330",
+    "category": "Ch. 5",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Énonce le théorème de convergence des martingales dans le cas $L^1$ / uniformément intégrable. Quelle conclusion obtient-on (p.s. et $L^1$) ?",
+    "back": "Soit $(M_n)$ une martingale par rapport à $(\\mathcal{F}_n)$. Si $(M_n)$ est uniformément intégrable, alors il existe $M_\\infty\\in L^1$ tel que $M_n\\to M_\\infty$ presque sûrement ET dans $L^1$, et de plus $M_n=\\mathbb{E}[M_\\infty\\mid\\mathcal{F}_n]$ (la martingale est fermée par $M_\\infty$).",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {"label": "Hypothèse correcte : martingale uniformément intégrable", "weight": 2},
+        {"label": "Convergence presque sûre vers une limite M_infini dans L^1", "weight": 2},
+        {"label": "Convergence dans L^1 et fermeture M_n = E[M_infini | F_n]", "weight": 2}
+      ]
+    }
+  },
+  {
+    "id": "m330-ch4-02",
+    "course": "MATH-330",
+    "category": "Ch. 4",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Définis un temps d'arrêt $T$ pour une filtration $(\\mathcal{F}_n)$, puis énonce le théorème d'arrêt de Doob (optional stopping) avec ses hypothèses suffisantes.",
+    "back": "$T:\\Omega\\to\\mathbb{N}\\cup\\{\\infty\\}$ est un temps d'arrêt si $\\{T\\le n\\}\\in\\mathcal{F}_n$ pour tout $n$. Théorème d'arrêt : si $(M_n)$ est une martingale et $S\\le T$ des temps d'arrêt, alors $\\mathbb{E}[M_T]=\\mathbb{E}[M_0]$ sous l'une des conditions : (i) $T$ borné ; (ii) $T<\\infty$ p.s. et $(M_{n\\wedge T})$ uniformément intégrable ; (iii) $\\mathbb{E}[T]<\\infty$ et accroissements bornés.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {"label": "Définition correcte du temps d'arrêt : {T<=n} dans F_n", "weight": 2},
+        {"label": "Énoncé E[M_T] = E[M_0] pour une martingale", "weight": 2},
+        {"label": "Au moins une condition suffisante valable (borné / UI / E[T] fini)", "weight": 2}
+      ]
+    }
+  },
+  {
+    "id": "m330-s7-03",
+    "course": "MATH-330",
+    "category": "Série 7",
+    "kind": "exercice",
+    "difficulty": 3,
+    "front": "Soit $(M_n)$ une martingale bornée dans $L^2$ (i.e. $\\sup_n \\mathbb{E}[M_n^2]<\\infty$). Montre qu'elle converge presque sûrement et dans $L^2$.",
+    "back": "Les accroissements $d_k=M_k-M_{k-1}$ sont orthogonaux dans $L^2$, donc $\\mathbb{E}[M_n^2]=\\mathbb{E}[M_0^2]+\\sum_{k\\le n}\\mathbb{E}[d_k^2]$. La borne $\\sup_n\\mathbb{E}[M_n^2]<\\infty$ donne $\\sum_k\\mathbb{E}[d_k^2]<\\infty$, donc $(M_n)$ est de Cauchy dans $L^2$ : convergence $L^2$ vers un $M_\\infty$. Bornée dans $L^2\\Rightarrow$ bornée dans $L^1\\Rightarrow$ convergence p.s. par le théorème de convergence des martingales.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {"label": "Orthogonalité des accroissements et identité de Pythagore sur E[M_n^2]", "weight": 2},
+        {"label": "Somme des variances finie => suite de Cauchy dans L^2 => limite L^2", "weight": 2},
+        {"label": "Bornée dans L^2 => bornée dans L^1 => convergence presque sûre", "weight": 2}
+      ]
+    }
+  },
+  {
+    "id": "bayes-dt-01",
+    "course": "Bayesian Statistics",
+    "category": "Décision",
+    "kind": "cours",
+    "difficulty": 3,
+    "front": "Explique pourquoi l'estimateur du maximum de vraisemblance de la moyenne d'une gaussienne $N(\\theta, I_d)$ est inadmissible pour la perte quadratique dès que $d\\ge 3$ (phénomène de James–Stein).",
+    "back": "Pour $X\\sim N(\\theta,I_d)$, le MLE est $\\hat\\theta=X$, de risque constant $d$. L'estimateur de James–Stein $\\hat\\theta_{JS}=(1-\\tfrac{d-2}{\\|X\\|^2})X$ a, via la formule de Stein (intégration par parties), un risque $\\mathbb{E}\\|\\hat\\theta_{JS}-\\theta\\|^2 = d-\\mathbb{E}\\big[\\tfrac{(d-2)^2}{\\|X\\|^2}\\big] < d$ pour tout $\\theta$ dès $d\\ge 3$. Donc $X$ est dominé partout : inadmissible.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {"label": "Risque du MLE = d (constant) sous perte quadratique", "weight": 2},
+        {"label": "Estimateur de James-Stein avec facteur de shrinkage (d-2)/||X||^2", "weight": 2},
+        {"label": "Risque JS strictement < d pour tout theta via la formule de Stein (d>=3)", "weight": 2}
+      ]
+    }
+  },
+  {
+    "id": "bayes-dt-02",
+    "course": "Bayesian Statistics",
+    "category": "Décision",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Définis la règle de Bayes associée à un prior $\\pi$ et le risque de Bayes. Quel est le lien classique entre règle de Bayes (unique) et admissibilité ?",
+    "back": "Le risque de Bayes d'une règle $\\delta$ est $r(\\pi,\\delta)=\\int R(\\theta,\\delta)\\,\\pi(d\\theta)$. Une règle de Bayes minimise $r(\\pi,\\cdot)$ ; elle s'obtient en minimisant le risque a posteriori $\\mathbb{E}[L(\\theta,a)\\mid X]$ pour chaque $X$. Lien : une règle de Bayes unique (à risque fini) est admissible — sinon une règle qui la domine aurait un risque de Bayes au plus égal, contredisant l'unicité.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {"label": "Risque de Bayes r(pi,delta) = intégrale du risque contre le prior", "weight": 2},
+        {"label": "Règle de Bayes = minimise le risque a posteriori point par point", "weight": 2},
+        {"label": "Une règle de Bayes unique est admissible (argument de domination)", "weight": 2}
+      ]
+    }
+  }
+]

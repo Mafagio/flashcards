@@ -1,0 +1,10 @@
+services:
+  battle:
+    build: .
+    ports:
+      - "8000:8000"
+    env_file: .env
+    volumes:
+      - battle-data:/data          # la DB SQLite survit aux redémarrages
+volumes:
+  battle-data:

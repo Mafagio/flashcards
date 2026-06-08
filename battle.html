@@ -1,0 +1,846 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>⚔️ Battle — Flashcards</title>
+<link rel="icon" href="data:,">
+
+<!-- KaTeX (même rendu que le reste du site) -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/contrib/auto-render.min.js"></script>
+
+<style>
+:root{
+  --accent:#0a66ff;
+  --accent-soft:#e8f0ff;
+  --link:#6b3fa0;
+  --ink:#1b1b1f;
+  --muted:#6b6b73;
+  --line:#ececef;
+  --bg:#ffffff;
+  --panel:#fafafb;
+  --good:#1a8f5a;
+  --good-soft:#e4f5ec;
+  --bad:#d23b3b;
+  --bad-soft:#fbe9e9;
+  --warn:#c9851f;
+  --warn-soft:#fdf2e0;
+  --radius:16px;
+  --shadow:0 1px 2px rgba(20,20,30,.04), 0 6px 22px rgba(20,20,30,.06);
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0}
+body{
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  color:var(--ink); background:var(--bg);
+  line-height:1.5; -webkit-font-smoothing:antialiased;
+}
+a{color:var(--link);text-decoration:none}
+a:hover{text-decoration:underline}
+button{font-family:inherit;cursor:pointer}
+.wrap{max-width:920px;margin:0 auto;padding:24px 20px 80px}
+.muted{color:var(--muted)}
+.small{font-size:13px}
+.hidden{display:none !important}
+
+/* ---------- Header ---------- */
+header.bar{
+  display:flex;align-items:center;gap:14px;flex-wrap:wrap;
+  padding-bottom:18px;border-bottom:1px solid var(--line);margin-bottom:22px;
+}
+header.bar h1{font-size:22px;margin:0;letter-spacing:-.02em}
+.spacer{flex:1}
+.chip{
+  display:inline-flex;align-items:center;gap:6px;
+  background:var(--panel);border:1px solid var(--line);
+  border-radius:999px;padding:6px 12px;font-size:14px;font-weight:600;
+}
+.chip .lab{color:var(--muted);font-weight:500}
+.btn{
+  border:1px solid var(--line);background:#fff;border-radius:12px;
+  padding:9px 14px;font-size:14px;font-weight:600;color:var(--ink);
+  transition:.12s ease;
+}
+.btn:hover{border-color:#d9d9de;background:#fcfcfd}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
+.btn.primary:hover{background:#0a5be0}
+.btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
+.btn.ghost:hover{background:var(--panel);color:var(--ink)}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.btn.sm{padding:6px 10px;font-size:13px;border-radius:10px}
+
+/* ---------- Tabs ---------- */
+nav.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:22px}
+nav.tabs button{
+  border:none;background:transparent;border-radius:10px;
+  padding:8px 14px;font-size:14.5px;font-weight:600;color:var(--muted);
+}
+nav.tabs button:hover{background:var(--panel);color:var(--ink)}
+nav.tabs button.active{background:var(--accent-soft);color:var(--accent)}
+.badge{
+  display:inline-block;min-width:18px;height:18px;line-height:18px;text-align:center;
+  background:var(--bad);color:#fff;border-radius:999px;font-size:11px;font-weight:700;
+  padding:0 5px;margin-left:6px;vertical-align:middle;
+}
+
+/* ---------- Cards / panels ---------- */
+.card{
+  background:#fff;border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:22px;margin-bottom:18px;
+}
+.card h2{margin:0 0 4px;font-size:17px;letter-spacing:-.01em}
+.card h2 + .sub{margin:0 0 16px;color:var(--muted);font-size:13.5px}
+.row{display:flex;gap:14px;flex-wrap:wrap}
+.grow{flex:1;min-width:0}
+
+/* math content */
+.tex{white-space:pre-wrap;word-wrap:break-word}
+.tex.lg{font-size:17px}
+
+/* ---------- Versus (dashboard) ---------- */
+.versus{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px}
+.player{padding:16px;border-radius:14px;background:var(--panel);border:1px solid var(--line)}
+.player.me{background:var(--accent-soft);border-color:#d4e3ff}
+.player .name{font-weight:700;font-size:15px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.player .xp{font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1}
+.player .meta{margin-top:6px;color:var(--muted);font-size:13px}
+.vs{font-weight:800;color:var(--muted);font-size:15px;
+   border:1px solid var(--line);border-radius:999px;padding:8px 12px;background:#fff}
+.xpbar{height:10px;border-radius:999px;background:#eef0f3;overflow:hidden;margin-top:16px;display:flex}
+.xpbar .mine{background:var(--accent)}
+.xpbar .theirs{background:#c9ccd4}
+.token-hint{margin-top:14px;font-size:13.5px;color:var(--muted)}
+
+/* feed */
+.feed{list-style:none;margin:0;padding:0}
+.feed li{padding:10px 0;border-bottom:1px solid var(--line);font-size:14px;display:flex;justify-content:space-between;gap:12px}
+.feed li:last-child{border-bottom:none}
+.feed time{color:var(--muted);font-size:12px;white-space:nowrap}
+
+/* selectors */
+label.fld{display:block;font-size:13px;font-weight:600;color:var(--muted);margin:0 0 6px}
+select,input[type=text],input[type=password],textarea{
+  width:100%;font-family:inherit;font-size:15px;color:var(--ink);
+  border:1px solid var(--line);border-radius:12px;padding:11px 12px;background:#fff;
+}
+textarea{min-height:150px;resize:vertical;line-height:1.55}
+select:focus,input:focus,textarea:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.checks{display:flex;flex-wrap:wrap;gap:8px}
+.checks label{
+  display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);
+  border-radius:10px;padding:7px 11px;font-size:13.5px;cursor:pointer;background:#fff;
+}
+.checks label:has(input:checked){background:var(--accent-soft);border-color:#cfe0ff;color:var(--accent)}
+.checks input{accent-color:var(--accent)}
+
+/* review card */
+.flash{min-height:120px}
+.kindtag{display:inline-block;font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;
+  color:var(--muted);background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:3px 9px}
+.answer-reveal{margin-top:16px;padding-top:16px;border-top:1px dashed var(--line)}
+.conf-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px}
+.conf{flex:1;min-width:120px;border-radius:12px;border:1px solid var(--line);background:#fff;padding:12px 10px;text-align:center;font-weight:700;transition:.12s}
+.conf .k{display:block;font-size:11px;color:var(--muted);font-weight:600;margin-bottom:2px}
+.conf.unknown:hover{border-color:#c9ccd4;background:var(--panel)}
+.conf.c60{color:var(--warn)} .conf.c60:hover{background:var(--warn-soft);border-color:#f0d9a8}
+.conf.c80{color:var(--accent)} .conf.c80:hover{background:var(--accent-soft);border-color:#cfe0ff}
+.conf.c95{color:var(--good)} .conf.c95:hover{background:var(--good-soft);border-color:#bfe6cf}
+.progress{height:6px;border-radius:999px;background:#eef0f3;overflow:hidden;margin-bottom:16px}
+.progress > div{height:100%;background:var(--accent);transition:width .25s}
+
+/* audits */
+.aud{border:1px solid var(--line);border-radius:14px;padding:16px;margin-bottom:12px}
+.aud .head{display:flex;align-items:center;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.src{font-size:11.5px;font-weight:700;border-radius:999px;padding:3px 9px;text-transform:uppercase;letter-spacing:.03em}
+.src.audit{background:var(--accent-soft);color:var(--accent)}
+.src.challenge{background:var(--bad-soft);color:var(--bad)}
+.src.duel{background:var(--warn-soft);color:var(--warn)}
+.result{margin-top:14px;padding:14px;border-radius:12px;border:1px solid var(--line);background:var(--panel)}
+.result.pass{background:var(--good-soft);border-color:#bfe6cf}
+.result.fail{background:var(--bad-soft);border-color:#f3c9c9}
+.score-ring{font-size:26px;font-weight:800;letter-spacing:-.02em}
+.hits{list-style:none;margin:10px 0 0;padding:0}
+.hits li{font-size:13.5px;padding:3px 0;display:flex;gap:8px;align-items:flex-start}
+.hits .ok{color:var(--good);font-weight:800}
+.hits .no{color:var(--muted)}
+
+/* tables */
+table{width:100%;border-collapse:collapse;font-size:14px}
+th,td{text-align:left;padding:9px 8px;border-bottom:1px solid var(--line)}
+th{color:var(--muted);font-weight:600;font-size:12.5px;text-transform:uppercase;letter-spacing:.03em}
+td.num{text-align:right;font-variant-numeric:tabular-nums}
+.gap-over{color:var(--bad);font-weight:700}
+.gap-under{color:var(--accent);font-weight:700}
+.gap-ok{color:var(--good);font-weight:700}
+
+/* toast */
+#toasts{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);z-index:50;display:flex;flex-direction:column;gap:8px;align-items:center}
+.toast{background:#1b1b1f;color:#fff;padding:11px 16px;border-radius:12px;font-size:14px;font-weight:600;
+  box-shadow:0 8px 30px rgba(0,0,0,.2);animation:pop .2s ease}
+.toast.good{background:#0f7a4a}
+.toast.alert{background:#b23030}
+@keyframes pop{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* login */
+.login{max-width:380px;margin:8vh auto 0}
+.login h1{font-size:26px;text-align:center;letter-spacing:-.02em}
+.login p.sub{text-align:center;color:var(--muted);margin-top:-6px}
+.login .card > * + *{margin-top:14px}
+.err{color:var(--bad);font-size:13.5px;min-height:18px}
+.empty{color:var(--muted);font-size:14px;padding:6px 0}
+@media(max-width:560px){
+  .versus{grid-template-columns:1fr;gap:8px}
+  .vs{justify-self:center}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ LOGIN ============ -->
+<div id="login" class="wrap login">
+  <h1>⚔️ Battle</h1>
+  <p class="sub">Flashcards proba/stats — toi contre ton pote.</p>
+  <div class="card">
+    <div>
+      <label class="fld">Nom</label>
+      <input type="text" id="lg-name" autocomplete="username" placeholder="Tom">
+    </div>
+    <div>
+      <label class="fld">Phrase secrète</label>
+      <input type="password" id="lg-pass" autocomplete="current-password" placeholder="••••••••">
+    </div>
+    <div>
+      <label class="fld">URL de l'API <span class="muted" style="font-weight:400">— ton backend</span></label>
+      <input type="text" id="lg-api" placeholder="https://ton-backend.up.railway.app" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="err" id="lg-err"></div>
+    <div class="row">
+      <button class="btn primary grow" id="lg-login">Se connecter</button>
+      <button class="btn grow" id="lg-signup">Créer un compte</button>
+    </div>
+    <p class="small muted" style="margin:6px 0 0">
+      L'URL est enregistrée dans ce navigateur. En prod (GitHub Pages = HTTPS),
+      elle doit être en <b>https</b> (sinon le navigateur bloque l'appel).
+    </p>
+  </div>
+</div>
+
+<!-- ============ APP ============ -->
+<div id="app" class="wrap hidden">
+  <header class="bar">
+    <h1>⚔️ Battle</h1>
+    <span class="spacer"></span>
+    <span class="chip"><span class="lab">XP</span> <span id="hp-xp">0</span></span>
+    <span class="chip">🪙 <span id="hp-tok">0</span></span>
+    <span class="chip"><span class="lab">👤</span> <span id="hp-name"></span></span>
+    <button class="btn ghost sm" id="logout">Déconnexion</button>
+  </header>
+
+  <nav class="tabs" id="tabs">
+    <button data-tab="dash" class="active">Tableau de bord</button>
+    <button data-tab="review">Réviser</button>
+    <button data-tab="audits">Audits <span class="badge hidden" id="tab-aud-badge">0</span></button>
+    <button data-tab="challenge">Challenge</button>
+    <button data-tab="duels">Duels</button>
+    <button data-tab="calib">Calibration</button>
+  </nav>
+
+  <!-- DASHBOARD -->
+  <section data-panel="dash">
+    <div class="card">
+      <div class="versus" id="versus"></div>
+      <div class="xpbar" id="xpbar"><div class="mine" style="width:50%"></div><div class="theirs" style="width:50%"></div></div>
+      <div class="token-hint" id="token-hint"></div>
+    </div>
+    <div class="card">
+      <h2>Activité</h2>
+      <p class="sub">Le fil de la rivalité.</p>
+      <ul class="feed" id="feed"></ul>
+    </div>
+  </section>
+
+  <!-- REVIEW -->
+  <section data-panel="review" class="hidden">
+    <div class="card" id="review-setup">
+      <h2>Réviser en mode Battle</h2>
+      <p class="sub">Chaque carte « connue » te donne de l'XP tout de suite. Mais toutes les
+        20 cartes, 4 sont tirées au sort en <b>audit écrit</b> : déclare ta confiance honnêtement.</p>
+      <div class="row">
+        <div class="grow">
+          <label class="fld">Cours</label>
+          <select id="rv-course"></select>
+        </div>
+      </div>
+      <div style="margin-top:14px">
+        <label class="fld">Chapitres / séries</label>
+        <div class="checks" id="rv-cats"></div>
+      </div>
+      <div style="margin-top:18px">
+        <button class="btn primary" id="rv-start">Commencer la session</button>
+      </div>
+    </div>
+
+    <div class="card hidden" id="review-card">
+      <div class="progress"><div id="rv-progress" style="width:0%"></div></div>
+      <div class="head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
+        <span class="kindtag" id="rv-cat"></span>
+        <span class="small muted" id="rv-count"></span>
+      </div>
+      <div class="tex lg flash" id="rv-front"></div>
+      <div class="answer-reveal hidden" id="rv-back-wrap">
+        <div class="small muted" style="margin-bottom:6px">Réponse :</div>
+        <div class="tex" id="rv-back"></div>
+      </div>
+      <div style="margin-top:16px">
+        <button class="btn" id="rv-flip">Voir la réponse <span class="small muted">(Espace)</span></button>
+      </div>
+      <div class="conf-row">
+        <button class="conf unknown" data-known="0"><span class="k">1</span>Pas connue</button>
+        <button class="conf c60" data-known="1" data-q="0.6"><span class="k">2</span>Plutôt sûr · 60%</button>
+        <button class="conf c80" data-known="1" data-q="0.8"><span class="k">3</span>Sûr · 80%</button>
+        <button class="conf c95" data-known="1" data-q="0.95"><span class="k">4</span>Très sûr · 95%</button>
+      </div>
+      <p class="small muted" style="margin-top:12px">
+        Surévaluer ta confiance se paie cher si la carte tombe en audit (règle de score propre).
+      </p>
+    </div>
+
+    <div class="card hidden" id="review-done">
+      <h2>Session terminée 🎉</h2>
+      <p class="sub" id="rv-summary"></p>
+      <button class="btn primary" id="rv-again">Nouvelle session</button>
+    </div>
+  </section>
+
+  <!-- AUDITS -->
+  <section data-panel="audits" class="hidden">
+    <div class="card">
+      <h2>Audits en attente</h2>
+      <p class="sub">Prouve ce que tu as déclaré connaître. Corrigé sur 6 selon le barème du cours.</p>
+      <div id="aud-list"></div>
+    </div>
+  </section>
+
+  <!-- CHALLENGE -->
+  <section data-panel="challenge" class="hidden">
+    <div class="card">
+      <h2>Challenger ton pote 🪙</h2>
+      <p class="sub">Dépense un jeton pour forcer un audit sur une carte qu'il prétend connaître.
+        S'il rate : <b>+5 XP</b> pour toi. S'il réussit : <b>+3 XP</b> pour lui (le jeton est perdu).</p>
+      <div id="ch-list"></div>
+    </div>
+  </section>
+
+  <!-- DUELS -->
+  <section data-panel="duels" class="hidden">
+    <div class="card">
+      <h2>Lancer un duel 🤺</h2>
+      <p class="sub">6 cartes tirées au hasard, vous répondez tous les deux, le plus haut total gagne
+        (+10 XP, +2 pour l'autre).</p>
+      <div class="row">
+        <div class="grow">
+          <label class="fld">Cours</label>
+          <select id="dl-course"></select>
+        </div>
+        <div style="display:flex;align-items:flex-end">
+          <button class="btn primary" id="dl-start">Défier <span id="dl-opp"></span></button>
+        </div>
+      </div>
+    </div>
+    <div class="card">
+      <h2>Tes duels</h2>
+      <div id="dl-list"></div>
+    </div>
+  </section>
+
+  <!-- CALIBRATION -->
+  <section data-panel="calib" class="hidden">
+    <div class="card">
+      <h2>Calibration</h2>
+      <p class="sub">Ta confiance déclarée vs ta réussite réelle en audit, par chapitre.
+        <span class="gap-over">Écart &gt; 0 = surconfiant</span>,
+        <span class="gap-under">&lt; 0 = sous-confiant</span>. (Non compétitif — juste pour viser juste.)</p>
+      <div id="calib-body"></div>
+    </div>
+  </section>
+</div>
+
+<div id="toasts"></div>
+
+<script>
+/* =================================================================
+   CONFIG  — l'URL de l'API est réglable À L'EXÉCUTION (pas en dur).
+   Lue depuis localStorage("battle_api_url"), modifiable via le champ
+   "URL de l'API" sur l'écran de connexion. Fallback : localhost:8000.
+   ⚠️  GitHub Pages est servi en HTTPS : en prod, l'URL DOIT être en
+       https:// sinon le navigateur bloque (mixed content).
+   ================================================================= */
+const DEFAULT_API = "http://localhost:8000";
+let API_BASE = (localStorage.getItem("battle_api_url") || "").trim().replace(/\/+$/, "") || DEFAULT_API;
+function setApiBase(v){
+  API_BASE = (v || "").trim().replace(/\/+$/, "") || DEFAULT_API;  // sans slash final
+  localStorage.setItem("battle_api_url", API_BASE);
+  return API_BASE;
+}
+
+const CONF = { "0.6":{cls:"c60",label:"60%"}, "0.8":{cls:"c80",label:"80%"}, "0.95":{cls:"c95",label:"95%"} };
+const $  = (s,r=document)=>r.querySelector(s);
+const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
+
+let creds = JSON.parse(localStorage.getItem("battle_creds") || "null");
+const state = { me:null, opponent:null, deck:[], idx:0, session:{seen:0,xp0:0}, displayedXP:0 };
+
+/* ---------- API helper ---------- */
+async function api(path, {method="GET", body=null}={}){
+  const headers = {"Content-Type":"application/json"};
+  if(creds){ headers["X-User"]=creds.user; headers["X-Pass"]=creds.pass; }
+  const res = await fetch(API_BASE+path, {method, headers, body: body?JSON.stringify(body):null});
+  if(!res.ok){
+    let msg = "Erreur "+res.status;
+    try{ const j=await res.json(); if(j.detail) msg=j.detail; }catch(e){}
+    throw new Error(msg);
+  }
+  return res.status===204 ? null : res.json();
+}
+
+/* ---------- KaTeX (+ markdown léger : **gras**) ---------- */
+function tex(el, raw){
+  raw = raw || "";
+  // 1) échappe le HTML (KaTeX relit le textContent décodé : $a<b$ reste correct)
+  let s = raw.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+  // 2) **gras** -> <strong> (hors maths : pas de * ni saut de ligne dans la capture)
+  s = s.replace(/\*\*([^*\n]+)\*\*/g, "<strong>$1</strong>");
+  el.innerHTML = s;            // les retours à la ligne restent rendus via white-space:pre-wrap
+  if(window.renderMathInElement){
+    renderMathInElement(el, {
+      delimiters:[
+        {left:"$$",right:"$$",display:true},
+        {left:"$",right:"$",display:false},
+        {left:"\\(",right:"\\)",display:false},
+        {left:"\\[",right:"\\]",display:true},
+      ],
+      throwOnError:false
+    });
+  }
+}
+
+/* ---------- toast ---------- */
+function toast(msg, kind=""){
+  const t=document.createElement("div");
+  t.className="toast "+kind; t.textContent=msg;
+  $("#toasts").appendChild(t);
+  setTimeout(()=>{ t.style.opacity="0"; t.style.transition="opacity .3s"; setTimeout(()=>t.remove(),300); }, 2600);
+}
+
+/* ---------- XP count-up ---------- */
+function animXP(target){
+  const el=$("#hp-xp"); const start=state.displayedXP; const end=Math.round(target);
+  const t0=performance.now(); const dur=500;
+  function step(t){
+    const k=Math.min(1,(t-t0)/dur); const v=Math.round(start+(end-start)*(1-(1-k)*(1-k)));
+    el.textContent=v; if(k<1) requestAnimationFrame(step); else state.displayedXP=end;
+  }
+  requestAnimationFrame(step);
+}
+
+/* =================================================================
+   AUTH
+   ================================================================= */
+$("#lg-api").value = API_BASE;
+$("#lg-api").addEventListener("change", e=>{ $("#lg-api").value = setApiBase(e.target.value); });
+$("#lg-login").onclick  = ()=>auth("/login");
+$("#lg-signup").onclick = ()=>auth("/signup");
+$("#lg-pass").addEventListener("keydown", e=>{ if(e.key==="Enter") auth("/login"); });
+
+async function auth(path){
+  setApiBase($("#lg-api").value);                    // garantit l'URL même sans blur
+  const user=$("#lg-name").value.trim(), pass=$("#lg-pass").value;
+  if(!user||!pass){ $("#lg-err").textContent="Nom et phrase secrète requis."; return; }
+  $("#lg-err").textContent="";
+  try{
+    await api(path, {method:"POST", body:{name:user, passphrase:pass}});
+    // /signup ne connecte pas ; on stocke et on teste via /me
+    creds={user,pass}; localStorage.setItem("battle_creds", JSON.stringify(creds));
+    await enterApp();
+  }catch(err){ creds=null; $("#lg-err").textContent=err.message; }
+}
+
+$("#logout").onclick = ()=>{
+  localStorage.removeItem("battle_creds"); creds=null;
+  $("#app").classList.add("hidden"); $("#login").classList.remove("hidden");
+};
+
+async function enterApp(){
+  // valide les identifiants
+  state.me = await api("/me");
+  $("#login").classList.add("hidden");
+  $("#app").classList.remove("hidden");
+  $("#hp-name").textContent = state.me.name;
+  state.displayedXP = Math.round(state.me.xp);
+  await refreshHeader();
+  await loadCourses();
+  switchTab("dash");
+}
+
+/* =================================================================
+   HEADER / refresh global
+   ================================================================= */
+async function refreshHeader(){
+  state.me = await api("/me");
+  $("#hp-tok").textContent = state.me.tokens;
+  animXP(state.me.xp);
+  const n = state.me.pending_audits;
+  const b = $("#tab-aud-badge");
+  b.textContent=n; b.classList.toggle("hidden", n===0);
+}
+
+/* =================================================================
+   TABS
+   ================================================================= */
+$$("#tabs button").forEach(b=> b.onclick=()=>switchTab(b.dataset.tab));
+function switchTab(tab){
+  $$("#tabs button").forEach(b=>b.classList.toggle("active", b.dataset.tab===tab));
+  $$("#app section[data-panel]").forEach(s=>s.classList.toggle("hidden", s.dataset.panel!==tab));
+  if(tab==="dash")      renderDash();
+  if(tab==="audits")    renderAudits();
+  if(tab==="challenge") renderChallenge();
+  if(tab==="duels")     renderDuels();
+  if(tab==="calib")     renderCalib();
+}
+
+/* =================================================================
+   DASHBOARD
+   ================================================================= */
+async function renderDash(){
+  await refreshHeader();
+  const [lb, feed] = await Promise.all([api("/leaderboard"), api("/feed")]);
+  const me = lb.find(x=>x.me) || {name:state.me.name, xp:state.me.xp, tokens:state.me.tokens};
+  const opp = lb.find(x=>!x.me);
+  state.opponent = opp ? opp.name : null;
+
+  const V=$("#versus"); V.innerHTML="";
+  V.appendChild(playerCard(me, true));
+  const vs=document.createElement("div"); vs.className="vs"; vs.textContent="VS"; V.appendChild(vs);
+  V.appendChild(playerCard(opp || {name:"En attente…", xp:0, tokens:0}, false));
+
+  const total=(me.xp + (opp?opp.xp:0)) || 1;
+  const mine=Math.max(2, Math.round(100*me.xp/total));
+  $("#xpbar").innerHTML =
+    `<div class="mine" style="width:${mine}%"></div><div class="theirs" style="width:${100-mine}%"></div>`;
+
+  $("#token-hint").innerHTML =
+    `🪙 Prochain jeton challenge dans <b>${state.me.next_token_in}</b> XP (1 jeton / 50 XP de record).`;
+
+  const F=$("#feed"); F.innerHTML="";
+  if(!feed.length){ F.innerHTML='<li class="empty">Rien pour l\'instant — lance-toi !</li>'; }
+  feed.forEach(e=>{
+    const li=document.createElement("li");
+    const span=document.createElement("span"); span.textContent=e.text;
+    const tm=document.createElement("time"); tm.textContent=fmtTime(e.created_at);
+    li.append(span,tm); F.appendChild(li);
+  });
+}
+function playerCard(p, isMe){
+  const d=document.createElement("div"); d.className="player"+(isMe?" me":"");
+  d.innerHTML=`<div class="name">${isMe?"🟦":"⬜"} ${escapeHtml(p.name)}${isMe?" <span class='small muted'>(toi)</span>":""}</div>
+    <div class="xp">${Math.round(p.xp)}<span class="small muted" style="font-weight:600"> XP</span></div>
+    <div class="meta">🪙 ${p.tokens||0} jeton(s)</div>`;
+  return d;
+}
+
+/* =================================================================
+   COURSES (review + duel selectors)
+   ================================================================= */
+let COURSES={};
+async function loadCourses(){
+  COURSES = await api("/courses");
+  const names=Object.keys(COURSES);
+  fillSelect($("#rv-course"), names);
+  fillSelect($("#dl-course"), names);
+  $("#rv-course").onchange = renderCats;
+  renderCats();
+}
+function fillSelect(sel, opts){
+  sel.innerHTML=""; opts.forEach(o=>{ const op=document.createElement("option"); op.value=o; op.textContent=o; sel.appendChild(op); });
+}
+function renderCats(){
+  const course=$("#rv-course").value; const cats=COURSES[course]||[];
+  const box=$("#rv-cats"); box.innerHTML="";
+  cats.forEach(c=>{
+    const id="cat_"+Math.random().toString(36).slice(2);
+    const l=document.createElement("label");
+    l.innerHTML=`<input type="checkbox" value="${escapeHtml(c.category)}" id="${id}" checked> ${escapeHtml(c.category)} <span class="muted">(${c.count})</span>`;
+    box.appendChild(l);
+  });
+}
+
+/* =================================================================
+   REVIEW (mode battle)
+   ================================================================= */
+$("#rv-start").onclick = startReview;
+$("#rv-again").onclick = ()=>{ show("#review-setup"); };
+$("#rv-flip").onclick  = flipCard;
+
+async function startReview(){
+  const course=$("#rv-course").value;
+  const cats=$$("#rv-cats input:checked").map(i=>i.value);
+  if(!cats.length){ toast("Choisis au moins un chapitre.","alert"); return; }
+  let deck = await api(`/cards?course=${encodeURIComponent(course)}&categories=${encodeURIComponent(cats.join(","))}`);
+  if(!deck.length){ toast("Aucune carte ici.","alert"); return; }
+  // shuffle
+  for(let i=deck.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; }
+  state.deck=deck; state.idx=0; state.session={seen:0, xp0:state.me.xp};
+  show("#review-card"); renderFlash();
+}
+function show(sel){ ["#review-setup","#review-card","#review-done"].forEach(s=>$(s).classList.toggle("hidden", s!==sel)); }
+
+function renderFlash(){
+  const c=state.deck[state.idx];
+  $("#rv-progress").style.width = (100*state.idx/state.deck.length)+"%";
+  $("#rv-cat").textContent = `${c.category} · ${c.kind}`;
+  $("#rv-count").textContent = `${state.idx+1} / ${state.deck.length}`;
+  tex($("#rv-front"), c.front);
+  $("#rv-back-wrap").classList.add("hidden");
+  $("#rv-flip").classList.remove("hidden");
+}
+function flipCard(){
+  const c=state.deck[state.idx];
+  tex($("#rv-back"), c.back);
+  $("#rv-back-wrap").classList.remove("hidden");
+  $("#rv-flip").classList.add("hidden");
+}
+
+$$("#review-card .conf").forEach(btn=> btn.onclick=()=>declare(btn));
+async function declare(btn){
+  const c=state.deck[state.idx];
+  const known = btn.dataset.known==="1";
+  const body = {card_id:c.id, known};
+  if(known) body.q = parseFloat(btn.dataset.q);
+  try{
+    const r = await api("/review", {method:"POST", body});
+    state.session.seen++;
+    if(r.batched && r.new_audits>0){
+      toast(`🎲 ${r.new_audits} carte(s) tirée(s) en audit !`, "alert");
+    }
+    await refreshHeader();
+  }catch(err){ toast(err.message,"alert"); return; }
+  state.idx++;
+  if(state.idx>=state.deck.length) finishReview();
+  else renderFlash();
+}
+function finishReview(){
+  const gained = Math.round((state.me.xp - state.session.xp0)*10)/10;
+  $("#rv-progress").style.width="100%";
+  $("#rv-summary").textContent =
+    `${state.session.seen} cartes passées, ${gained>=0?"+":""}${gained} XP. `+
+    (state.me.pending_audits>0 ? `Tu as ${state.me.pending_audits} audit(s) à faire.` : `Aucun audit en attente.`);
+  show("#review-done");
+}
+
+// raccourcis clavier en révision
+document.addEventListener("keydown", e=>{
+  if($("#review-card").classList.contains("hidden")) return;
+  if($("#app").classList.contains("hidden")) return;
+  if(e.key===" "){ e.preventDefault(); if(!$("#rv-flip").classList.contains("hidden")) flipCard(); }
+  const map={"1":0,"2":1,"3":2,"4":3};
+  if(e.key in map){ const b=$$("#review-card .conf")[map[e.key]]; if(b) b.click(); }
+});
+
+/* =================================================================
+   AUDITS
+   ================================================================= */
+async function renderAudits(){
+  await refreshHeader();
+  const list = await api("/audits/pending");
+  const box=$("#aud-list"); box.innerHTML="";
+  if(!list.length){ box.innerHTML='<p class="empty">Aucun audit en attente. 👌</p>'; return; }
+  list.forEach(a=>box.appendChild(auditCard(a)));
+}
+function auditCard(a){
+  const d=document.createElement("div"); d.className="aud"; d.dataset.id=a.id;
+  const head=document.createElement("div"); head.className="head";
+  const src=document.createElement("span"); src.className="src "+a.source;
+  src.textContent = a.source==="challenge" ? `challenge${a.challenger?` · ${a.challenger}`:""}`
+                  : a.source==="duel" ? "duel" : "audit";
+  const cat=document.createElement("span"); cat.className="kindtag"; cat.textContent=`${a.category} · ${a.kind}`;
+  head.append(src,cat);
+  if(a.source!=="duel" && a.q){
+    const qc=CONF[String(a.q)];
+    if(qc){ const q=document.createElement("span"); q.className="small muted"; q.textContent=`confiance déclarée : ${qc.label}`; head.append(q); }
+  }
+  const front=document.createElement("div"); front.className="tex"; tex(front, a.front);
+
+  const ta=document.createElement("textarea"); ta.placeholder="Écris ta preuve / ta réponse…";
+  const btn=document.createElement("button"); btn.className="btn primary"; btn.textContent="Soumettre la réponse"; btn.style.marginTop="10px";
+  const out=document.createElement("div");
+
+  btn.onclick=async()=>{
+    if(!ta.value.trim()){ toast("Réponse vide.","alert"); return; }
+    btn.disabled=true; btn.textContent="Correction…";
+    try{
+      const r=await api(`/audits/${a.id}/answer`, {method:"POST", body:{answer:ta.value}});
+      out.appendChild(resultBox(r, a));
+      ta.disabled=true; btn.classList.add("hidden");
+      await refreshHeader();
+      toast(`${r.score}/6 — ${r.outcome?"réussi ✅":"raté ❌"} (${r.mastery>=0?"+":""}${r.mastery} XP)`, r.outcome?"good":"alert");
+    }catch(err){ toast(err.message,"alert"); btn.disabled=false; btn.textContent="Soumettre la réponse"; }
+  };
+  d.append(head, front, ta, btn, out);
+  return d;
+}
+function resultBox(r, a){
+  const box=document.createElement("div");
+  box.className="result "+(r.outcome?"pass":"fail");
+  const top=document.createElement("div");
+  top.innerHTML=`<span class="score-ring">${r.score}/6</span>
+     <span style="font-weight:700;margin-left:10px">${r.outcome?"Réussi ✅":"Raté ❌"}</span>
+     <span class="small muted" style="margin-left:10px">${r.mastery>=0?"+":""}${r.mastery} XP</span>`;
+  const just=document.createElement("p"); just.style.margin="10px 0 0"; just.style.fontSize="14px"; just.textContent=r.justification;
+  box.append(top, just);
+
+  // checklist barème
+  if(r.bareme && r.bareme.points){
+    const ul=document.createElement("ul"); ul.className="hits";
+    const hit=new Set(r.hits||[]);
+    r.bareme.points.forEach(p=>{
+      const li=document.createElement("li");
+      const ok=hit.has(p.label);
+      const mark=document.createElement("span"); mark.className=ok?"ok":"no"; mark.textContent=ok?"✓":"○";
+      const lab=document.createElement("span"); tex(lab, `${p.label} (${p.weight} pt)`);
+      li.append(mark, lab); ul.appendChild(li);
+    });
+    box.appendChild(ul);
+  }
+  // réponse attendue révélée
+  const rev=document.createElement("div"); rev.className="answer-reveal";
+  rev.innerHTML='<div class="small muted" style="margin-bottom:6px">Réponse attendue :</div>';
+  const back=document.createElement("div"); back.className="tex"; tex(back, r.back);
+  rev.appendChild(back); box.appendChild(rev);
+  return box;
+}
+
+/* =================================================================
+   CHALLENGE
+   ================================================================= */
+async function renderChallenge(){
+  await refreshHeader();
+  const claims = await api("/opponent/claims");
+  const box=$("#ch-list"); box.innerHTML="";
+  if(!claims.length){ box.innerHTML='<p class="empty">Ton pote n\'a encore rien déclaré connaître.</p>'; return; }
+  const head=document.createElement("p"); head.className="small muted";
+  head.innerHTML=`Tu as <b>${state.me.tokens}</b> jeton(s).`;
+  box.appendChild(head);
+  claims.forEach(c=>{
+    const row=document.createElement("div"); row.className="aud";
+    const h=document.createElement("div"); h.className="head";
+    const cat=document.createElement("span"); cat.className="kindtag"; cat.textContent=`${c.category} · ${c.kind}`;
+    const who=document.createElement("span"); who.className="small muted"; who.textContent=c.opponent;
+    h.append(cat, who);
+    const qc=CONF[String(c.q)];
+    if(qc){ const q=document.createElement("span"); q.className="small muted"; q.textContent=`il s'est dit sûr à ${qc.label}`; h.append(q); }
+    const btn=document.createElement("button"); btn.className="btn primary sm"; btn.style.marginTop="10px";
+    if(c.challenged){ btn.textContent="Challenge déjà en cours"; btn.disabled=true; }
+    else if(state.me.tokens<1){ btn.textContent="Défier (1 🪙)"; btn.disabled=true; }
+    else{
+      btn.textContent="Défier (1 🪙)";
+      btn.onclick=async()=>{
+        btn.disabled=true;
+        try{
+          await api("/challenge", {method:"POST", body:{opponent:c.opponent, card_id:c.id}});
+          toast("⚔️ Challenge lancé !","good");
+          renderChallenge();
+        }catch(err){ toast(err.message,"alert"); btn.disabled=false; }
+      };
+    }
+    row.append(h, btn); box.appendChild(row);
+  });
+}
+
+/* =================================================================
+   DUELS
+   ================================================================= */
+$("#dl-start").onclick = async()=>{
+  if(!state.opponent){ await renderDash(); }
+  if(!state.opponent){ toast("Pas encore d'adversaire.","alert"); return; }
+  const course=$("#dl-course").value;
+  try{
+    await api("/duels", {method:"POST", body:{opponent:state.opponent, course}});
+    toast("🤺 Duel lancé ! Réponds dans l'onglet Audits.","good");
+    renderDuels();
+  }catch(err){ toast(err.message,"alert"); }
+};
+async function renderDuels(){
+  await refreshHeader();
+  if(!state.opponent){ const lb=await api("/leaderboard"); const o=lb.find(x=>!x.me); state.opponent=o?o.name:null; }
+  $("#dl-opp").textContent = state.opponent ? state.opponent : "";
+  const duels = await api("/duels");
+  const box=$("#dl-list"); box.innerHTML="";
+  if(!duels.length){ box.innerHTML='<p class="empty">Aucun duel pour l\'instant.</p>'; return; }
+  duels.forEach(d=>{
+    const row=document.createElement("div"); row.className="aud";
+    const status = d.status==="done"
+      ? (d.winner ? `🏆 ${escapeHtml(d.winner)} gagne` : "🤝 Nul")
+      : (d.my_remaining>0 ? `⏳ ${d.my_remaining} carte(s) à faire (onglet Audits)` : "⏳ En attente de ton pote");
+    row.innerHTML=`<div class="head">
+        <span class="kindtag">${escapeHtml(d.course)}</span>
+        <span class="small muted">${escapeHtml(d.challenger)} vs ${escapeHtml(d.opponent)}</span>
+      </div><div style="font-size:14px">${status}</div>`;
+    box.appendChild(row);
+  });
+}
+
+/* =================================================================
+   CALIBRATION
+   ================================================================= */
+async function renderCalib(){
+  const data = await api("/calibration");
+  const box=$("#calib-body"); box.innerHTML="";
+  if(!data.overall){ box.innerHTML='<p class="empty">Pas encore d\'audit corrigé — reviens après quelques audits.</p>'; return; }
+  const t=document.createElement("table");
+  t.innerHTML=`<thead><tr><th>Cours</th><th>Chapitre</th><th class="num">n</th>
+     <th class="num">Réussite</th><th class="num">Confiance</th><th class="num">Brier</th><th class="num">Écart</th></tr></thead>`;
+  const tb=document.createElement("tbody");
+  data.by_category.forEach(r=> tb.appendChild(calibRow(r)));
+  // overall
+  const ov=calibRow(Object.assign({course:"—", category:"Global"}, data.overall), true);
+  ov.style.fontWeight="700"; tb.appendChild(ov);
+  t.appendChild(tb); box.appendChild(t);
+}
+function calibRow(r, bold){
+  const tr=document.createElement("tr");
+  const gapCls = r.gap>0.07 ? "gap-over" : r.gap<-0.07 ? "gap-under" : "gap-ok";
+  tr.innerHTML=`<td>${escapeHtml(r.course)}</td><td>${escapeHtml(r.category)}</td>
+    <td class="num">${r.n}</td>
+    <td class="num">${pct(r.accuracy)}</td>
+    <td class="num">${pct(r.mean_confidence)}</td>
+    <td class="num">${r.brier}</td>
+    <td class="num ${gapCls}">${r.gap>0?"+":""}${r.gap}</td>`;
+  return tr;
+}
+
+/* ---------- utils ---------- */
+function pct(x){ return Math.round(x*100)+"%"; }
+function escapeHtml(s){ return (s==null?"":String(s)).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function fmtTime(s){
+  if(!s) return "";
+  const d=new Date(s.replace(" ","T")+(s.includes("Z")||s.includes("+")?"":"Z"));
+  if(isNaN(d)) return "";
+  const diff=(Date.now()-d.getTime())/1000;
+  if(diff<60) return "à l'instant";
+  if(diff<3600) return Math.floor(diff/60)+" min";
+  if(diff<86400) return Math.floor(diff/3600)+" h";
+  return d.toLocaleDateString("fr-CH",{day:"2-digit",month:"2-digit"});
+}
+
+/* ---------- boot ---------- */
+window.addEventListener("DOMContentLoaded", async()=>{
+  if(creds){
+    try{ await enterApp(); }
+    catch(e){ localStorage.removeItem("battle_creds"); creds=null; $("#login").classList.remove("hidden"); }
+  }
+});
+</script>
+</body>
+</html>
