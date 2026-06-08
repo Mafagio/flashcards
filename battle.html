@@ -6,8 +6,8 @@
 <title>Battle — Flashcards</title>
 <link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2032%2032%27%20fill%3D%27none%27%20stroke%3D%27%230a66ff%27%20stroke-width%3D%272.6%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M7%2025%20L28%204%27/%3E%3Cpath%20d%3D%27M7.5%2018.5%20L13.5%2024.5%27/%3E%3Cpath%20d%3D%27M5%2023%20L9%2027%27/%3E%3Cpath%20d%3D%27M25%2025%20L4%204%27/%3E%3Cpath%20d%3D%27M18.5%2024.5%20L24.5%2018.5%27/%3E%3Cpath%20d%3D%27M23%2027%20L27%2023%27/%3E%3C/svg%3E">
 
-<!-- Thème appliqué AVANT le rendu (anti-flash) ; défaut = sombre -->
-<script>(function(){try{var t=localStorage.getItem('battle_theme');if(t!=='light'&&t!=='dark')t='dark';document.documentElement.setAttribute('data-theme',t);}catch(e){document.documentElement.setAttribute('data-theme','dark');}})();</script>
+<!-- Fond + style de cartes appliqués AVANT le rendu (anti-flash) ; défauts = Blanc + cartes blanches -->
+<script>(function(){var e=document.documentElement;try{var bg=localStorage.getItem('battle_bg');if(['white','dark','purple','crystal','green'].indexOf(bg)<0)bg='white';var cd=localStorage.getItem('battle_cards')==='themed'?'themed':'white';e.setAttribute('data-bg',bg);e.setAttribute('data-cards',cd);}catch(err){e.setAttribute('data-bg','white');e.setAttribute('data-cards','white');}})();</script>
 
 <!-- KaTeX (même rendu que le reste du site) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
@@ -16,64 +16,65 @@
 
 <style>
 :root{
-  /* ===== THÈME SOMBRE (par défaut) ===== */
-  --accent:#6b6bff;
-  --accent-soft:rgba(107,107,255,.18);
-  --link:#b9a6ff;
-  --ink:#eaecf5;
-  --muted:#a6acc4;
-  --line:rgba(255,255,255,.10);
-  --bg:#0a0a14;
-  --panel:rgba(20,22,40,.72);
-  --good:#37d39a;
-  --good-soft:rgba(55,211,154,.16);
-  --bad:#ff6b6b;
-  --bad-soft:rgba(255,107,107,.16);
-  --warn:#e6b85e;
-  --warn-soft:rgba(230,184,94,.16);
-  --chip-bg:rgba(255,255,255,.06);
-  --btn-bg:rgba(255,255,255,.08);
-  --track:rgba(255,255,255,.13);
-  --track2:rgba(255,255,255,.28);
+  /* constantes */
+  --accent:#5b6bff; --link:#6b3fa0;
+  --good:#1a8f5a; --good-soft:#e4f5ec;
+  --bad:#d23b3b;  --bad-soft:#fbe9e9;
+  --warn:#c9851f; --warn-soft:#fdf2e0;
+  --accent-soft-page:rgba(91,107,255,.16);
   --radius:16px;
+  /* PAGE (défaut = Blanc) */
+  --page-text:#1b1b1f; --page-muted:#6b6b73; --veil:transparent;
+  --chip-bg2:#fafafb; --chip-line:#ececef;
+  --modal-bg:#ffffff; --modal-text:#1b1b1f; --modal-line:#ececef;
+  /* CARTES (défaut = blanches opaques) */
+  --panel:#ffffff; --panel-blur:0px;
+  --ink:#1b1b1f; --muted:#6b6b73; --line:#ececef;
+  --chip-bg:#fafafb; --btn-bg:#ffffff;
+  --accent-soft:#e8f0ff; --track:#eef0f3; --track2:#c9ccd4;
+  --shadow:0 1px 2px rgba(20,20,30,.04), 0 6px 22px rgba(20,20,30,.06);
+}
+/* ===== FOND (data-bg) : texte de page + voile + chips header + modale ===== */
+html[data-bg="dark"]   { --page-text:#eef1f8; --page-muted:#aab2cc; --veil:rgba(8,8,18,.80);
+                         --chip-bg2:rgba(255,255,255,.08); --chip-line:rgba(255,255,255,.16);
+                         --modal-bg:#181a2b; --modal-text:#eaecf5; --modal-line:rgba(255,255,255,.12); }
+html[data-bg="purple"] { --page-text:#1c1638; --page-muted:#4a4368; --veil:rgba(250,248,255,.42);
+                         --chip-bg2:rgba(255,255,255,.55); --chip-line:rgba(20,20,40,.14); }
+html[data-bg="crystal"]{ --page-text:#0f2330; --page-muted:#39556a; --veil:rgba(248,252,255,.48);
+                         --chip-bg2:rgba(255,255,255,.58); --chip-line:rgba(20,40,60,.14); }
+html[data-bg="green"]  { --page-text:#102a1c; --page-muted:#37563f; --veil:rgba(248,255,250,.44);
+                         --chip-bg2:rgba(255,255,255,.55); --chip-line:rgba(20,40,30,.14); }
+/* image de fond */
+html[data-bg="dark"]    body{ background:#0a0a14 url('battle-assets/bg/bg-dark.jpg')    center/cover fixed no-repeat; }
+html[data-bg="purple"]  body{ background:#d9c8ef url('battle-assets/bg/bg-purple.jpg')  center/cover fixed no-repeat; }
+html[data-bg="crystal"] body{ background:#dfeaf2 url('battle-assets/bg/bg-crystal.jpg') center/cover fixed no-repeat; }
+html[data-bg="green"]   body{ background:#cfe9d6 url('battle-assets/bg/bg-green.jpg')   center/cover fixed no-repeat; }
+html:not([data-bg="white"]) body::before{
+  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:var(--veil);
+}
+/* ===== CARTES (data-cards × data-bg) ===== */
+html[data-cards="themed"][data-bg="dark"]{
+  --panel:rgba(18,20,38,.72); --panel-blur:6px;
+  --ink:#eaecf5; --muted:#a6acc4; --line:rgba(255,255,255,.10);
+  --chip-bg:rgba(255,255,255,.07); --btn-bg:rgba(255,255,255,.09);
+  --accent-soft:rgba(91,107,255,.22); --track:rgba(255,255,255,.14); --track2:rgba(255,255,255,.30);
   --shadow:0 1px 2px rgba(0,0,0,.35), 0 10px 34px rgba(0,0,0,.42);
 }
-:root[data-theme="light"]{
-  /* ===== THÈME CLAIR (d'origine) ===== */
-  --accent:#0a66ff;
-  --accent-soft:#e8f0ff;
-  --link:#6b3fa0;
-  --ink:#1b1b1f;
-  --muted:#6b6b73;
-  --line:#ececef;
-  --bg:#ffffff;
-  --panel:#ffffff;
-  --good:#1a8f5a;
-  --good-soft:#e4f5ec;
-  --bad:#d23b3b;
-  --bad-soft:#fbe9e9;
-  --warn:#c9851f;
-  --warn-soft:#fdf2e0;
-  --chip-bg:#fafafb;
-  --btn-bg:#ffffff;
-  --track:#eef0f3;
-  --track2:#c9ccd4;
-  --shadow:0 1px 2px rgba(20,20,30,.04), 0 6px 22px rgba(20,20,30,.06);
+html[data-cards="themed"][data-bg="purple"],
+html[data-cards="themed"][data-bg="crystal"],
+html[data-cards="themed"][data-bg="green"]{
+  --panel:rgba(255,255,255,.62); --panel-blur:6px;
+  --ink:#1b1b22; --muted:#586070; --line:rgba(20,20,45,.12);
+  --chip-bg:rgba(255,255,255,.62); --btn-bg:rgba(255,255,255,.74);
+  --accent-soft:rgba(91,107,255,.14); --track:rgba(20,20,45,.10); --track2:rgba(20,20,45,.24);
+  --shadow:0 1px 2px rgba(20,20,40,.06), 0 8px 26px rgba(20,20,40,.12);
 }
 *{box-sizing:border-box}
 html,body{margin:0;padding:0}
 body{
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
-  color:var(--ink); background:var(--bg);
+  color:var(--page-text); background:#ffffff;
   line-height:1.5; -webkit-font-smoothing:antialiased;
-}
-/* SOMBRE : image de fond + voile pour la lisibilité */
-:root:not([data-theme="light"]) body{
-  background:#0a0a14 url('battle-assets/bg-battle.jpg') center/cover fixed no-repeat;
-}
-:root:not([data-theme="light"]) body::before{
-  content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;
-  background:linear-gradient(rgba(8,8,18,.72), rgba(8,8,18,.86));
 }
 a{color:var(--link);text-decoration:none}
 a:hover{text-decoration:underline}
@@ -86,14 +87,14 @@ button{font-family:inherit;cursor:pointer}
 /* ---------- Header ---------- */
 header.bar{
   display:flex;align-items:center;gap:14px;flex-wrap:wrap;
-  padding-bottom:18px;border-bottom:1px solid var(--line);margin-bottom:22px;
+  padding-bottom:18px;border-bottom:1px solid var(--chip-line);margin-bottom:22px;
 }
 header.bar h1{font-size:22px;margin:0;letter-spacing:-.02em}
 .spacer{flex:1}
 .chip{
   display:inline-flex;align-items:center;gap:6px;
-  background:var(--panel);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
-  border:1px solid var(--line);
+  background:var(--chip-bg2);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);
+  border:1px solid var(--chip-line);color:var(--page-text);
   border-radius:999px;padding:6px 12px;font-size:14px;font-weight:600;
 }
 .chip .lab{color:var(--muted);font-weight:500}
@@ -106,7 +107,9 @@ header.bar h1{font-size:22px;margin:0;letter-spacing:-.02em}
 .btn.primary{background:var(--accent);border-color:var(--accent);color:#fff}
 .btn.primary:hover{filter:brightness(1.08)}
 .btn.ghost{background:transparent;border-color:transparent;color:var(--muted)}
-.btn.ghost:hover{background:var(--panel);color:var(--ink)}
+.btn.ghost:hover{background:var(--chip-bg);color:var(--ink)}
+header.bar .btn.ghost{color:var(--page-muted)}
+header.bar .btn.ghost:hover{background:var(--chip-bg2);color:var(--page-text)}
 .btn:disabled{opacity:.45;cursor:not-allowed}
 .btn.sm{padding:6px 10px;font-size:13px;border-radius:10px}
 
@@ -114,10 +117,10 @@ header.bar h1{font-size:22px;margin:0;letter-spacing:-.02em}
 nav.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:22px}
 nav.tabs button{
   border:none;background:transparent;border-radius:10px;
-  padding:8px 14px;font-size:14.5px;font-weight:600;color:var(--muted);
+  padding:8px 14px;font-size:14.5px;font-weight:600;color:var(--page-muted);
 }
-nav.tabs button:hover{background:var(--panel);color:var(--ink)}
-nav.tabs button.active{background:var(--accent-soft);color:var(--accent)}
+nav.tabs button:hover{background:var(--chip-bg2);color:var(--page-text)}
+nav.tabs button.active{background:var(--accent-soft-page);color:var(--accent)}
 .badge{
   display:inline-block;min-width:18px;height:18px;line-height:18px;text-align:center;
   background:var(--bad);color:#fff;border-radius:999px;font-size:11px;font-weight:700;
@@ -126,8 +129,8 @@ nav.tabs button.active{background:var(--accent-soft);color:var(--accent)}
 
 /* ---------- Cards / panels ---------- */
 .card{
-  background:var(--panel);backdrop-filter:blur(7px);-webkit-backdrop-filter:blur(7px);border:1px solid var(--line);border-radius:var(--radius);
-  box-shadow:var(--shadow);padding:22px;margin-bottom:18px;
+  background:var(--panel);backdrop-filter:blur(var(--panel-blur));-webkit-backdrop-filter:blur(var(--panel-blur));border:1px solid var(--line);border-radius:var(--radius);
+  box-shadow:var(--shadow);padding:22px;margin-bottom:18px;color:var(--ink);
 }
 .card h2{margin:0 0 4px;font-size:17px;letter-spacing:-.01em}
 .card h2 + .sub{margin:0 0 16px;color:var(--muted);font-size:13.5px}
@@ -237,7 +240,29 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
 /* ---------- Logo / marque ---------- */
 .brand{display:inline-flex;align-items:center;gap:8px}
 .brand-logo{flex:none;width:1.15em;height:1.15em}
-#theme-toggle{font-size:16px;line-height:1;padding:7px 10px}
+#profil-chip{cursor:pointer}
+#profil-chip .gear{opacity:.65;margin-left:1px}
+#profil-chip:hover .gear{opacity:1}
+
+/* ---------- Modale Réglages ---------- */
+.modal-overlay{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;
+  background:rgba(8,8,18,.5);backdrop-filter:blur(3px);padding:20px}
+.modal{background:var(--modal-bg);color:var(--modal-text);border:1px solid var(--modal-line);border-radius:18px;
+  width:min(440px,100%);max-height:90vh;overflow:auto;box-shadow:0 24px 70px rgba(0,0,0,.45);padding:20px 22px}
+.modal-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.modal-head h2{margin:0;font-size:18px}
+.modal-sec{margin-top:18px}
+.modal-label{font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;opacity:.6;margin-bottom:9px}
+.bg-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}
+.bg-thumb{cursor:pointer;border-radius:10px;overflow:hidden;border:2px solid transparent;aspect-ratio:1;
+  position:relative;background:#fff center/cover no-repeat;box-shadow:inset 0 0 0 1px var(--modal-line)}
+.bg-thumb.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent)}
+.bg-thumb span{position:absolute;left:0;right:0;bottom:0;font-size:9px;font-weight:600;text-align:center;
+  background:rgba(0,0,0,.5);color:#fff;padding:1px 0;line-height:1.3}
+.seg{display:flex;border:1px solid var(--modal-line);border-radius:11px;overflow:hidden}
+.seg button{flex:1;border:none;background:transparent;color:var(--modal-text);padding:10px;font-size:13.5px;
+  font-weight:600;cursor:pointer;transition:.12s}
+.seg button.sel{background:var(--accent);color:#fff}
 
 /* ---------- Rangs ---------- */
 #hp-rank img{margin-right:5px}
@@ -305,8 +330,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
     <span class="chip"><img src="battle-assets/ui/ic-xp.png" width="20" height="20" style="object-fit:contain;vertical-align:-4px" alt="XP"> <span id="hp-xp">0</span></span>
     <span class="chip" id="hp-rank"></span>
     <span class="chip"><img src="battle-assets/ui/ic-jeton.png" width="18" height="18" style="object-fit:contain;vertical-align:-4px" alt="jetons"> <span id="hp-tok">0</span></span>
-    <span class="chip"><img src="battle-assets/ui/ic-profil.png" width="18" height="18" style="object-fit:contain;vertical-align:-4px" alt=""> <span id="hp-name"></span></span>
-    <button class="btn ghost sm" id="theme-toggle" title="Thème clair / sombre" aria-label="Changer de thème">☀</button>
+    <span class="chip" id="profil-chip" title="Réglages" role="button" tabindex="0"><img src="battle-assets/ui/ic-profil.png" width="18" height="18" style="object-fit:contain;vertical-align:-4px" alt=""> <span id="hp-name"></span><svg class="gear" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
     <button class="btn ghost sm" id="logout">Déconnexion</button>
   </header>
 
@@ -453,6 +477,27 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
   </section>
 </div>
 
+<!-- ============ MODALE RÉGLAGES ============ -->
+<div id="settings-overlay" class="modal-overlay hidden">
+  <div class="modal" role="dialog" aria-label="Réglages">
+    <div class="modal-head">
+      <h2>Réglages</h2>
+      <button class="btn ghost sm" id="settings-close" aria-label="Fermer">✕</button>
+    </div>
+    <div class="modal-sec">
+      <div class="modal-label">Fond d'écran</div>
+      <div class="bg-grid" id="bg-grid"></div>
+    </div>
+    <div class="modal-sec">
+      <div class="modal-label">Apparence des cartes</div>
+      <div class="seg" id="cards-seg">
+        <button data-cards="white">Cartes blanches</button>
+        <button data-cards="themed">Cartes selon le thème</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div id="toasts"></div>
 
 <script>
@@ -494,7 +539,7 @@ function rankOf(xp){
  return {...r, index:i, next, toNext: next?Math.max(0,next.min-xp):0,
          progress: next?Math.min(1,(xp-r.min)/(next.min-r.min)):1};
 }
-function rankImg(r,size){
+function rankImg(r,size){ size=size||56;
  return '<img src="battle-assets/ranks/rank-'+r.key+'.png" width="'+size+'" height="'+size+
         '" alt="'+r.name+'" style="object-fit:contain;vertical-align:middle">';
 }
@@ -602,18 +647,52 @@ $("#logout").onclick = ()=>{
   $("#app").classList.add("hidden"); $("#login").classList.remove("hidden");
 };
 
-/* ---------- Thème clair / sombre ---------- */
-function applyTheme(t){
-  t = (t==="light") ? "light" : "dark";
-  document.documentElement.setAttribute("data-theme", t);
-  try{ localStorage.setItem("battle_theme", t); }catch(e){}
-  const b=$("#theme-toggle"); if(b){ b.textContent = (t==="dark") ? "☀" : "☾"; }
+/* ---------- Réglages : fond d'écran + apparence des cartes ---------- */
+const BACKGROUNDS=[
+ {key:"white",  name:"Blanc",      img:null,                              text:"dark"},
+ {key:"dark",   name:"Sombre",     img:"battle-assets/bg/bg-dark.jpg",    text:"light"},
+ {key:"purple", name:"Crépuscule", img:"battle-assets/bg/bg-purple.jpg",  text:"dark"},
+ {key:"crystal",name:"Cristal",    img:"battle-assets/bg/bg-crystal.jpg", text:"dark"},
+ {key:"green",  name:"Émeraude",   img:"battle-assets/bg/bg-green.jpg",   text:"dark"}
+];
+function applyBg(key){
+  if(!BACKGROUNDS.some(b=>b.key===key)) key="white";
+  document.documentElement.setAttribute("data-bg", key);
+  try{ localStorage.setItem("battle_bg", key); }catch(e){}
+  renderSettings();
 }
-$("#theme-toggle").onclick = ()=>{
-  const cur = document.documentElement.getAttribute("data-theme")==="light" ? "light" : "dark";
-  applyTheme(cur==="dark" ? "light" : "dark");
-};
-applyTheme(document.documentElement.getAttribute("data-theme"));
+function applyCards(mode){
+  mode = (mode==="themed") ? "themed" : "white";
+  document.documentElement.setAttribute("data-cards", mode);
+  try{ localStorage.setItem("battle_cards", mode); }catch(e){}
+  renderSettings();
+}
+function renderSettings(){
+  const bg=document.documentElement.getAttribute("data-bg")||"white";
+  const cd=document.documentElement.getAttribute("data-cards")||"white";
+  const grid=$("#bg-grid");
+  if(grid){
+    grid.innerHTML="";
+    BACKGROUNDS.forEach(b=>{
+      const t=document.createElement("div");
+      t.className="bg-thumb"+(b.key===bg?" sel":"");
+      if(b.img) t.style.backgroundImage="url('"+b.img+"')";
+      t.innerHTML='<span>'+b.name+'</span>';
+      t.title=b.name; t.onclick=()=>applyBg(b.key);
+      grid.appendChild(t);
+    });
+  }
+  $$("#cards-seg button").forEach(b=>b.classList.toggle("sel", b.dataset.cards===cd));
+}
+function openSettings(){ $("#settings-overlay").classList.remove("hidden"); renderSettings(); }
+function closeSettings(){ $("#settings-overlay").classList.add("hidden"); }
+$("#profil-chip").onclick = openSettings;
+$("#profil-chip").addEventListener("keydown", e=>{ if(e.key==="Enter"||e.key===" "){ e.preventDefault(); openSettings(); } });
+$("#settings-close").onclick = closeSettings;
+$("#settings-overlay").onclick = e=>{ if(e.target===$("#settings-overlay")) closeSettings(); };
+$$("#cards-seg button").forEach(b=> b.onclick=()=>applyCards(b.dataset.cards));
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeSettings(); });
+renderSettings();
 
 async function enterApp(){
   // valide les identifiants
@@ -728,7 +807,7 @@ async function renderRanks(){
     const range = next ? `${r.min}–${next.min-1} XP` : `${r.min}+ XP`;
     const cell=document.createElement("div");
     cell.className="rank-cell"+(i===cur.index?" current":"");
-    cell.innerHTML = rankImg(r,72)
+    cell.innerHTML = rankImg(r,64)
       + `<div class="rank-cell-name" style="color:${r.text}">${r.name}</div>`
       + `<div class="rank-cell-range small muted">${range}</div>`
       + (i===cur.index?'<div class="rank-cell-tag">toi</div>':'');
