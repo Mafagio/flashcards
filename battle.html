@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>⚔️ Battle — Flashcards</title>
-<link rel="icon" href="data:,">
+<title>Battle — Flashcards</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg%20xmlns%3D%27http%3A//www.w3.org/2000/svg%27%20viewBox%3D%270%200%2032%2032%27%20fill%3D%27none%27%20stroke%3D%27%230a66ff%27%20stroke-width%3D%272.6%27%20stroke-linecap%3D%27round%27%20stroke-linejoin%3D%27round%27%3E%3Cpath%20d%3D%27M7%2025%20L28%204%27/%3E%3Cpath%20d%3D%27M7.5%2018.5%20L13.5%2024.5%27/%3E%3Cpath%20d%3D%27M5%2023%20L9%2027%27/%3E%3Cpath%20d%3D%27M25%2025%20L4%204%27/%3E%3Cpath%20d%3D%27M18.5%2024.5%20L24.5%2018.5%27/%3E%3Cpath%20d%3D%27M23%2027%20L27%2023%27/%3E%3C/svg%3E">
 
 <!-- KaTeX (même rendu que le reste du site) -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.16.9/katex.min.css">
@@ -194,13 +194,43 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
   .versus{grid-template-columns:1fr;gap:8px}
   .vs{justify-self:center}
 }
+
+/* ---------- Logo / marque ---------- */
+.brand{display:inline-flex;align-items:center;gap:8px}
+.battle-logo{width:1.1em;height:1.1em;color:var(--accent);flex:none}
+
+/* ---------- Rangs ---------- */
+#hp-rank img{margin-right:5px}
+.rk-row{display:flex;align-items:center;gap:8px;margin:8px 0 2px}
+.rk-name{font-weight:700;font-size:14.5px}
+.rk-bar{height:7px;border-radius:999px;background:#e9ebf0;overflow:hidden;margin-top:10px}
+.rk-bar>div{height:100%;background:var(--accent);border-radius:999px;transition:width .3s}
+.rk-next{margin-top:6px}
+/* classement */
+.lb-list{list-style:none;margin:0;padding:0}
+.lb-list li{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}
+.lb-list li:last-child{border-bottom:none}
+.lb-rank{width:18px;color:var(--muted);font-weight:700;text-align:center}
+.lb-name{font-weight:600}
+.lb-name.me{color:var(--accent)}
+.lb-tier{font-weight:600;font-size:13px}
+.lb-xp{margin-left:auto;color:var(--muted);font-variant-numeric:tabular-nums}
+/* grille des paliers */
+.ranks-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.rank-cell{position:relative;display:flex;flex-direction:column;align-items:center;gap:5px;
+  border:1px solid var(--line);border-radius:14px;padding:16px 8px 12px;background:#fff;text-align:center}
+.rank-cell.current{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.rank-cell-name{font-weight:700;font-size:14px}
+.rank-cell-tag{position:absolute;top:8px;right:8px;background:var(--accent);color:#fff;
+  border-radius:999px;font-size:11px;font-weight:700;padding:1px 8px}
+@media(max-width:560px){ .ranks-grid{grid-template-columns:repeat(2,1fr)} }
 </style>
 </head>
 <body>
 
 <!-- ============ LOGIN ============ -->
 <div id="login" class="wrap login">
-  <h1>⚔️ Battle</h1>
+  <h1 class="brand"><svg class="battle-logo" viewBox="0 0 32 32" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Battle"><path d="M7 25 L28 4"/><path d="M7.5 18.5 L13.5 24.5"/><path d="M5 23 L9 27"/><path d="M25 25 L4 4"/><path d="M18.5 24.5 L24.5 18.5"/><path d="M23 27 L27 23"/></svg><span>Battle</span></h1>
   <p class="sub">Flashcards proba/stats — toi contre ton pote.</p>
   <div class="card">
     <div>
@@ -230,9 +260,10 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
 <!-- ============ APP ============ -->
 <div id="app" class="wrap hidden">
   <header class="bar">
-    <h1>⚔️ Battle</h1>
+    <h1 class="brand"><svg class="battle-logo" viewBox="0 0 32 32" width="28" height="28" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" role="img" aria-label="Battle"><path d="M7 25 L28 4"/><path d="M7.5 18.5 L13.5 24.5"/><path d="M5 23 L9 27"/><path d="M25 25 L4 4"/><path d="M18.5 24.5 L24.5 18.5"/><path d="M23 27 L27 23"/></svg><span>Battle</span></h1>
     <span class="spacer"></span>
     <span class="chip"><span class="lab">XP</span> <span id="hp-xp">0</span></span>
+    <span class="chip" id="hp-rank"></span>
     <span class="chip">🪙 <span id="hp-tok">0</span></span>
     <span class="chip"><span class="lab">👤</span> <span id="hp-name"></span></span>
     <button class="btn ghost sm" id="logout">Déconnexion</button>
@@ -245,6 +276,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
     <button data-tab="challenge">Challenge</button>
     <button data-tab="duels">Duels</button>
     <button data-tab="calib">Calibration</button>
+    <button data-tab="ranks">Rangs</button>
   </nav>
 
   <!-- DASHBOARD -->
@@ -253,6 +285,10 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
       <div class="versus" id="versus"></div>
       <div class="xpbar" id="xpbar"><div class="mine" style="width:50%"></div><div class="theirs" style="width:50%"></div></div>
       <div class="token-hint" id="token-hint"></div>
+    </div>
+    <div class="card">
+      <h2>Classement</h2>
+      <ol class="lb-list" id="lb-list"></ol>
     </div>
     <div class="card">
       <h2>Activité</h2>
@@ -365,6 +401,15 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
       <div id="calib-body"></div>
     </div>
   </section>
+
+  <!-- RANGS -->
+  <section data-panel="ranks" class="hidden">
+    <div class="card">
+      <h2>Rangs</h2>
+      <p class="sub">Grimpe les paliers en grindant honnêtement. Ton rang suit ton XP.</p>
+      <div id="ranks-grid" class="ranks-grid"></div>
+    </div>
+  </section>
 </div>
 
 <div id="toasts"></div>
@@ -388,6 +433,35 @@ function setApiBase(v){
 }
 
 const CONF = { "0.6":{cls:"c60",label:"60%"}, "0.8":{cls:"c80",label:"80%"}, "0.95":{cls:"c95",label:"95%"} };
+
+/* =================================================================
+   RANGS — paliers calés sur l'XP (badges dans battle-assets/ranks/)
+   ================================================================= */
+const RANKS=[
+ {key:"bronze",      name:"Bronze",       min:0,    text:"#b97a44"},
+ {key:"silver",      name:"Silver",       min:100,  text:"#8b95a1"},
+ {key:"gold",        name:"Gold",         min:300,  text:"#c79318"},
+ {key:"platinum",    name:"Platinum",     min:600,  text:"#2f9b8e"},
+ {key:"diamond",     name:"Diamond",      min:1000, text:"#3d7fd6"},
+ {key:"master",      name:"Master",       min:1500, text:"#8a5fe0"},
+ {key:"grandmaster", name:"Grandmaster",  min:2200, text:"#cf4a3c"},
+ {key:"legend",      name:"Legend",       min:3000, text:"#c79318"}
+];
+function rankOf(xp){
+ let i=0; for(let k=0;k<RANKS.length;k++) if(xp>=RANKS[k].min) i=k;
+ const r=RANKS[i], next=RANKS[i+1]||null;
+ return {...r, index:i, next, toNext: next?Math.max(0,next.min-xp):0,
+         progress: next?Math.min(1,(xp-r.min)/(next.min-r.min)):1};
+}
+function rankImg(r,size){
+ return '<img src="battle-assets/ranks/rank-'+r.key+'.png" width="'+size+'" height="'+size+
+        '" alt="'+r.name+'" style="object-fit:contain;vertical-align:middle">';
+}
+function maybeRankUp(oldXp, newXp){
+ if(typeof oldXp!=="number" || typeof newXp!=="number") return;
+ const b=rankOf(newXp);
+ if(b.index>rankOf(oldXp).index) toast("⬆️ Nouveau rang : "+b.name+" !", "good");
+}
 const $  = (s,r=document)=>r.querySelector(s);
 const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
 
@@ -493,6 +567,8 @@ async function refreshHeader(){
   state.me = await api("/me");
   $("#hp-tok").textContent = state.me.tokens;
   animXP(state.me.xp);
+  const rk = rankOf(state.me.xp);
+  $("#hp-rank").innerHTML = rankImg(rk,22) + '<b style="color:'+rk.text+'">'+rk.name+'</b>';
   const n = state.me.pending_audits;
   const b = $("#tab-aud-badge");
   b.textContent=n; b.classList.toggle("hidden", n===0);
@@ -510,6 +586,7 @@ function switchTab(tab){
   if(tab==="challenge") renderChallenge();
   if(tab==="duels")     renderDuels();
   if(tab==="calib")     renderCalib();
+  if(tab==="ranks")     renderRanks();
 }
 
 /* =================================================================
@@ -526,6 +603,21 @@ async function renderDash(){
   V.appendChild(playerCard(me, true));
   const vs=document.createElement("div"); vs.className="vs"; vs.textContent="VS"; V.appendChild(vs);
   V.appendChild(playerCard(opp || {name:"En attente…", xp:0, tokens:0}, false));
+
+  // classement avec rangs
+  const Lb=$("#lb-list");
+  if(Lb){
+    Lb.innerHTML="";
+    lb.forEach((x,i)=>{
+      const rr=rankOf(x.xp||0);
+      const li=document.createElement("li");
+      li.innerHTML=`<span class="lb-rank">${i+1}</span>${rankImg(rr,26)}`+
+        `<span class="lb-name${x.me?' me':''}">${escapeHtml(x.name)}</span>`+
+        `<span class="lb-tier" style="color:${rr.text}">${rr.name}</span>`+
+        `<span class="lb-xp">${Math.round(x.xp)} XP</span>`;
+      Lb.appendChild(li);
+    });
+  }
 
   const total=(me.xp + (opp?opp.xp:0)) || 1;
   const mine=Math.max(2, Math.round(100*me.xp/total));
@@ -546,10 +638,35 @@ async function renderDash(){
 }
 function playerCard(p, isMe){
   const d=document.createElement("div"); d.className="player"+(isMe?" me":"");
+  const r=rankOf(p.xp||0);
+  const prog = r.next
+    ? `<div class="rk-bar"><div style="width:${Math.round(r.progress*100)}%"></div></div>
+       <div class="rk-next small muted">plus que <b>${Math.round(r.toNext)}</b> XP pour ${escapeHtml(r.next.name)}</div>`
+    : `<div class="rk-next small muted">Rang max 🏆</div>`;
   d.innerHTML=`<div class="name">${isMe?"🟦":"⬜"} ${escapeHtml(p.name)}${isMe?" <span class='small muted'>(toi)</span>":""}</div>
+    <div class="rk-row">${rankImg(r,56)}<span class="rk-name" style="color:${r.text}">${r.name}</span></div>
     <div class="xp">${Math.round(p.xp)}<span class="small muted" style="font-weight:600"> XP</span></div>
-    <div class="meta">🪙 ${p.tokens||0} jeton(s)</div>`;
+    <div class="meta">🪙 ${p.tokens||0} jeton(s)</div>
+    ${prog}`;
   return d;
+}
+
+/* ---------- onglet Rangs : grille des paliers ---------- */
+async function renderRanks(){
+  await refreshHeader();
+  const cur = rankOf(state.me ? state.me.xp : 0);
+  const box=$("#ranks-grid"); box.innerHTML="";
+  RANKS.forEach((r,i)=>{
+    const next=RANKS[i+1];
+    const range = next ? `${r.min}–${next.min-1} XP` : `${r.min}+ XP`;
+    const cell=document.createElement("div");
+    cell.className="rank-cell"+(i===cur.index?" current":"");
+    cell.innerHTML = rankImg(r,72)
+      + `<div class="rank-cell-name" style="color:${r.text}">${r.name}</div>`
+      + `<div class="rank-cell-range small muted">${range}</div>`
+      + (i===cur.index?'<div class="rank-cell-tag">toi</div>':'');
+    box.appendChild(cell);
+  });
 }
 
 /* =================================================================
@@ -620,6 +737,7 @@ async function declare(btn){
   const known = btn.dataset.known==="1";
   const body = {card_id:c.id, known};
   if(known) body.q = parseFloat(btn.dataset.q);
+  const oldXp = state.me ? state.me.xp : 0;
   try{
     const r = await api("/review", {method:"POST", body});
     state.session.seen++;
@@ -627,6 +745,7 @@ async function declare(btn){
       toast(`🎲 ${r.new_audits} carte(s) tirée(s) en audit !`, "alert");
     }
     await refreshHeader();
+    maybeRankUp(oldXp, r.xp);
   }catch(err){ toast(err.message,"alert"); return; }
   state.idx++;
   if(state.idx>=state.deck.length) finishReview();
@@ -681,12 +800,14 @@ function auditCard(a){
   btn.onclick=async()=>{
     if(!ta.value.trim()){ toast("Réponse vide.","alert"); return; }
     btn.disabled=true; btn.textContent="Correction…";
+    const oldXp = state.me ? state.me.xp : 0;
     try{
       const r=await api(`/audits/${a.id}/answer`, {method:"POST", body:{answer:ta.value}});
       out.appendChild(resultBox(r, a));
       ta.disabled=true; btn.classList.add("hidden");
       await refreshHeader();
       toast(`${r.score}/6 — ${r.outcome?"réussi ✅":"raté ❌"} (${r.mastery>=0?"+":""}${r.mastery} XP)`, r.outcome?"good":"alert");
+      maybeRankUp(oldXp, r.xp);
     }catch(err){ toast(err.message,"alert"); btn.disabled=false; btn.textContent="Soumettre la réponse"; }
   };
   d.append(head, front, ta, btn, out);
@@ -751,7 +872,7 @@ async function renderChallenge(){
         btn.disabled=true;
         try{
           await api("/challenge", {method:"POST", body:{opponent:c.opponent, card_id:c.id}});
-          toast("⚔️ Challenge lancé !","good");
+          toast("Challenge lancé !","good");
           renderChallenge();
         }catch(err){ toast(err.message,"alert"); btn.disabled=false; }
       };
