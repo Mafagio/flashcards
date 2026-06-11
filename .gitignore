@@ -7,3 +7,7 @@ backend/.env
 *.db-shm
 __pycache__/
 *.pyc
+
+# Payloads d'examens (énoncés + corrigés transcrits VERBATIM) — BACKEND UNIQUEMENT.
+# Vit sur le volume Railway, jamais dans le repo public.
+backend/ts_exams*.json

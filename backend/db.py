@@ -77,8 +77,30 @@ CREATE TABLE IF NOT EXISTS audits (
     score         INTEGER,
     justification TEXT,
     mastery       REAL NOT NULL DEFAULT 0,
+    exam_id       TEXT,                       -- si source='exam_check' : examen visé (ts_exams.id)
     created_at    TEXT NOT NULL DEFAULT (datetime('now')),
     graded_at     TEXT
+);
+
+-- Examens à note déclarée (mode Time Series). Le payload (énoncés + corrigés +
+-- barèmes) reste BACKEND UNIQUEMENT (importé depuis ts_exams.json, jamais commité).
+CREATE TABLE IF NOT EXISTS ts_exams (
+    id          TEXT PRIMARY KEY,             -- ex: "2024", "2020", "mock1"
+    title       TEXT NOT NULL,
+    n_exercises INTEGER NOT NULL,
+    payload_json TEXT NOT NULL                -- [{id, front, back, bareme}] par exercice
+);
+
+-- Une note d'examen déclarée par un joueur (1 par (user, exam), non modifiable).
+CREATE TABLE IF NOT EXISTS ts_results (
+    id          INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id     INTEGER NOT NULL REFERENCES users(id),
+    exam_id     TEXT NOT NULL REFERENCES ts_exams(id),
+    note20      REAL NOT NULL,
+    xp_awarded  REAL NOT NULL DEFAULT 0,
+    status      TEXT NOT NULL,                -- 'declared' | 'verified' | 'flagged'
+    declared_at TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE(user_id, exam_id)
 );
 
 CREATE TABLE IF NOT EXISTS duels (
@@ -116,7 +138,15 @@ def init_db() -> None:
     db = get_db()
     with LOCK:
         db.executescript(SCHEMA)
+        _migrate(db)
         db.commit()
+
+
+def _migrate(db: sqlite3.Connection) -> None:
+    """Migrations idempotentes pour les bases déjà créées (ADD COLUMN ne casse rien)."""
+    cols = {r["name"] for r in db.execute("PRAGMA table_info(audits)").fetchall()}
+    if "exam_id" not in cols:
+        db.execute("ALTER TABLE audits ADD COLUMN exam_id TEXT")
 
 
 # ---- passphrases (pbkdf2, suffisant pour 2 amis derrière HTTPS) -------------

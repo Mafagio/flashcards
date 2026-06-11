@@ -1,0 +1,1874 @@
+[
+  {
+    "id": "ts-seed-form-01",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Soit $X_t=\\sum_{j=0}^{q}\\theta_j\\varepsilon_{t-j}$ un MA(q) ($\\theta_0=1$, $(\\varepsilon_t)$ bruit blanc de variance $\\sigma^2$). Donne son autocovariance $\\gamma(\\tau)$ pour tout $\\tau$.",
+    "back": "$\\gamma(\\tau)=\\sigma^2\\sum_{j=0}^{q-|\\tau|}\\theta_j\\,\\theta_{j+|\\tau|}$ pour $|\\tau|\\le q$, et $\\gamma(\\tau)=0$ sinon. L'ACVF d'un MA(q) **coupe** au-delà du lag $q$ (mémoire finie) ; en particulier $\\gamma(0)=\\sigma^2\\sum_{j}\\theta_j^2$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Somme des produits décalés sigma^2 sum theta_j theta_{j+|tau|}",
+          "weight": 2
+        },
+        {
+          "label": "Nullité pour |tau|>q (coupure, mémoire finie)",
+          "weight": 2
+        },
+        {
+          "label": "Cas gamma(0)=sigma^2 sum theta_j^2",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-seed-form-02",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 1,
+    "front": "Estimateur de Yule-Walker d'un $\\mathrm{AR}(1)$ $X_t=\\phi X_{t-1}+\\varepsilon_t$ : exprime $\\hat\\phi$ et $\\hat\\sigma^2$ à partir des autocovariances empiriques $\\hat\\gamma(0),\\hat\\gamma(1)$.",
+    "back": "$\\hat\\phi=\\dfrac{\\hat\\gamma(1)}{\\hat\\gamma(0)}=\\hat\\rho(1)$ et $\\hat\\sigma^2=\\hat\\gamma(0)\\,(1-\\hat\\phi^2)$. Vient des équations de Yule-Walker $\\gamma(1)=\\phi\\,\\gamma(0)$ et $\\gamma(0)=\\phi\\,\\gamma(1)+\\sigma^2$. Prédicteur à un pas : $\\hat X_{T+1}=\\hat\\phi X_T$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "phi chapeau = gamma(1)/gamma(0) = rho(1)",
+          "weight": 2
+        },
+        {
+          "label": "sigma^2 chapeau = gamma(0)(1 - phi^2)",
+          "weight": 2
+        },
+        {
+          "label": "Origine équations Yule-Walker ou prédicteur phi X_T",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-seed-form-03",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Densité spectrale $S(f)$ d'un $\\mathrm{AR}(1)$ causal $X_t=\\phi X_{t-1}+\\varepsilon_t$ (variance du bruit $\\sigma^2$), convention $f\\in[-\\tfrac12,\\tfrac12]$.",
+    "back": "$S(f)=\\dfrac{\\sigma^2}{\\lvert 1-\\phi e^{-2\\pi i f}\\rvert^2}=\\dfrac{\\sigma^2}{1+\\phi^2-2\\phi\\cos(2\\pi f)}$. C'est $\\sigma^2$ fois le module au carré de la fonction de transfert $1/\\phi(e^{-2\\pi if})$ ; pic en $f=0$ si $\\phi>0$ (basses fréquences).",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Forme sigma^2 / |1 - phi e^{-2 pi i f}|^2",
+          "weight": 2
+        },
+        {
+          "label": "Forme réelle 1 + phi^2 - 2 phi cos(2 pi f)",
+          "weight": 2
+        },
+        {
+          "label": "Interprétation filtre / pic basse fréquence si phi>0",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-seed-trick-01",
+    "course": "Time Series",
+    "category": "Tricks",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "ARMA $\\phi(B)X_t=\\theta(B)\\varepsilon_t$ : quel critère sur les **racines** des polynômes $\\phi(z)$ et $\\theta(z)$ donne la causalité (stationnarité) et l'inversibilité ?",
+    "back": "**Causal/stationnaire** $\\iff$ toutes les racines de $\\phi(z)=0$ sont **hors du cercle unité** ($|z|>1$). **Inversible** $\\iff$ toutes les racines de $\\theta(z)=0$ vérifient $|z|>1$. Réflexe : factorise, lis les racines. Pour un AR(1) : $|z|=1/|\\phi|>1\\iff|\\phi|<1$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Racines de phi(z) hors cercle unité <=> causal/stationnaire",
+          "weight": 2
+        },
+        {
+          "label": "Racines de theta(z) hors cercle unité <=> inversible",
+          "weight": 2
+        },
+        {
+          "label": "Méthode (factoriser/lire racines) ou cas AR(1) |phi|<1",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-seed-trick-02",
+    "course": "Time Series",
+    "category": "Tricks",
+    "kind": "cours",
+    "difficulty": 1,
+    "front": "Tu observes l'ACF et la PACF empiriques. Comment distinguer un $\\mathrm{MA}(q)$, un $\\mathrm{AR}(p)$ et un ARMA ? (réflexe « cut-off / tail-off »)",
+    "back": "**MA(q)** : ACF **coupe** après le lag $q$ (=0 ensuite), PACF **décroît** (tail-off). **AR(p)** : PACF **coupe** après le lag $p$, ACF **décroît**. **ARMA(p,q)** : les deux décroissent (aucune coupure nette). Piège : ACF qui décroît très lentement $\\Rightarrow$ non-stationnaire (différencier).",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "MA(q) : ACF coupe au lag q, PACF tail-off",
+          "weight": 2
+        },
+        {
+          "label": "AR(p) : PACF coupe au lag p, ACF tail-off",
+          "weight": 2
+        },
+        {
+          "label": "ARMA : les deux décroissent ; piège non-stationnarité (différencier)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-ma-01",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 1,
+    "front": "Soit $X_t=\\varepsilon_t+\\theta\\varepsilon_{t-1}$ un $\\mathrm{MA}(1)$, $(\\varepsilon_t)$ bruit blanc de variance $\\sigma^2$. Donne $\\gamma(0)$, $\\gamma(1)$, $\\gamma(\\tau)$ pour $|\\tau|\\ge 2$, puis $\\rho(1)$.",
+    "back": "$\\gamma(0)=\\sigma^2(1+\\theta^2)$, $\\gamma(1)=\\theta\\sigma^2$, et $\\gamma(\\tau)=0$ pour $|\\tau|\\ge 2$ (**coupure** au lag $1$). D'où $\\rho(1)=\\dfrac{\\theta}{1+\\theta^2}$ et $\\rho(\\tau)=0$ pour $|\\tau|\\ge 2$. L'ACF d'un MA(1) ne « voit » qu'un seul lag.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "gamma(0)=sigma^2(1+theta^2) et gamma(1)=theta sigma^2",
+          "weight": 2
+        },
+        {
+          "label": "gamma(tau)=0 pour |tau|>=2 (coupure au lag 1)",
+          "weight": 2
+        },
+        {
+          "label": "rho(1)=theta/(1+theta^2), rho(tau)=0 ensuite",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-ma-02",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Pour un $\\mathrm{MA}(1)$, $\\rho(1)=\\dfrac{\\theta}{1+\\theta^2}$. Quelle est la valeur maximale possible de $|\\rho(1)|$, et quel $\\theta$ l'atteint ? Que vaut $\\rho(1)$ si on remplace $\\theta$ par $1/\\theta$ ?",
+    "back": "$|\\rho(1)|\\le \\tfrac12$, maximum atteint en $\\theta=\\pm 1$. Surtout, $\\theta$ et $1/\\theta$ donnent **le même** $\\rho(1)$ : deux MA(1) distincts ont la même ACF. L'**inversibilité** ($|\\theta|<1$, racine de $1+\\theta z$ hors du cercle) sert à lever cette ambiguïté en choisissant la racine $|\\theta|<1$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "|rho(1)|<=1/2, atteint en theta=+/-1",
+          "weight": 2
+        },
+        {
+          "label": "theta et 1/theta donnent le meme rho(1) (non-unicite)",
+          "weight": 2
+        },
+        {
+          "label": "Inversibilite |theta|<1 leve l'ambiguite (racine hors cercle)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-ma-03",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Soit $X_t=\\varepsilon_t+0.3\\,\\varepsilon_{t-1}-0.1\\,\\varepsilon_{t-2}$ un $\\mathrm{MA}(2)$, $\\mathrm{Var}(\\varepsilon_t)=\\sigma^2$. Calcule $\\gamma(0),\\gamma(1),\\gamma(2)$ puis $\\rho(1),\\rho(2)$.",
+    "back": "$\\gamma(0)=\\sigma^2(1+0.3^2+0.1^2)=1.10\\,\\sigma^2$, $\\gamma(1)=\\sigma^2(1\\cdot0.3+0.3\\cdot(-0.1))=0.27\\,\\sigma^2$, $\\gamma(2)=\\sigma^2(1\\cdot(-0.1))=-0.1\\,\\sigma^2$, $\\gamma(\\tau)=0$ si $|\\tau|\\ge 3$. D'où $\\rho(1)=0.27/1.10\\approx0.245$, $\\rho(2)=-0.1/1.10\\approx-0.091$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "gamma(0)=1.10 sigma^2 (somme des carres des theta_j)",
+          "weight": 2
+        },
+        {
+          "label": "gamma(1)=0.27 sigma^2 et gamma(2)=-0.1 sigma^2",
+          "weight": 2
+        },
+        {
+          "label": "rho(1)~0.245, rho(2)~-0.091, coupure au lag 2",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-ma-04",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "MA(2) général $X_t=\\varepsilon_t+\\theta_1\\varepsilon_{t-1}+\\theta_2\\varepsilon_{t-2}$ ($\\sigma^2$ la variance du bruit). Donne $\\gamma(0),\\gamma(1),\\gamma(2)$ et $\\rho(1),\\rho(2)$ en fonction de $\\theta_1,\\theta_2$.",
+    "back": "$\\gamma(0)=\\sigma^2(1+\\theta_1^2+\\theta_2^2)$, $\\gamma(1)=\\sigma^2(\\theta_1+\\theta_1\\theta_2)$, $\\gamma(2)=\\sigma^2\\theta_2$, et $0$ au-delà. D'où $\\rho(1)=\\dfrac{\\theta_1(1+\\theta_2)}{1+\\theta_1^2+\\theta_2^2}$, $\\rho(2)=\\dfrac{\\theta_2}{1+\\theta_1^2+\\theta_2^2}$. ACF coupe au lag $2$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "gamma(0)=sigma^2(1+theta_1^2+theta_2^2)",
+          "weight": 2
+        },
+        {
+          "label": "gamma(1)=sigma^2 theta_1(1+theta_2), gamma(2)=sigma^2 theta_2",
+          "weight": 2
+        },
+        {
+          "label": "rho(1) et rho(2) corrects, coupure au lag 2",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-ma-05",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "MA saisonnier (lacunaire) $X_t=\\varepsilon_t+\\Theta\\,\\varepsilon_{t-12}$, $(\\varepsilon_t)$ bruit blanc de variance $\\sigma^2$. Donne $\\gamma(\\tau)$ et $\\rho(\\tau)$ pour tout $\\tau$.",
+    "back": "$\\gamma(0)=\\sigma^2(1+\\Theta^2)$, $\\gamma(\\pm12)=\\Theta\\sigma^2$, et $\\gamma(\\tau)=0$ pour tout autre $\\tau$. Donc $\\rho(12)=\\dfrac{\\Theta}{1+\\Theta^2}$ et $\\rho(\\tau)=0$ ailleurs : l'ACF ne pique **qu'au lag saisonnier** $12$. Modèle écrit $X_t=(1+\\Theta B^{12})\\varepsilon_t$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "gamma(0)=sigma^2(1+Theta^2), gamma(+/-12)=Theta sigma^2",
+          "weight": 2
+        },
+        {
+          "label": "gamma(tau)=0 pour tau autre que 0 et +/-12",
+          "weight": 2
+        },
+        {
+          "label": "rho(12)=Theta/(1+Theta^2), pic seulement au lag saisonnier",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-ma-06",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "MA lacunaire $X_t=\\varepsilon_t+\\theta\\,\\varepsilon_{t-d}$ ($d\\ge 1$ fixé, « gappy »), variance du bruit $\\sigma^2$. Où l'ACF est-elle non nulle, et que vaut-elle ?",
+    "back": "$\\gamma(0)=\\sigma^2(1+\\theta^2)$, $\\gamma(\\pm d)=\\theta\\sigma^2$, $\\gamma(\\tau)=0$ sinon. Donc $\\rho(\\pm d)=\\dfrac{\\theta}{1+\\theta^2}$ et $0$ partout ailleurs. C'est un MA(1) « étiré » : un seul lag non nul, situé en $d$ au lieu de $1$ (cas $d=12$ : saisonnier mensuel).",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "gamma(0)=sigma^2(1+theta^2), gamma(+/-d)=theta sigma^2",
+          "weight": 2
+        },
+        {
+          "label": "gamma nulle partout ailleurs (un seul lag non nul, en d)",
+          "weight": 2
+        },
+        {
+          "label": "rho(+/-d)=theta/(1+theta^2), analogie MA(1) etire",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-ma-07",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 1,
+    "front": "On observe une série avec $\\hat\\rho(1)=0.4$, $\\hat\\rho(2)\\approx 0$, $\\hat\\rho(\\tau)\\approx 0$ pour $\\tau\\ge 2$. Quel modèle MA propose-t-on et comment estimer $\\theta$ (moments) ?",
+    "back": "L'ACF **coupe** au lag $1$ $\\Rightarrow$ $\\mathrm{MA}(1)$ : $X_t=\\varepsilon_t+\\theta\\varepsilon_{t-1}$. Méthode des moments : résoudre $\\hat\\rho(1)=\\dfrac{\\theta}{1+\\theta^2}=0.4$, i.e. $0.4\\theta^2-\\theta+0.4=0$, $\\theta=\\dfrac{1\\pm\\sqrt{1-0.64}}{0.8}$, soit $\\theta=0.5$ (racine **inversible** $|\\theta|<1$) ou $2$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Coupure ACF au lag 1 => MA(1)",
+          "weight": 2
+        },
+        {
+          "label": "Equation des moments rho(1)=theta/(1+theta^2)=0.4",
+          "weight": 2
+        },
+        {
+          "label": "theta=0.5 (racine inversible) plutot que 2",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-ma-08",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Énonce la **propriété de coupure (cut-off)** de l'ACF d'un $\\mathrm{MA}(q)$ et utilise-la : pour quel(s) lag(s) l'ACF d'un $\\mathrm{MA}(q)$ s'annule-t-elle, et comment lit-on $q$ sur un corrélogramme ?",
+    "back": "Pour un MA(q), $\\gamma(\\tau)=0$ et donc $\\rho(\\tau)=0$ dès que $|\\tau|>q$ : l'ACF est **identiquement nulle au-delà du lag $q$** (mémoire finie). En pratique on lit $q$ comme le **dernier lag** dont $\\hat\\rho$ sort des bandes $\\pm 1.96/\\sqrt{n}$. La PACF, elle, décroît (tail-off).",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "rho(tau)=0 pour |tau|>q (coupure, memoire finie)",
+          "weight": 2
+        },
+        {
+          "label": "q = dernier lag significatif hors bandes +/-1.96/sqrt(n)",
+          "weight": 2
+        },
+        {
+          "label": "Contraste avec PACF qui decroit (tail-off)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-ar-01",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Pour l'**AR(2)** causal $X_t-\\phi_1 X_{t-1}-\\phi_2 X_{t-2}=\\varepsilon_t$, écris le système de **Yule-Walker** aux lags $\\tau=1,2$ reliant $(\\phi_1,\\phi_2)$ aux autocorrélations $\\rho(1),\\rho(2)$.",
+    "back": "$$\\rho(1)=\\phi_1+\\phi_2\\,\\rho(1),\\qquad \\rho(2)=\\phi_1\\,\\rho(1)+\\phi_2.$$ On les obtient en divisant $\\Gamma\\phi=\\gamma$ par $\\gamma(0)$ et en utilisant $\\rho(-1)=\\rho(1)$. Résolution : $\\phi_1=\\dfrac{\\rho(1)(1-\\rho(2))}{1-\\rho(1)^2}$, $\\phi_2=\\dfrac{\\rho(2)-\\rho(1)^2}{1-\\rho(1)^2}$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Première équation $\\rho(1)=\\phi_1+\\phi_2\\rho(1)$ (avec $\\rho(-1)=\\rho(1)$)",
+          "weight": 2
+        },
+        {
+          "label": "Seconde équation $\\rho(2)=\\phi_1\\rho(1)+\\phi_2$",
+          "weight": 2
+        },
+        {
+          "label": "Inversion correcte donnant $\\phi_1,\\phi_2$ en fonction de $\\rho(1),\\rho(2)$",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-ar-02",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Pour l'**AR(2)** stationnaire causal, donne la formule explicite de l'autocorrélation $\\rho(1)$ et de $\\rho(2)$ en fonction de $(\\phi_1,\\phi_2)$.",
+    "back": "$$\\rho(1)=\\frac{\\phi_1}{1-\\phi_2},\\qquad \\rho(2)=\\phi_2+\\frac{\\phi_1^2}{1-\\phi_2}.$$ On résout Yule-Walker : la 1re équation donne $\\rho(1)(1-\\phi_2)=\\phi_1$ ; on injecte dans $\\rho(2)=\\phi_1\\rho(1)+\\phi_2$. Pour $\\tau\\ge 2$, $\\rho$ suit ensuite la récurrence de l'AR(2).",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "$\\rho(1)=\\phi_1/(1-\\phi_2)$",
+          "weight": 2
+        },
+        {
+          "label": "$\\rho(2)=\\phi_2+\\phi_1^2/(1-\\phi_2)$",
+          "weight": 2
+        },
+        {
+          "label": "Justification via le système de Yule-Walker / substitution",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-ar-03",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 1,
+    "front": "Pour un **AR(2)** causal, écris la **récurrence** vérifiée par l'autocovariance $\\gamma(\\tau)$ pour $\\tau\\ge 1$, ainsi que celle de $\\rho(\\tau)$.",
+    "back": "$$\\gamma(\\tau)=\\phi_1\\,\\gamma(\\tau-1)+\\phi_2\\,\\gamma(\\tau-2),\\quad \\tau\\ge 1,$$ et en divisant par $\\gamma(0)$ : $\\rho(\\tau)=\\phi_1\\,\\rho(\\tau-1)+\\phi_2\\,\\rho(\\tau-2)$. On l'obtient en multipliant l'équation $X_t=\\phi_1X_{t-1}+\\phi_2X_{t-2}+\\varepsilon_t$ par $X_{t-\\tau}$ et en prenant l'espérance ($\\mathbb{E}[\\varepsilon_t X_{t-\\tau}]=0$ pour $\\tau\\ge1$ par causalité).",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Récurrence $\\gamma(\\tau)=\\phi_1\\gamma(\\tau-1)+\\phi_2\\gamma(\\tau-2)$",
+          "weight": 2
+        },
+        {
+          "label": "Même récurrence pour $\\rho(\\tau)$ (division par $\\gamma(0)$)",
+          "weight": 2
+        },
+        {
+          "label": "Validité $\\tau\\ge1$ via $\\mathbb{E}[\\varepsilon_t X_{t-\\tau}]=0$ (causalité)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-ar-04",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Donne la **variance stationnaire** $\\gamma(0)$ d'un **AR(2)** causal $X_t=\\phi_1X_{t-1}+\\phi_2X_{t-2}+\\varepsilon_t$ en fonction de $\\phi_1,\\phi_2,\\sigma^2$.",
+    "back": "$$\\gamma(0)=\\frac{(1-\\phi_2)\\,\\sigma^2}{(1+\\phi_2)\\big[(1-\\phi_2)^2-\\phi_1^2\\big]}.$$ On part de $\\gamma(0)=\\phi_1\\gamma(1)+\\phi_2\\gamma(2)+\\sigma^2$ (équation au lag $0$, le $\\sigma^2$ venant de $\\mathbb{E}[\\varepsilon_t X_t]$), puis on remplace $\\gamma(1),\\gamma(2)$ via $\\rho(1),\\rho(2)$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Équation lag 0 : $\\gamma(0)=\\phi_1\\gamma(1)+\\phi_2\\gamma(2)+\\sigma^2$ avec terme $\\sigma^2$",
+          "weight": 2
+        },
+        {
+          "label": "Substitution de $\\rho(1),\\rho(2)$ pour fermer le système",
+          "weight": 2
+        },
+        {
+          "label": "Formule finale $\\gamma(0)=\\frac{(1-\\phi_2)\\sigma^2}{(1+\\phi_2)[(1-\\phi_2)^2-\\phi_1^2]}$",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-ar-05",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Énonce la **condition de stationnarité (causalité)** d'un **AR(2)** $\\phi(B)=1-\\phi_1B-\\phi_2B^2$ exprimée directement comme inégalités sur $(\\phi_1,\\phi_2)$ (triangle de stationnarité).",
+    "back": "Les racines de $\\phi(z)=1-\\phi_1z-\\phi_2z^2$ doivent vérifier $|z|>1$, ce qui équivaut à : $$\\phi_1+\\phi_2<1,\\quad \\phi_2-\\phi_1<1,\\quad |\\phi_2|<1.$$ Ces trois inégalités définissent le **triangle** de stationnarité dans le plan $(\\phi_1,\\phi_2)$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Lien : racines de $\\phi(z)$ de module $>1$ (causalité)",
+          "weight": 2
+        },
+        {
+          "label": "Les deux inégalités $\\phi_1+\\phi_2<1$ et $\\phi_2-\\phi_1<1$",
+          "weight": 2
+        },
+        {
+          "label": "La condition $|\\phi_2|<1$ (et identification du triangle)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-ar-06",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Application numérique : pour l'**AR(2)** $X_t=0.5\\,X_{t-1}+0.2\\,X_{t-2}+\\varepsilon_t$, calcule $\\rho(1)$, $\\rho(2)$ et $\\rho(3)$.",
+    "back": "$\\rho(1)=\\dfrac{\\phi_1}{1-\\phi_2}=\\dfrac{0.5}{0.8}=0.625$. $\\rho(2)=\\phi_2+\\phi_1\\rho(1)=0.2+0.5\\cdot0.625=0.5125$. Récurrence : $\\rho(3)=\\phi_1\\rho(2)+\\phi_2\\rho(1)=0.5\\cdot0.5125+0.2\\cdot0.625=0.38125$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "$\\rho(1)=0.5/0.8=0.625$",
+          "weight": 2
+        },
+        {
+          "label": "$\\rho(2)=0.2+0.5\\cdot0.625=0.5125$",
+          "weight": 2
+        },
+        {
+          "label": "$\\rho(3)=0.5\\cdot0.5125+0.2\\cdot0.625=0.38125$ (récurrence)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-ar-07",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Pour l'**AR(2)** causal, donne la **forme générale** de l'ACF $\\rho(\\tau)$ lorsque $\\phi(z)$ a deux racines réelles distinctes $z_1,z_2$ ($|z_i|>1$), puis le comportement quand les racines sont complexes conjuguées.",
+    "back": "Racines réelles : $\\rho(\\tau)=c_1\\,z_1^{-|\\tau|}+c_2\\,z_2^{-|\\tau|}$, mélange de deux décroissances géométriques (les $z_i^{-1}$ sont les pôles inverses, $|z_i^{-1}|<1$). Racines complexes $z=r e^{\\pm i\\omega}$ : $\\rho(\\tau)=c\\,r^{-|\\tau|}\\cos(\\omega|\\tau|+\\varphi)$, soit une **sinusoïde amortie** (oscillations pseudo-périodiques).",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Cas réel : $\\rho(\\tau)=c_1 z_1^{-|\\tau|}+c_2 z_2^{-|\\tau|}$ (somme géométrique)",
+          "weight": 2
+        },
+        {
+          "label": "Cas complexe : $\\rho(\\tau)=c\\,r^{-|\\tau|}\\cos(\\omega|\\tau|+\\varphi)$",
+          "weight": 2
+        },
+        {
+          "label": "Interprétation : décroissance géométrique vs sinusoïde amortie",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-ar-08",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 1,
+    "front": "Pour l'**AR(1)** $X_t=\\phi X_{t-1}+\\varepsilon_t$ causal, donne l'autocovariance complète $\\gamma(\\tau)$ pour tout $\\tau\\in\\mathbb{Z}$ (pas seulement $\\rho$).",
+    "back": "$$\\gamma(\\tau)=\\frac{\\sigma^2}{1-\\phi^2}\\,\\phi^{|\\tau|},\\qquad \\tau\\in\\mathbb{Z}.$$ En effet $\\gamma(0)=\\sigma^2/(1-\\phi^2)$ et $\\rho(\\tau)=\\phi^{|\\tau|}$, donc $\\gamma(\\tau)=\\gamma(0)\\rho(\\tau)$. La décroissance est géométrique et $\\gamma$ est paire ($\\gamma(\\tau)=\\gamma(-\\tau)$).",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "$\\gamma(0)=\\sigma^2/(1-\\phi^2)$",
+          "weight": 2
+        },
+        {
+          "label": "Facteur $\\phi^{|\\tau|}$ et formule $\\gamma(\\tau)=\\frac{\\sigma^2}{1-\\phi^2}\\phi^{|\\tau|}$",
+          "weight": 2
+        },
+        {
+          "label": "Parité $\\gamma(\\tau)=\\gamma(-\\tau)$ / valable pour tout $\\tau\\in\\mathbb{Z}$",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-arma-01",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Pour un ARMA causal $\\phi(B)X_t=\\theta(B)\\varepsilon_t$, comment obtient-on les **poids causaux** $\\psi_j$ de la représentation $X_t=\\sum_{j\\ge0}\\psi_j\\varepsilon_{t-j}$ ?",
+    "back": "On identifie les coefficients dans $\\psi(z)\\phi(z)=\\theta(z)$, soit $\\sum_{j\\ge0}\\psi_jz^j=\\dfrac{\\theta(z)}{\\phi(z)}$. En pratique : **récurrence** $\\psi_j=\\theta_j+\\sum_{k=1}^p\\phi_k\\psi_{j-k}$ (avec $\\theta_j=0$ pour $j>q$, $\\psi_j=0$ pour $j<0$, $\\psi_0=1$), ou **fractions partielles** de $\\theta(z)/\\phi(z)$ qui donne une forme close $\\psi_j=\\sum_i c_i z_i^{-j}$ via les racines $z_i$ de $\\phi$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Égalité génératrice $\\psi(z)\\phi(z)=\\theta(z)$, i.e. $\\psi(z)=\\theta(z)/\\phi(z)$",
+          "weight": 2
+        },
+        {
+          "label": "Récurrence $\\psi_j=\\theta_j+\\sum_{k=1}^p\\phi_k\\psi_{j-k}$ avec conditions initiales",
+          "weight": 2
+        },
+        {
+          "label": "Méthode des fractions partielles donnant forme close via racines de $\\phi$",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-arma-02",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 1,
+    "front": "Donne les poids causaux $\\psi_j$ de l'ARMA(1,1) $(1-0.4B)X_t=(1+0.2B)\\varepsilon_t$.",
+    "back": "$\\psi_0=1$ et $\\psi_j=0.6\\cdot0.4^{\\,j-1}$ pour $j\\ge1$. En effet $\\psi(z)=\\dfrac{1+0.2z}{1-0.4z}=1+\\dfrac{0.6z}{1-0.4z}=1+0.6\\sum_{j\\ge1}0.4^{\\,j-1}z^{j}$ : le poids initial vaut $1$ puis décroît géométriquement au taux $0.4$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "$\\psi_0=1$",
+          "weight": 2
+        },
+        {
+          "label": "$\\psi_j=0.6\\cdot0.4^{j-1}$ pour $j\\ge1$",
+          "weight": 2
+        },
+        {
+          "label": "Justification via $\\psi(z)=(1+0.2z)/(1-0.4z)$ et décroissance géométrique",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-arma-03",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Donne les poids causaux $\\psi_j$ de l'ARMA(2,1) $(1-0.7B+0.1B^2)X_t=(1+0.4B)\\varepsilon_t$ par fractions partielles.",
+    "back": "On factorise $\\phi(z)=1-0.7z+0.1z^2=(1-0.2z)(1-0.5z)$ : les **racines** sont $z=5$ et $z=2$ (toutes $|z|>1$, donc causal), avec taux géométriques $0.2$ et $0.5$ (les inverses des racines). La décomposition de $\\theta(z)/\\phi(z)=\\tfrac{3}{1-0.5z}-\\tfrac{2}{1-0.2z}$ donne $\\psi_j=-2\\,(0.2)^{j}+3\\,(0.5)^{j}$ pour $j\\ge0$ (vérif : $\\psi_0=1$, $\\psi_1=1.1$).",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Deux modes géométriques de taux $0.2$ et $0.5$ (inverses des racines $5,2$ de $\\phi$)",
+          "weight": 2
+        },
+        {
+          "label": "$\\psi_j=-2(0.2)^j+3(0.5)^j$",
+          "weight": 2
+        },
+        {
+          "label": "Constantes issues des fractions partielles, vérif $\\psi_0=1$",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-arma-04",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Pour un ARMA inversible, comment calcule-t-on les **poids inversibles** $\\pi_j$ de la représentation AR($\\infty$) $\\sum_{j\\ge0}\\pi_jX_{t-j}=\\varepsilon_t$ ? Applique à $(1-0.4B)X_t=(1+0.2B)\\varepsilon_t$.",
+    "back": "On a $\\pi(z)=\\dfrac{\\phi(z)}{\\theta(z)}$ (inverse de $\\psi=\\theta/\\phi$), soit la récurrence $\\pi_j=-\\,\\phi_j-\\sum_{k=1}^{q}\\theta_k\\pi_{j-k}$ (avec $\\pi_0=1$, $\\phi_j$ le paramètre AR). Pour l'exemple : $\\pi(z)=\\dfrac{1-0.4z}{1+0.2z}$ donne $\\pi_0=1$ et $\\pi_j=-0.6\\,(-0.2)^{\\,j-1}$ pour $j\\ge1$ (raison $-0.2=-\\theta_1=1/(\\text{racine }z=-5$ de $\\theta)$, d'où le signe alterné).",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "$\\pi(z)=\\phi(z)/\\theta(z)$ (inverse de $\\psi$)",
+          "weight": 2
+        },
+        {
+          "label": "Récurrence $\\pi_j=-\\phi_j-\\sum_{k=1}^q\\theta_k\\pi_{j-k}$, $\\pi_0=1$",
+          "weight": 2
+        },
+        {
+          "label": "Application : $\\pi_j=-0.6(-0.2)^{j-1}$, $j\\ge1$ (signe alterné)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-arma-05",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Donne $\\gamma(0)$ de l'ARMA(1,1) $(1-\\phi B)X_t=(1+\\theta B)\\varepsilon_t$, puis évalue pour $\\phi=0.4,\\ \\theta=0.2$.",
+    "back": "$\\gamma(0)=\\sigma^2\\,\\dfrac{1+2\\phi\\theta+\\theta^2}{1-\\phi^2}$. Pour $\\phi=0.4,\\theta=0.2$ : numérateur $1+2(0.08)+0.04=1.2$, dénominateur $1-0.16=0.84$, d'où $\\gamma(0)=\\dfrac{1.2}{0.84}\\sigma^2=\\dfrac{10}{7}\\sigma^2$. On peut aussi retrouver ce résultat via $\\gamma(0)=\\sigma^2\\sum_{j\\ge0}\\psi_j^2$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "$\\gamma(0)=\\sigma^2(1+2\\phi\\theta+\\theta^2)/(1-\\phi^2)$",
+          "weight": 2
+        },
+        {
+          "label": "Évaluation $1.2/0.84$",
+          "weight": 2
+        },
+        {
+          "label": "Résultat $\\gamma(0)=\\tfrac{10}{7}\\sigma^2$ (ou via $\\sigma^2\\sum\\psi_j^2$)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-arma-06",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Donne $\\gamma(1)$ et $\\rho(1)$ de l'ARMA(1,1) $(1-\\phi B)X_t=(1+\\theta B)\\varepsilon_t$, puis $\\gamma(\\tau)$ pour $\\tau\\ge2$.",
+    "back": "$\\gamma(1)=\\sigma^2\\,\\dfrac{(1+\\phi\\theta)(\\phi+\\theta)}{1-\\phi^2}$, et $\\gamma(\\tau)=\\phi\\,\\gamma(\\tau-1)$ pour $\\tau\\ge2$ : au-delà du lag 1, l'ACVF décroît géométriquement comme un AR(1). On a $\\rho(1)=\\dfrac{(1+\\phi\\theta)(\\phi+\\theta)}{1+2\\phi\\theta+\\theta^2}$. Pour $\\phi=0.4,\\theta=0.2$ : $\\gamma(1)=\\tfrac{1.08\\cdot0.6}{0.84}\\sigma^2=\\tfrac{0.648}{0.84}\\sigma^2$, $\\rho(1)=0.54$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "$\\gamma(1)=\\sigma^2(1+\\phi\\theta)(\\phi+\\theta)/(1-\\phi^2)$",
+          "weight": 2
+        },
+        {
+          "label": "Récurrence $\\gamma(\\tau)=\\phi\\,\\gamma(\\tau-1)$ pour $\\tau\\ge2$",
+          "weight": 2
+        },
+        {
+          "label": "$\\rho(1)=(1+\\phi\\theta)(\\phi+\\theta)/(1+2\\phi\\theta+\\theta^2)$",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-arma-07",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 1,
+    "front": "Pour le SARMA purement saisonnier $(1-0.6B^2)X_t=(1+0.3B^2)\\varepsilon_t$, donne les poids causaux $\\psi_j$.",
+    "back": "Seuls les lags **pairs** sont non nuls : $\\psi_0=1$, $\\psi_{2k}=0.9\\cdot0.6^{\\,k-1}$ pour $k\\ge1$, et $\\psi_{2k+1}=0$. En effet $\\psi(z)=\\dfrac{1+0.3z^2}{1-0.6z^2}$ ne dépend que de $z^2$ : c'est l'ARMA(1,1) en $B^2$ avec coefficient $0.9=0.6+0.3$ devant la géométrique de taux $0.6$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "$\\psi_0=1$ et structure : seuls lags pairs non nuls",
+          "weight": 2
+        },
+        {
+          "label": "$\\psi_{2k}=0.9\\cdot0.6^{k-1}$ pour $k\\ge1$",
+          "weight": 2
+        },
+        {
+          "label": "$\\psi_{2k+1}=0$ (justif : $\\psi(z)$ fonction de $z^2$)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-arma-08",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Écris la forme générale d'un modèle **SARMA** multiplicatif $\\text{ARMA}(p,q)\\times(P,Q)_s$ de période $s$, en termes des opérateurs $\\phi,\\theta,\\Phi,\\Theta$.",
+    "back": "$\\phi(B)\\,\\Phi(B^s)\\,X_t=\\theta(B)\\,\\Theta(B^s)\\,\\varepsilon_t$, où $\\Phi(B^s)=1-\\Phi_1B^s-\\dots-\\Phi_PB^{Ps}$ et $\\Theta(B^s)=1+\\Theta_1B^s+\\dots+\\Theta_QB^{Qs}$ agissent aux lags saisonniers (multiples de $s$). Le polynôme AR total $\\phi(B)\\Phi(B^s)$ mélange dynamique court terme et saisonnière par produit.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Équation $\\phi(B)\\Phi(B^s)X_t=\\theta(B)\\Theta(B^s)\\varepsilon_t$",
+          "weight": 2
+        },
+        {
+          "label": "$\\Phi,\\Theta$ polynômes en $B^s$ (lags saisonniers multiples de $s$)",
+          "weight": 2
+        },
+        {
+          "label": "Structure multiplicative : produit des polynômes court/saisonnier",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-arma-09",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Pour le SARMA $(1-0.6B^2)X_t=(1+0.3B^2)\\varepsilon_t$, donne $\\gamma(0)$ et la structure de l'ACVF $\\gamma(\\tau)$ aux lags.",
+    "back": "C'est un ARMA(1,1) en $B^2$ : $\\gamma(0)=\\sigma^2\\dfrac{1+2(0.6)(0.3)+0.3^2}{1-0.6^2}=\\sigma^2\\dfrac{1.45}{0.64}$. L'ACVF est **nulle aux lags impairs** ; aux lags pairs $\\tau=2k$ elle suit la structure ARMA(1,1) en $0.6$ : $\\gamma(2)$ donné par la formule ARMA(1,1) puis $\\gamma(2k)=0.6\\,\\gamma(2k-2)$ pour $k\\ge2$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "$\\gamma(0)=\\sigma^2(1+2\\cdot0.6\\cdot0.3+0.3^2)/(1-0.6^2)=\\tfrac{1.45}{0.64}\\sigma^2$",
+          "weight": 2
+        },
+        {
+          "label": "ACVF nulle aux lags impairs",
+          "weight": 2
+        },
+        {
+          "label": "Aux lags pairs : structure ARMA(1,1) en $B^2$, $\\gamma(2k)=0.6\\,\\gamma(2k-2)$",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-spectral-01",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 1,
+    "front": "Définition de la densité spectrale $S(f)$ d'un processus stationnaire à partir de son autocovariance $\\gamma(\\tau)$ (convention $f\\in[-\\tfrac12,\\tfrac12]$).",
+    "back": "$S(f)=\\displaystyle\\sum_{\\tau=-\\infty}^{+\\infty}\\gamma(\\tau)\\,e^{-2\\pi i f\\tau}$. C'est la **transformée de Fourier** de l'ACVS ; $S$ est réelle, paire et $\\ge 0$. Puisque $\\gamma(-\\tau)=\\gamma(\\tau)$, on peut l'écrire $S(f)=\\gamma(0)+2\\sum_{\\tau\\ge 1}\\gamma(\\tau)\\cos(2\\pi f\\tau)$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "TF de l'ACVS: somme gamma(tau) e^{-2pi i f tau}",
+          "weight": 2
+        },
+        {
+          "label": "Propriétés: réelle, paire, >= 0",
+          "weight": 2
+        },
+        {
+          "label": "Forme cosinus gamma(0)+2 sum gamma(tau)cos(2pi f tau)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-spectral-02",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 1,
+    "front": "Transformée de Fourier inverse : comment retrouver $\\gamma(\\tau)$ à partir de $S(f)$ ? Application : $S(f)=3+4\\cos(2\\pi f)+2\\cos(4\\pi f)$.",
+    "back": "$\\gamma(\\tau)=\\displaystyle\\int_{-1/2}^{1/2} S(f)\\,e^{2\\pi i f\\tau}\\,df$. En identifiant $4\\cos(2\\pi f)=2(e^{2\\pi if}+e^{-2\\pi if})$ et $2\\cos(4\\pi f)=(e^{4\\pi if}+e^{-4\\pi if})$, on lit directement les coefficients : $\\gamma(0)=3,\\ \\gamma(1)=2,\\ \\gamma(2)=1$ (et nuls au-delà).",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Formule TF inverse: gamma(tau)=int S(f) e^{2pi i f tau} df",
+          "weight": 2
+        },
+        {
+          "label": "Identification cos(2pi f k) -> demi-coefficient sur gamma(k)",
+          "weight": 2
+        },
+        {
+          "label": "Résultat numérique gamma=(3,2,1)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-spectral-03",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 1,
+    "front": "Densité spectrale du **bruit blanc** $(\\varepsilon_t)$ de variance $\\sigma^2$ : donne $S(f)$ et interprète.",
+    "back": "$S(f)=\\sigma^2$ pour tout $f\\in[-\\tfrac12,\\tfrac12]$ (spectre **plat**). En effet $\\gamma(0)=\\sigma^2$ et $\\gamma(\\tau)=0$ pour $\\tau\\neq 0$, donc la TF est constante. Toutes les fréquences contribuent également — d'où le nom \"blanc\". Vérification : $\\int_{-1/2}^{1/2}\\sigma^2\\,df=\\sigma^2=\\gamma(0)$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "S(f)=sigma^2 constant (spectre plat)",
+          "weight": 2
+        },
+        {
+          "label": "Justification gamma(0)=sigma^2, gamma(tau)=0 sinon",
+          "weight": 2
+        },
+        {
+          "label": "Interprétation: toutes fréquences égales / intégrale = gamma(0)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-spectral-04",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Théorème du **filtre linéaire** : si $Y_t=\\sum_j a_j X_{t-j}=a(B)X_t$ avec $(X_t)$ stationnaire de spectre $S_X(f)$, donne le spectre $S_Y(f)$.",
+    "back": "$S_Y(f)=\\lvert A(f)\\rvert^2\\,S_X(f)$ où $A(f)=\\sum_j a_j e^{-2\\pi i f j}$ est la **fonction de transfert** du filtre. Le filtre agit en multipliant le spectre par le gain $\\lvert A(f)\\rvert^2$. Exemple : un MA(∞) $X_t=\\psi(B)\\varepsilon_t$ a pour spectre $\\lvert\\psi(e^{-2\\pi if})\\rvert^2\\sigma^2$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "S_Y = |A(f)|^2 S_X",
+          "weight": 2
+        },
+        {
+          "label": "A(f)=sum a_j e^{-2pi i f j} (fonction de transfert)",
+          "weight": 2
+        },
+        {
+          "label": "Interprétation gain |A(f)|^2 / application MA(inf)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-spectral-05",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Densité spectrale d'un **MA(1)** $X_t=\\varepsilon_t-\\theta\\varepsilon_{t-1}$ (bruit de variance $\\sigma^2$).",
+    "back": "$S(f)=\\sigma^2\\lvert 1-\\theta e^{-2\\pi i f}\\rvert^2=\\sigma^2\\bigl(1+\\theta^2-2\\theta\\cos(2\\pi f)\\bigr)$. C'est $\\sigma^2$ fois le module au carré de la fonction de transfert $\\theta(e^{-2\\pi if})=1-\\theta e^{-2\\pi if}$. Pour $\\theta>0$ : creux en $f=0$, pic en $f=\\tfrac12$ (hautes fréquences).",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "S = sigma^2 |1 - theta e^{-2pi i f}|^2",
+          "weight": 2
+        },
+        {
+          "label": "Forme développée sigma^2(1+theta^2-2theta cos 2pi f)",
+          "weight": 2
+        },
+        {
+          "label": "Lien fonction de transfert / forme du spectre",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-spectral-06",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Densité spectrale générale d'un **ARMA(p,q)** causal $\\phi(B)X_t=\\theta(B)\\varepsilon_t$ (bruit de variance $\\sigma^2$).",
+    "back": "$S(f)=\\sigma^2\\,\\dfrac{\\lvert\\theta(e^{-2\\pi i f})\\rvert^2}{\\lvert\\phi(e^{-2\\pi i f})\\rvert^2}=\\sigma^2\\,\\dfrac{\\bigl\\lvert 1+\\theta_1 e^{-2\\pi if}+\\dots+\\theta_q e^{-2\\pi ifq}\\bigr\\rvert^2}{\\bigl\\lvert 1-\\phi_1 e^{-2\\pi if}-\\dots-\\phi_p e^{-2\\pi ifp}\\bigr\\rvert^2}$. Le numérateur (MA) crée des creux, le dénominateur (AR) des pics près des racines de $\\phi$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "S = sigma^2 |theta(e^{-2pi if})|^2 / |phi(e^{-2pi if})|^2",
+          "weight": 2
+        },
+        {
+          "label": "Écriture explicite des polynômes phi et theta",
+          "weight": 2
+        },
+        {
+          "label": "Rôle numérateur MA (creux) / dénominateur AR (pics)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-spectral-07",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 1,
+    "front": "Définition du **périodogramme** $\\hat S(f)$ à partir de l'échantillon $X_1,\\dots,X_n$, et son espérance approchée.",
+    "back": "$\\hat S(f)=\\dfrac{1}{n}\\Bigl\\lvert\\sum_{t=1}^{n} (X_t-\\bar X)\\,e^{-2\\pi i f t}\\Bigr\\rvert^2=\\sum_{|\\tau|<n}\\hat\\gamma(\\tau)\\,e^{-2\\pi i f\\tau}$, où $\\hat\\gamma(\\tau)$ est l'autocovariance **empirique**. C'est la TF des $\\hat\\gamma$. Asymptotiquement non biaisé : $\\mathbb E[\\hat S(f)]\\to S(f)$, mais **inconsistant** ($\\mathrm{Var}(\\hat S(f))\\to S(f)^2\\neq 0$).",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Définition (1/n)|sum (X_t-Xbar) e^{-2pi i f t}|^2 = TF de gamma chapeau",
+          "weight": 2
+        },
+        {
+          "label": "E[S chapeau(f)] -> S(f) (asymptotiquement sans biais)",
+          "weight": 2
+        },
+        {
+          "label": "Inconsistance: variance -> S(f)^2 ne tend pas vers 0",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-spectral-08",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 1,
+    "front": "Que vaut $\\displaystyle\\int_{-1/2}^{1/2}\\hat S(f)\\,df$ pour le périodogramme ? Quel est l'analogue continu (théorème de Parseval) ?",
+    "back": "$\\displaystyle\\int_{-1/2}^{1/2}\\hat S(f)\\,df=\\hat\\gamma(0)$ : l'aire sous le périodogramme égale la **variance empirique**. C'est l'analogue de $\\int_{-1/2}^{1/2}S(f)\\,df=\\gamma(0)$ (TF inverse en $\\tau=0$). Le spectre **décompose la variance** par bande de fréquence.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "int S chapeau df = gamma chapeau(0)",
+          "weight": 2
+        },
+        {
+          "label": "Version théorique int S df = gamma(0)",
+          "weight": 2
+        },
+        {
+          "label": "Interprétation: décomposition de la variance par fréquence",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-spectral-09",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "**Taper** (fenêtre conique) $\\{h_t\\}$ pour l'estimation spectrale : estimateur $\\hat S_h(f)$ et condition de normalisation imposée sur les $h_t$.",
+    "back": "$\\hat S_h(f)=\\Bigl\\lvert\\sum_{t=1}^{n} h_t\\,X_t\\,e^{-2\\pi i f t}\\Bigr\\rvert^2$ avec la normalisation $\\displaystyle\\sum_{t=1}^{n} h_t^2=1$. Cette contrainte garantit que $\\hat S_h$ reste **non biaisé asymptotiquement** (même normalisation que le $1/n$ du périodogramme). Le taper réduit la **fuite spectrale** (leakage) en adoucissant les bords.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Estimateur |sum h_t X_t e^{-2pi i f t}|^2",
+          "weight": 2
+        },
+        {
+          "label": "Normalisation sum h_t^2 = 1",
+          "weight": 2
+        },
+        {
+          "label": "But: réduire fuite spectrale / préserver le non-biais",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-spectral-10",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Critère de **validité d'une ACVS** : une suite $\\{\\gamma(\\tau)\\}$ est une autocovariance valide si et seulement si... ? Test via le spectre.",
+    "back": "$\\{\\gamma(\\tau)\\}$ est une ACVS valide $\\iff$ sa transformée de Fourier $S(f)=\\sum_\\tau\\gamma(\\tau)e^{-2\\pi if\\tau}$ vérifie $S(f)\\ge 0$ pour tout $f$ (semi-définie positive, Herglotz). Méthode : calculer $S(f)$ et vérifier sa positivité. Si $S(f)<0$ pour un $f$, la suite n'est **pas** une autocovariance.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Critère: S(f) >= 0 pour tout f (semi-def positive)",
+          "weight": 2
+        },
+        {
+          "label": "S(f) = TF de gamma (théorème de Herglotz)",
+          "weight": 2
+        },
+        {
+          "label": "Méthode pratique: calculer S(f) et tester positivité",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-forecast-01",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 1,
+    "front": "Prévision à $h$ pas d'un $\\mathrm{AR}(1)$ causal $X_t=\\phi X_{t-1}+\\varepsilon_t$ ($|\\phi|<1$). Donne le prédicteur optimal $\\hat X_{T+h\\mid T}$ et l'erreur quadratique de prévision (MSPE).",
+    "back": "$\\hat X_{T+h\\mid T}=\\phi^{h}X_T$ (récurrence $\\hat X_{T+k}=\\phi\\,\\hat X_{T+k-1}$). La MSPE est $\\mathbb E[(X_{T+h}-\\hat X_{T+h\\mid T})^2]=\\sigma^2\\sum_{j=0}^{h-1}\\phi^{2j}=\\sigma^2\\dfrac{1-\\phi^{2h}}{1-\\phi^2}$. Quand $h\\to\\infty$ : $\\hat X\\to 0$ (la moyenne) et la MSPE $\\to\\gamma(0)=\\sigma^2/(1-\\phi^2)$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Predicteur X_{T+h|T} = phi^h X_T",
+          "weight": 2
+        },
+        {
+          "label": "MSPE = sigma^2 sum_{j=0}^{h-1} phi^{2j} = sigma^2 (1-phi^{2h})/(1-phi^2)",
+          "weight": 2
+        },
+        {
+          "label": "Limite h->infini : predicteur -> 0, MSPE -> gamma(0)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-forecast-02",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Pour un processus causal $X_t=\\sum_{j\\ge0}\\psi_j\\varepsilon_{t-j}$, exprime l'erreur de prévision à $h$ pas et sa variance en fonction des poids $\\psi_j$.",
+    "back": "L'erreur est $e_{T+h}=X_{T+h}-\\hat X_{T+h\\mid T}=\\sum_{j=0}^{h-1}\\psi_j\\,\\varepsilon_{T+h-j}$ (les innovations **futures** non prévisibles). Sa variance vaut $\\operatorname{Var}(e_{T+h})=\\sigma^2\\sum_{j=0}^{h-1}\\psi_j^2$. Elle croît avec $h$ et tend vers $\\gamma(0)=\\sigma^2\\sum_{j\\ge0}\\psi_j^2$ ; pour $h=1$ on retrouve $\\sigma^2$ ($\\psi_0=1$).",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Erreur e_{T+h} = somme_{j=0}^{h-1} psi_j epsilon_{T+h-j} (innovations futures)",
+          "weight": 2
+        },
+        {
+          "label": "Variance = sigma^2 somme_{j=0}^{h-1} psi_j^2",
+          "weight": 2
+        },
+        {
+          "label": "Croissance avec h ; limite gamma(0) ; cas h=1 -> sigma^2",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-forecast-03",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Prévision **tronquée** d'un ARMA causal via les poids $\\psi_j$ : à partir de $\\hat X_{T+h\\mid T}=\\sum_{j\\ge h}\\psi_j\\,\\varepsilon_{T+h-j}$, applique-la à l'ARMA(1,1) $(1-0.4B)X_t=(1+0.2B)\\varepsilon_t$ où $\\psi_0=1$, $\\psi_j=0.6\\cdot0.4^{\\,j-1}$ ($j\\ge1$). Donne $\\hat X_{T+h\\mid T}$.",
+    "back": "Le prédicteur garde seulement les innovations passées (indices $\\le T$) : $\\hat X_{T+h\\mid T}=\\sum_{j\\ge h}\\psi_j\\varepsilon_{T+h-j}$. Ici, pour $h\\ge1$ : $\\hat X_{T+h\\mid T}=\\sum_{k\\ge0}\\psi_{h+k}\\varepsilon_{T-k}=0.6\\cdot0.4^{\\,h-1}\\sum_{k\\ge0}0.4^{k}\\varepsilon_{T-k}$, soit $\\hat X_{T+h\\mid T}=0.4\\,\\hat X_{T+h-1\\mid T}=0.4^{\\,h-1}\\hat X_{T+1\\mid T}$ : décroissance géométrique vers $0$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Predicteur tronque = somme_{j>=h} psi_j epsilon_{T+h-j} (innovations passees)",
+          "weight": 2
+        },
+        {
+          "label": "Application ARMA(1,1) : facteur 0.6 * 0.4^{h-1} sur somme_k 0.4^k epsilon_{T-k}",
+          "weight": 2
+        },
+        {
+          "label": "Recurrence X_{T+h|T} = 0.4 X_{T+h-1|T}, decroissance geometrique vers 0",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-forecast-04",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Définis la fonction d'autocorrélation **partielle** (PACF) $\\alpha(h)$ d'un processus stationnaire, et donne sa valeur explicite pour un $\\mathrm{AR}(1)$ et un $\\mathrm{MA}(1)$ $X_t=\\varepsilon_t+\\theta\\varepsilon_{t-1}$.",
+    "back": "$\\alpha(h)$ est la corrélation entre $X_t$ et $X_{t+h}$ une fois retiré l'effet linéaire des intermédiaires $X_{t+1},\\dots,X_{t+h-1}$ ; c'est le dernier coefficient $\\phi_{hh}$ de la meilleure régression sur $h$ retards. **AR(1)** : $\\alpha(1)=\\phi$, $\\alpha(h)=0$ pour $h\\ge2$ (coupe au lag $p=1$). **MA(1)** : $\\alpha(h)=\\dfrac{-(-\\theta)^h(1-\\theta^2)}{1-\\theta^{2(h+1)}}$, décroissance sans coupure.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Definition : correlation residuelle / dernier coeff phi_hh de la regression sur h retards",
+          "weight": 2
+        },
+        {
+          "label": "AR(1) : alpha(1)=phi, alpha(h)=0 pour h>=2 (coupe au lag p)",
+          "weight": 2
+        },
+        {
+          "label": "MA(1) : alpha(h) = -(-theta)^h(1-theta^2)/(1-theta^{2(h+1)}), pas de coupure",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-forecast-05",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Récursion de **Durbin-Levinson** : à partir des coefficients $\\phi_{n-1,k}$ et de l'erreur $v_{n-1}$, donne la mise à jour $\\phi_{nn}$, $\\phi_{n,k}$ et $v_n$ pour la prévision à un pas.",
+    "back": "$\\phi_{nn}=\\dfrac{\\gamma(n)-\\sum_{k=1}^{n-1}\\phi_{n-1,k}\\,\\gamma(n-k)}{v_{n-1}}$ ; puis $\\phi_{n,k}=\\phi_{n-1,k}-\\phi_{nn}\\,\\phi_{n-1,n-k}$ pour $k=1,\\dots,n-1$ ; et $v_n=v_{n-1}\\,(1-\\phi_{nn}^2)$, avec $v_0=\\gamma(0)$. Les $\\phi_{nn}$ sont exactement la **PACF** au lag $n$ ; $v_n$ est la MSPE à un pas.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "phi_nn = (gamma(n) - somme phi_{n-1,k} gamma(n-k)) / v_{n-1}",
+          "weight": 2
+        },
+        {
+          "label": "Mise a jour phi_{n,k} = phi_{n-1,k} - phi_nn phi_{n-1,n-k} et v_n = v_{n-1}(1-phi_nn^2)",
+          "weight": 2
+        },
+        {
+          "label": "phi_nn = PACF au lag n ; v_n = MSPE a un pas ; v_0 = gamma(0)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-forecast-06",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Représentation **spectrale (de Cramér)** d'un processus stationnaire $X_t$. Écris $X_t$ via l'increment $\\,dZ(f)$ et donne les propriétés de $Z$ reliant l'autocovariance au spectre $S(f)$.",
+    "back": "$X_t=\\displaystyle\\int_{-1/2}^{1/2} e^{2\\pi i f t}\\,dZ(f)$ avec $Z$ à **incréments orthogonaux** centrés : $\\mathbb E[dZ(f)]=0$ et $\\mathbb E[dZ(f)\\,\\overline{dZ(f')}]=0$ si $f\\neq f'$, $\\mathbb E[|dZ(f)|^2]=S(f)\\,df$. On retrouve $\\gamma(\\tau)=\\int_{-1/2}^{1/2} e^{2\\pi i f\\tau}\\,S(f)\\,df$ : le processus est une superposition d'oscillations de puissance $S(f)\\,df$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "X_t = integrale e^{2 pi i f t} dZ(f) sur [-1/2,1/2]",
+          "weight": 2
+        },
+        {
+          "label": "Z increments orthogonaux : E[dZ dZ'bar]=0 si f != f', E[|dZ|^2]=S(f)df",
+          "weight": 2
+        },
+        {
+          "label": "gamma(tau) = integrale e^{2 pi i f tau} S(f) df (lien autocov-spectre)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-forecast-07",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "**Delay process** : $X^{(1)}_t=a\\,X^{(2)}_{t-h}+\\eta_t$ avec $\\eta_t$ bruit indépendant de $X^{(2)}$. Donne le **spectre croisé** $S_{12}(f)$, son module (cohérence) et sa phase.",
+    "back": "$S_{12}(f)=a\\,e^{-2\\pi i f h}\\,S_{22}(f)$. Le **gain** est $|S_{12}(f)|=|a|\\,S_{22}(f)$ et la **phase** est $\\arg S_{12}(f)=-2\\pi f h$ (linéaire en $f$, de pente $-2\\pi h$) : la pente de la phase révèle directement le **décalage** $h$. La cohérence au carré vaut $1$ là où $\\eta$ est absent.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "S12(f) = a e^{-2 pi i f h} S22(f)",
+          "weight": 2
+        },
+        {
+          "label": "Module/gain = |a| S22(f)",
+          "weight": 2
+        },
+        {
+          "label": "Phase = -2 pi f h, lineaire, pente revele le delai h",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-forecast-08",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 1,
+    "front": "Prévision à $h$ pas d'un $\\mathrm{MA}(1)$ inversible $X_t=\\varepsilon_t+\\theta\\varepsilon_{t-1}$ ($|\\theta|<1$). Donne $\\hat X_{T+h\\mid T}$ et la variance d'erreur pour $h=1$ et $h\\ge2$.",
+    "back": "$\\psi_0=1,\\ \\psi_1=\\theta,\\ \\psi_j=0$ pour $j\\ge2$. **$h=1$** : $\\hat X_{T+1\\mid T}=\\theta\\,\\varepsilon_T$, variance d'erreur $=\\sigma^2$. **$h\\ge2$** : $\\hat X_{T+h\\mid T}=0$ (mémoire finie épuisée), variance $=\\gamma(0)=\\sigma^2(1+\\theta^2)$. La prévision retombe à la moyenne dès qu'on dépasse l'ordre $q=1$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "h=1 : predicteur = theta epsilon_T, variance erreur = sigma^2",
+          "weight": 2
+        },
+        {
+          "label": "h>=2 : predicteur = 0 (memoire finie), variance = gamma(0)=sigma^2(1+theta^2)",
+          "weight": 2
+        },
+        {
+          "label": "Retour a la moyenne des que h > q=1",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-arch-01",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 1,
+    "front": "Écris la **définition** d'un processus $\\mathrm{ARCH}(p)$ pour les rendements $r_t=\\sigma_t\\varepsilon_t$, où $(\\varepsilon_t)$ est i.i.d. centré de variance $1$.",
+    "back": "$r_t=\\sigma_t\\varepsilon_t$ avec $\\sigma_t^2=\\alpha_0+\\sum_{j=1}^{p}\\alpha_j\\,r_{t-j}^2$, où $\\alpha_0>0$, $\\alpha_j\\ge 0$. La variance conditionnelle $\\sigma_t^2$ dépend des carrés passés des rendements : c'est un modèle de **volatilité variable** (clustering). Conditionnellement à $\\mathcal{F}_{t-1}$, $r_t$ est centré de variance $\\sigma_t^2$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "r_t = sigma_t epsilon_t avec epsilon_t i.i.d. centré variance 1",
+          "weight": 2
+        },
+        {
+          "label": "sigma_t^2 = alpha_0 + sum alpha_j r_{t-j}^2 (p termes carrés passés)",
+          "weight": 2
+        },
+        {
+          "label": "Contraintes alpha_0>0, alpha_j>=0 / interprétation volatilité conditionnelle",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-arch-02",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 1,
+    "front": "Pour un $\\mathrm{ARCH}(p)$ $r_t=\\sigma_t\\varepsilon_t$ (avec $\\sigma_t$ mesurable par rapport au passé $\\mathcal{F}_{t-1}$ et $\\varepsilon_t$ centré indépendant du passé), montre que $\\mathbb{E}[r_t]=0$.",
+    "back": "Par espérance itérée : $\\mathbb{E}[r_t]=\\mathbb{E}\\big[\\mathbb{E}[\\sigma_t\\varepsilon_t\\mid\\mathcal{F}_{t-1}]\\big]=\\mathbb{E}\\big[\\sigma_t\\,\\mathbb{E}[\\varepsilon_t]\\big]=0$, car $\\sigma_t$ est $\\mathcal{F}_{t-1}$-mesurable et $\\mathbb{E}[\\varepsilon_t]=0$. Le processus est donc **centré** (espérance nulle inconditionnelle).",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Conditionnement / sigma_t mesurable par rapport à F_{t-1}",
+          "weight": 2
+        },
+        {
+          "label": "E[epsilon_t]=0 sort le facteur sigma_t",
+          "weight": 2
+        },
+        {
+          "label": "Conclusion E[r_t]=0 (loi des espérances itérées)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-arch-03",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Pourquoi un $\\mathrm{ARCH}(p)$ $r_t=\\sigma_t\\varepsilon_t$ est-il **non corrélé** (bruit blanc faible) ? Calcule $\\gamma(\\tau)=\\mathrm{Cov}(r_t,r_{t+\\tau})$ pour $\\tau\\neq 0$.",
+    "back": "Pour $\\tau>0$ : $\\mathbb{E}[r_t r_{t+\\tau}]=\\mathbb{E}\\big[r_t\\,\\sigma_{t+\\tau}\\,\\mathbb{E}[\\varepsilon_{t+\\tau}\\mid\\mathcal{F}_{t+\\tau-1}]\\big]$, car $r_t\\sigma_{t+\\tau}$ est $\\mathcal{F}_{t+\\tau-1}$-mesurable. Or $\\varepsilon_{t+\\tau}\\perp\\mathcal{F}_{t+\\tau-1}$ et $\\mathbb{E}[\\varepsilon_{t+\\tau}]=0$, donc $\\mathbb{E}[\\varepsilon_{t+\\tau}\\mid\\mathcal{F}_{t+\\tau-1}]=0$. Comme $\\mathbb{E}[r_t]=0$, on a $\\gamma(\\tau)=0$ pour $\\tau\\neq0$ : $(r_t)$ est un **bruit blanc faible** (non corrélé, centré).",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Conditionnement sur F_{t+tau-1}, r_t sigma_{t+tau} mesurable",
+          "weight": 2
+        },
+        {
+          "label": "E[epsilon_{t+tau}|F_{t+tau-1}]=0 donne gamma(tau)=0 pour tau != 0",
+          "weight": 2
+        },
+        {
+          "label": "Conclusion : bruit blanc faible (non corrélé)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-arch-04",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Donne la **variance non conditionnelle** $\\mathrm{Var}(r_t)$ d'un $\\mathrm{ARCH}(p)$ stationnaire $\\sigma_t^2=\\alpha_0+\\sum_{j=1}^{p}\\alpha_j r_{t-j}^2$.",
+    "back": "$\\mathrm{Var}(r_t)=\\mathbb{E}[r_t^2]=\\mathbb{E}[\\sigma_t^2]=\\dfrac{\\alpha_0}{1-\\sum_{j=1}^{p}\\alpha_j}$. On prend l'espérance de $\\sigma_t^2$ en utilisant $\\mathbb{E}[r_{t-j}^2]=\\mathbb{E}[r_t^2]$ (stationnarité), puis on résout. Ex. $\\mathrm{ARCH}(2)$ : $\\mathrm{Var}=\\alpha_0/(1-\\alpha_1-\\alpha_2)$. Exige $\\sum_j\\alpha_j<1$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Var(r_t)=E[sigma_t^2] via E[r_t^2]=E[sigma_t^2]",
+          "weight": 2
+        },
+        {
+          "label": "Résultat alpha_0 / (1 - sum_j alpha_j)",
+          "weight": 2
+        },
+        {
+          "label": "Utilisation stationnarité E[r_{t-j}^2]=E[r_t^2] / condition sum<1",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-arch-05",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Quelle est la **condition de stationnarité** (variance finie) d'un $\\mathrm{ARCH}(p)$ $\\sigma_t^2=\\alpha_0+\\sum_{j=1}^{p}\\alpha_j r_{t-j}^2$ ? Et pour un $\\mathrm{GARCH}(p,q)$ ?",
+    "back": "**ARCH(p)** : stationnaire au second ordre $\\iff \\sum_{j=1}^{p}\\alpha_j<1$ (avec $\\alpha_0>0,\\ \\alpha_j\\ge0$), d'où $\\mathrm{Var}(r_t)=\\dfrac{\\alpha_0}{1-\\sum_{j}\\alpha_j}<\\infty$. **GARCH(p,q)** $\\sigma_t^2=\\alpha_0+\\sum_{j=1}^{p}\\alpha_j r_{t-j}^2+\\sum_{j=1}^{q}\\beta_j\\sigma_{t-j}^2$ : stationnaire au second ordre $\\iff \\sum_{j=1}^{p}\\alpha_j+\\sum_{j=1}^{q}\\beta_j<1$, avec $\\mathrm{Var}(r_t)=\\dfrac{\\alpha_0}{1-\\sum_j\\alpha_j-\\sum_j\\beta_j}$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "ARCH(p) : sum_{j=1}^p alpha_j < 1",
+          "weight": 2
+        },
+        {
+          "label": "Lien avec variance finie alpha_0/(1-sum alpha_j) ; alpha_0>0, alpha_j>=0",
+          "weight": 2
+        },
+        {
+          "label": "GARCH(p,q) (alpha sur r^2 indices 1..p, beta sur sigma^2 indices 1..q) : sum alpha_j + sum beta_j < 1",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-arch-06",
+    "course": "Time Series",
+    "category": "Formules",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Un $\\mathrm{ARCH}(p)$ est un bruit blanc faible (non corrélé). Pourtant il n'est **pas indépendant** ni i.i.d. : explique pourquoi et avec quelle quantité on le voit.",
+    "back": "Les rendements $r_t$ sont non corrélés mais **dépendants** : la volatilité $\\sigma_t^2$ dépend des $r_{t-j}^2$ passés (clustering de volatilité). On le détecte sur les **carrés** : les $r_t^2$ sont **autocorrélés** ($\\mathrm{Cov}(r_t^2,r_{t-j}^2)\\neq0$), alors que i.i.d. donnerait une ACF des carrés nulle. Donc non corrélé $\\neq$ indépendant.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "sigma_t^2 dépend des r_{t-j}^2 passés -> dépendance (clustering)",
+          "weight": 2
+        },
+        {
+          "label": "Les carrés r_t^2 sont autocorrélés (Cov(r_t^2, r_{t-j}^2) != 0)",
+          "weight": 2
+        },
+        {
+          "label": "Distinction non corrélé vs indépendant / pas i.i.d.",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-tricksid-01",
+    "course": "Time Series",
+    "category": "Tricks",
+    "kind": "cours",
+    "difficulty": 1,
+    "front": "Réflexe : on observe une ACF qui décroît **très lentement** (quasi linéaire, encore $\\approx 0.8$ au lag 20) et une PACF avec un seul pic massif au lag 1 ($\\approx 1$). Quel diagnostic et quelle action ?",
+    "back": "Diagnostic : **non-stationnarité** (racine unité, type $I(1)$). Action : **différencier** une fois, $Y_t=(1-B)X_t$, puis ré-examiner l'ACF/PACF de $Y_t$. Une ACF qui ne s'éteint pas n'est PAS celle d'un ARMA stationnaire ; le pic PACF $\\approx 1$ au lag 1 signale $\\phi\\approx 1$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Identifie la non-stationnarité / racine unité ($I(1)$) à partir de l'ACF à décroissance lente",
+          "weight": 2
+        },
+        {
+          "label": "Action correcte : différencier $Y_t=(1-B)X_t$ puis ré-analyser",
+          "weight": 2
+        },
+        {
+          "label": "Justifie : ACF qui ne s'éteint pas $\\neq$ ARMA stationnaire (pic PACF $\\approx 1 \\Rightarrow \\phi\\approx 1$)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-tricksid-02",
+    "course": "Time Series",
+    "category": "Tricks",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "On factorise le polynôme AR $\\phi(z)=1-1.0z+0.21z^2$. Le processus $\\phi(B)X_t=\\varepsilon_t$ est-il **causal** ? (Utilise la règle des racines.)",
+    "back": "$\\phi(z)=(1-0.3z)(1-0.7z)$, racines $z_1=1/0.3\\approx3.33$ et $z_2=1/0.7\\approx1.43$. Les deux vérifient $|z|>1$ : **causal** (et stationnaire). Réflexe : factoriser, prendre $z_i=1/(\\text{terme})$, comparer à 1. Ici les deux modules $>1$, donc OK.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Factorise $\\phi(z)=(1-0.3z)(1-0.7z)$",
+          "weight": 2
+        },
+        {
+          "label": "Calcule les racines $z\\approx3.33$ et $z\\approx1.43$",
+          "weight": 2
+        },
+        {
+          "label": "Conclut causal car les deux racines vérifient $|z|>1$",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-tricksid-03",
+    "course": "Time Series",
+    "category": "Tricks",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Réflexe d'inversibilité : pour le MA(2) $X_t=\\varepsilon_t-1.5\\varepsilon_{t-1}+0.56\\varepsilon_{t-2}$, dire s'il est **inversible** en examinant les racines de $\\theta(z)$.",
+    "back": "$\\theta(z)=1-1.5z+0.56z^2=(1-0.7z)(1-0.8z)$, racines $z=1/0.7\\approx1.43$ et $z=1/0.8=1.25$. Les deux $|z|>1$ : **inversible**. Réflexe : inversibilité $\\Leftrightarrow$ racines de $\\theta(z)$ hors du cercle unité (mêmes règles que la causalité, mais sur $\\theta$).",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Factorise $\\theta(z)=(1-0.7z)(1-0.8z)$",
+          "weight": 2
+        },
+        {
+          "label": "Racines $z\\approx1.43$ et $z=1.25$",
+          "weight": 2
+        },
+        {
+          "label": "Inversible car racines de $\\theta(z)$ vérifient $|z|>1$",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-tricksid-04",
+    "course": "Time Series",
+    "category": "Tricks",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Réflexe seasonal : une ACF montre des pics nets aux lags $4,8,12,\\dots$ (et presque rien entre), tandis que la PACF a un gros pic au lag 4 puis s'éteint. Quel modèle privilégier ?",
+    "back": "Saisonnalité de période $s=4$. Pic ACF qui se répète aux multiples de 4 + PACF qui coupe au lag 4 $\\Rightarrow$ composante **AR saisonnier** $(1-\\Phi B^4)X_t=\\varepsilon_t$. Réflexe : lire la **périodicité** des lags non nuls = période $s$ ; ACF tail-off vs PACF cut-off au lag $s$ $\\Rightarrow$ SAR(1).",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Reconnaît la période saisonnière $s=4$ (lags non nuls aux multiples de 4)",
+          "weight": 2
+        },
+        {
+          "label": "PACF cut-off au lag 4 $\\Rightarrow$ structure AR saisonnier",
+          "weight": 2
+        },
+        {
+          "label": "Modèle SAR(1) : $(1-\\Phi B^4)X_t=\\varepsilon_t$",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-tricksid-05",
+    "course": "Time Series",
+    "category": "Tricks",
+    "kind": "cours",
+    "difficulty": 1,
+    "front": "Réflexe PACF d'un MA : pour un MA(1) inversible $X_t=\\varepsilon_t+\\theta\\varepsilon_{t-1}$, la PACF **coupe-t-elle** à un lag fini ? Que voit-on à la place ?",
+    "back": "**Non** : la PACF d'un MA **tail-off** (décroît, en alternant de signe selon le signe de $\\theta$), elle ne coupe jamais. C'est l'**ACF** du MA(1) qui coupe au lag 1. Réflexe-miroir : MA $\\to$ ACF cut-off + PACF tail-off ; AR $\\to$ l'inverse.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Réponse : la PACF d'un MA ne coupe pas, elle tail-off (décroissance)",
+          "weight": 2
+        },
+        {
+          "label": "Précise que c'est l'ACF qui coupe (au lag 1 pour MA(1))",
+          "weight": 2
+        },
+        {
+          "label": "Énonce la dualité MA $\\leftrightarrow$ AR (ACF/PACF cut-off vs tail-off)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-tricksid-06",
+    "course": "Time Series",
+    "category": "Tricks",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "On hésite entre AR(2) et ARMA(1,1). L'ACF **décroît** (tail-off) ET la PACF **décroît** aussi (tail-off, aucun cut-off net). Que conclure ?",
+    "back": "Les deux qui tail-off $\\Rightarrow$ modèle **ARMA mixte** $(p\\geq1,q\\geq1)$, pas un AR pur ni un MA pur. Réflexe : un cut-off net dans l'ACF **ou** la PACF révèle un ordre fini ; son **absence dans les deux** pointe vers ARMA. On commence parcimonieux : ARMA(1,1).",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Conclut : ARMA mixte (les deux tail-off $\\Rightarrow p,q\\geq1$)",
+          "weight": 2
+        },
+        {
+          "label": "Exclut AR pur et MA pur (aucun cut-off net)",
+          "weight": 2
+        },
+        {
+          "label": "Choix parcimonieux : commencer par ARMA(1,1)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-tricksid-07",
+    "course": "Time Series",
+    "category": "Tricks",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Réflexe racine unité au bord : le processus $(1-B)(1-0.5B)X_t=\\varepsilon_t$ est-il stationnaire/causal ? Lire les facteurs.",
+    "back": "Le facteur $(1-B)$ a une racine $z=1$ : **sur** le cercle unité $\\Rightarrow$ **non stationnaire** (modèle ARIMA, $d=1$). L'autre facteur $(1-0.5B)$ a $z=2>1$ (OK). Réflexe : une racine **égale** à 1 n'est pas $>1$, donc pas causal ; il faut différencier pour retirer le facteur $(1-B)$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Repère la racine $z=1$ du facteur $(1-B)$ (sur le cercle unité)",
+          "weight": 2
+        },
+        {
+          "label": "Conclut non stationnaire $\\Rightarrow$ ARIMA avec $d=1$",
+          "weight": 2
+        },
+        {
+          "label": "Note que $|z|>1$ strict est requis ; différencier élimine $(1-B)$",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-tricksid-08",
+    "course": "Time Series",
+    "category": "Tricks",
+    "kind": "cours",
+    "difficulty": 1,
+    "front": "Réflexe d'AR(1) à coefficient négatif : pour $X_t=-0.7X_{t-1}+\\varepsilon_t$, à quoi ressemble l'ACF ($\\rho(\\tau)$) et que voit-on sur la PACF ?",
+    "back": "$\\rho(\\tau)=(-0.7)^{|\\tau|}$ : décroissance **oscillante** ($\\rho(1)=-0.7,\\ \\rho(2)=+0.49,\\dots$). PACF : **un seul** pic à $-0.7$ au lag 1, puis $0$ (cut-off au lag 1). Réflexe : $\\phi<0$ $\\Rightarrow$ ACF alterne de signe ; AR(1) $\\Rightarrow$ PACF coupe toujours au lag 1.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "ACF : $\\rho(\\tau)=(-0.7)^{|\\tau|}$, décroissance oscillante (alterne de signe)",
+          "weight": 2
+        },
+        {
+          "label": "PACF : pic unique $-0.7$ au lag 1 puis nulle (cut-off au lag 1)",
+          "weight": 2
+        },
+        {
+          "label": "Réflexe : $\\phi<0\\Rightarrow$ ACF oscillante ; AR(1) $\\Rightarrow$ PACF cut-off au lag 1",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-tricksid-09",
+    "course": "Time Series",
+    "category": "Tricks",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Réflexe sur-différenciation : après différenciation, l'ACF de $Y_t=(1-B)X_t$ montre un fort pic **négatif** au lag 1 ($\\rho(1)\\approx-0.5$) et rien ensuite. Qu'est-ce que cela signale ?",
+    "back": "Signe d'**over-differencing** : différencier un processus déjà stationnaire introduit un facteur MA $(1-B)$ avec racine $z=1$ (non inversible), créant un $\\rho(1)<0$ artificiel. Réflexe : un gros $\\rho(1)$ négatif après différenciation $\\Rightarrow$ on a différencié de trop ; réduire $d$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Diagnostic : over-differencing (différenciation excessive)",
+          "weight": 2
+        },
+        {
+          "label": "Cause : facteur MA $(1-B)$ induit, racine $z=1$ non inversible $\\Rightarrow\\rho(1)<0$",
+          "weight": 2
+        },
+        {
+          "label": "Action : réduire $d$ (ne pas différencier davantage)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-tricksid-10",
+    "course": "Time Series",
+    "category": "Tricks",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Réflexe lecture de facteurs ARMA : on a $(1-0.5B)(1-B)X_t=(1+0.4B)\\varepsilon_t$. Donner $(p,d,q)$ et dire ce qui est causal/inversible.",
+    "back": "Le facteur $(1-B)$ donne $d=1$ ; le reste de $\\phi$ est $(1-0.5B)$ donc $p=1$ ; $\\theta(B)=(1+0.4B)$ donc $q=1$ : **ARIMA(1,1,1)**. Partie causale : racine $z=2>1$ (OK). Inversibilité : $\\theta(z)$ a $z=-1/0.4=-2.5$, $|z|=2.5>1$ (OK). Réflexe : isoler $(1-B)^d$ avant de lire $p$ et $q$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Sépare le facteur $(1-B)$ $\\Rightarrow d=1$, identifie ARIMA(1,1,1)",
+          "weight": 2
+        },
+        {
+          "label": "Partie AR restante causale : racine $z=2>1$",
+          "weight": 2
+        },
+        {
+          "label": "Inversibilité de $\\theta$ : racine $z=-2.5$, $|z|>1$ $\\Rightarrow$ OK",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-tricksexam-01",
+    "course": "Time Series",
+    "category": "Tricks",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "**Delay process** : $X^{(1)}_t=a\\,X^{(2)}_{t-h}+\\eta_t$ avec $(\\eta_t)$ bruit blanc (variance $\\sigma_\\eta^2$) indépendant de $(X^{(2)}_t)$. Donne le **spectre croisé** $S_{12}(f)$ et la cohérence.",
+    "back": "$S_{12}(f)=a\\,e^{-2\\pi i f h}\\,S_{22}(f)$, et $S_{11}(f)=a^2S_{22}(f)+\\sigma_\\eta^2$. La **phase** $\\arg S_{12}(f)=-2\\pi f h$ (si $a>0$) est **linéaire en $f$** de pente $-2\\pi h$ : le délai pur se lit dans la phase. Cohérence $|R_{12}(f)|^2=\\dfrac{|S_{12}|^2}{S_{11}S_{22}}=\\dfrac{a^2S_{22}(f)}{a^2S_{22}(f)+\\sigma_\\eta^2}<1$ : le bruit $\\eta$ (non corrélé croisé) gonfle $S_{11}$ et abaisse la cohérence sous $1$ ; elle tend vers $1$ seulement si $\\sigma_\\eta^2\\to0$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "S12(f) = a e^{-2 pi i f h} S22(f)",
+          "weight": 2
+        },
+        {
+          "label": "Phase linéaire -2 pi f h, pente = -2 pi h donne le délai",
+          "weight": 2
+        },
+        {
+          "label": "S11 = a^2 S22 + sigma_eta^2, donc cohérence = a^2 S22/(a^2 S22 + sigma_eta^2) < 1 (=1 ssi sigma_eta^2=0)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-tricksexam-02",
+    "course": "Time Series",
+    "category": "Tricks",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "Processus **harmonique** $X_t=A\\cos(\\lambda t)+B\\sin(\\lambda t)$. À quelle condition sur $A,B$ est-il **stationnaire** ? Piège classique.",
+    "back": "Stationnaire $\\iff$ $A,B$ sont des **variables aléatoires** avec $E[A]=E[B]=0$, $\\mathrm{Var}(A)=\\mathrm{Var}(B)=\\sigma^2$ et $\\mathrm{Cov}(A,B)=0$. Alors $E[X_t]=0$ et $\\gamma(\\tau)=\\sigma^2\\cos(\\lambda\\tau)$ (indépendant de $t$). **Piège** : si $A,B$ sont des **constantes**, $X_t$ est déterministe et la moyenne $A\\cos\\lambda t+B\\sin\\lambda t$ dépend de $t$ $\\Rightarrow$ non stationnaire.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Condition A,B aléatoires centrés, même variance, décorrélés",
+          "weight": 2
+        },
+        {
+          "label": "ACVF gamma(tau)=sigma^2 cos(lambda tau) indépendante de t",
+          "weight": 2
+        },
+        {
+          "label": "Piège: A,B constantes => moyenne dépend de t => non stationnaire",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-tricksexam-03",
+    "course": "Time Series",
+    "category": "Tricks",
+    "kind": "cours",
+    "difficulty": 1,
+    "front": "**Marche aléatoire** $X_t=X_{t-1}+\\varepsilon_t$ ($X_0=0$). Montre rapidement qu'elle est **non stationnaire** (deux arguments).",
+    "back": "$X_t=\\sum_{s=1}^{t}\\varepsilon_s$, donc $\\mathrm{Var}(X_t)=t\\,\\sigma^2$ **croît avec $t$** : variance non constante $\\Rightarrow$ non stationnaire. De plus $\\mathrm{Cov}(X_t,X_{t+\\tau})=t\\,\\sigma^2$ dépend de $t$ (pas seulement de $\\tau$). **Réflexe** : racine $z=1$ de $\\phi(z)=1-z$ sur le cercle unité ; différencier $\\nabla X_t=\\varepsilon_t$ rend stationnaire.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Var(X_t)=t sigma^2 croît avec t (non constante)",
+          "weight": 2
+        },
+        {
+          "label": "Cov(X_t,X_{t+tau})=t sigma^2 dépend de t",
+          "weight": 2
+        },
+        {
+          "label": "Racine unité z=1 / différencier donne bruit blanc",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-tricksexam-04",
+    "course": "Time Series",
+    "category": "Tricks",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "On te donne une suite $\\{\\gamma(\\tau)\\}$. Comment **vérifier** qu'elle est une **ACVS valide** (fonction d'autocovariance d'un processus stationnaire) ?",
+    "back": "Conditions : (1) **symétrie** $\\gamma(-\\tau)=\\gamma(\\tau)$ ; (2) **type positif** ($\\sum_{i,j}a_i a_j\\gamma(t_i-t_j)\\ge0$). **Réflexe d'examen** : calculer la densité spectrale $S(f)=\\sum_\\tau \\gamma(\\tau)e^{-2\\pi i f\\tau}$ et vérifier $S(f)\\ge0$ pour tout $f$ — équivalent au type positif (Herglotz). Si un $S(f)<0$, la suite n'est **pas** une ACVS.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Symétrie gamma(-tau)=gamma(tau)",
+          "weight": 2
+        },
+        {
+          "label": "Type positif (matrice de covariance semi-définie positive)",
+          "weight": 2
+        },
+        {
+          "label": "Critère pratique S(f)=sum gamma e^{-2 pi i f tau} >= 0",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-tricksexam-05",
+    "course": "Time Series",
+    "category": "Tricks",
+    "kind": "cours",
+    "difficulty": 1,
+    "front": "Suite candidate $\\gamma(0)=1$, $\\gamma(\\pm1)=0.6$, $\\gamma(\\tau)=0$ sinon. Est-ce une **ACVS valide** ? (test rapide par le spectre)",
+    "back": "$S(f)=\\gamma(0)+2\\gamma(1)\\cos(2\\pi f)=1+1.2\\cos(2\\pi f)$. Minimum en $f=\\tfrac12$ : $S(\\tfrac12)=1-1.2=-0.2<0$. Donc **non valide** (spectre négatif). Réflexe : pour un « MA(1) » $\\rho(1)=\\gamma(1)/\\gamma(0)$ doit vérifier $|\\rho(1)|\\le\\tfrac12$ ; ici $0.6>0.5$ $\\Rightarrow$ impossible.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "S(f)=1+1.2 cos(2 pi f) (forme du spectre)",
+          "weight": 2
+        },
+        {
+          "label": "S(1/2)=-0.2<0 => non valide",
+          "weight": 2
+        },
+        {
+          "label": "Borne |rho(1)|<=1/2 violée (0.6>0.5)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-tricksexam-06",
+    "course": "Time Series",
+    "category": "Tricks",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "**ACVF par produit de polynômes** : pour un MA, $\\gamma(\\tau)$ se lit comme un **coefficient**. Pour $X_t=\\theta(B)\\varepsilon_t$, exprime $\\gamma(\\tau)$ via le produit $\\theta(z)\\theta(z^{-1})$.",
+    "back": "$\\gamma(\\tau)=\\sigma^2\\,[\\text{coeff. de }z^{\\tau}\\text{ dans }\\theta(z)\\theta(z^{-1})]$. **Astuce** : développer $\\theta(z)\\theta(1/z)$ et identifier les puissances de $z$. Ex. MA(1) $\\theta(z)=1+\\theta z$ : $\\theta(z)\\theta(1/z)=\\theta z^{-1}+(1+\\theta^2)+\\theta z$, d'où $\\gamma(0)=\\sigma^2(1+\\theta^2)$, $\\gamma(\\pm1)=\\sigma^2\\theta$, $0$ sinon.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "gamma(tau)=sigma^2 * coeff de z^tau dans theta(z)theta(1/z)",
+          "weight": 2
+        },
+        {
+          "label": "Méthode: développer le produit et identifier les puissances",
+          "weight": 2
+        },
+        {
+          "label": "Exemple MA(1): gamma0=sigma^2(1+theta^2), gamma1=sigma^2 theta",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-tricksexam-07",
+    "course": "Time Series",
+    "category": "Tricks",
+    "kind": "cours",
+    "difficulty": 2,
+    "front": "**Prévision saisonnière** : modèle SAR $(1-\\Phi B^{s})X_t=\\varepsilon_t$, $|\\Phi|<1$, période $s$. Donne le prédicteur à horizon $\\ell$ et la méthode, selon que $\\ell$ est multiple de $s$ ou non.",
+    "back": "Récurrence : $\\hat X_T(\\ell)=\\Phi\\,\\hat X_T(\\ell-s)$ (les $\\varepsilon$ futurs s'annulent ; $\\hat X_T(j)=X_{T+j}$ si $j\\le0$). **Réflexe** : on remonte de $s$ en $s$ jusqu'à une valeur **observée**, chaque saut multipliant par $\\Phi$. Si $\\ell=ks$ : $\\hat X_T(ks)=\\Phi^{k}X_T$. Si $\\ell=ks+r$ ($0<r<s$) : $\\hat X_T(\\ell)=\\Phi^{k+1}X_{T+r-s}$ (le reste $r$ force un facteur $\\Phi$ de plus). Variance d'erreur croît **en escalier** tous les $s$ pas.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Récurrence saisonnière hatX_T(l)=Phi hatX_T(l-s)",
+          "weight": 2
+        },
+        {
+          "label": "Prédicteur Phi^k X_T pour l=ks (horizon multiple de s)",
+          "weight": 2
+        },
+        {
+          "label": "Réflexe: remonter de s en s jusqu'à valeur observée, erreur en escalier",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "ts-tricksexam-08",
+    "course": "Time Series",
+    "category": "Tricks",
+    "kind": "cours",
+    "difficulty": 1,
+    "front": "**Piège du spectre croisé** : que valent $S_{21}(f)$ et le **co-spectre / quadrature** pour le delay process $X^{(1)}_t=a\\,X^{(2)}_{t-h}+\\eta_t$ ?",
+    "back": "$S_{21}(f)=\\overline{S_{12}(f)}=a\\,e^{+2\\pi i f h}S_{22}(f)$ (échanger les indices **conjugue**). Décomposition $S_{12}=c_{12}-i\\,q_{12}$ : co-spectre $c_{12}(f)=a\\cos(2\\pi f h)S_{22}(f)$, quadrature $q_{12}(f)=a\\sin(2\\pi f h)S_{22}(f)$. **Réflexe** : un délai pur met de l'énergie dans la **quadrature** (phase non nulle), pas seulement dans le co-spectre.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "S21 = conjugué de S12 = a e^{+2 pi i f h} S22",
+          "weight": 2
+        },
+        {
+          "label": "Co-spectre c12 = a cos(2 pi f h) S22",
+          "weight": 2
+        },
+        {
+          "label": "Quadrature q12 = a sin(2 pi f h) S22 (énergie hors-phase due au délai)",
+          "weight": 2
+        }
+      ]
+    }
+  }
+]

@@ -55,6 +55,46 @@ W_OPP_FAILED = 1.5
 
 
 # ---------------------------------------------------------------------------
+# PROFILS DE COURS — certains cours (ex. Time Series) tirent leur XP surtout des
+# EXAMENS à note déclarée ; la révision (cartes formules/tricks) ne rapporte
+# qu'un petit XP. base_known = XP immédiat d'une carte "connue" en révision.
+# ---------------------------------------------------------------------------
+BASE_PROFILE = {"revision_xp": True, "audits": True, "base_known": BASE_KNOWN}
+COURSE_PROFILE = {
+    "Time Series": {"revision_xp": True, "audits": True, "base_known": 0.3},
+}
+
+
+def profile_for(course: str) -> dict:
+    return COURSE_PROFILE.get(course, BASE_PROFILE)
+
+
+# ---------------------------------------------------------------------------
+# EXAMENS À NOTE DÉCLARÉE (mode Time Series).
+# L'examen est fait SUR PAPIER, noté /20 par un correcteur externe, puis la note
+# est SAISIE par le joueur. XP = EXAM_MAX * (note/20)^2 (convexe : récompense le
+# haut du barème). On ne crédite que EXAM_UPFRONT tout de suite ; le reste à la
+# VÉRIFICATION par audit (anti-triche). Un audit incohérent recalcule la note.
+# ---------------------------------------------------------------------------
+EXAM_MAX_XP: float = 150.0     # XP d'un 20/20
+EXAM_UPFRONT: float = 0.80     # fraction créditée à la déclaration (reste à la vérif)
+EXAM_VERIFY_BONUS: float = 5.0  # bonus si la note déclarée est vérifiée cohérente
+EXAM_TOL: float = 0.25         # tolérance (fraction de 1) : obtenu >= attendu - TOL = cohérent
+EXAM_TWO_CHECKS_AT: float = 16.0  # note20 >= 16 -> 2 exercices tirés en vérification (au lieu d'1)
+
+
+def exam_full_xp(note20: float) -> int:
+    """XP total d'une note /20 (avant split 80/20). Convexe."""
+    n = max(0.0, min(20.0, float(note20)))
+    return round(EXAM_MAX_XP * (n / 20.0) ** 2)
+
+
+def exam_upfront_xp(note20: float) -> int:
+    """XP crédité immédiatement à la déclaration (80 % du total)."""
+    return round(exam_full_xp(note20) * EXAM_UPFRONT)
+
+
+# ---------------------------------------------------------------------------
 # FONCTIONS PURES
 # ---------------------------------------------------------------------------
 

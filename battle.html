@@ -372,6 +372,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
     <button data-tab="review">Réviser</button>
     <button data-tab="progress">Progression</button>
     <button data-tab="audits">Audits <span class="badge hidden" id="tab-aud-badge">0</span></button>
+    <button data-tab="examens">Examens TS</button>
     <button data-tab="challenge">Challenge</button>
     <button data-tab="duels">Duels</button>
     <button data-tab="calib">Calibration</button>
@@ -466,6 +467,17 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
       <h2>Audits en attente</h2>
       <p class="sub">Prouve ce que tu as déclaré connaître. Corrigé sur 6 selon le barème du cours.</p>
       <div id="aud-list"></div>
+    </div>
+  </section>
+
+  <!-- EXAMENS TS -->
+  <section data-panel="examens" class="hidden">
+    <div class="card">
+      <h2>Examens <span class="kindtag">Time Series</span></h2>
+      <p class="sub">Tu fais l'examen <b>sur papier</b>, ton tuteur le note /20, tu saisis la note ici.
+        80 % de l'XP est crédité tout de suite ; le reste après <b>vérification</b> (1 exo tiré au sort,
+        2 si la note ≥ 16). Déclarer une note fausse se paie : elle est recalculée après l'audit.</p>
+      <div id="ex-list"></div>
     </div>
   </section>
 
@@ -775,6 +787,7 @@ function switchTab(tab){
   if(tab==="dash")      renderDash();
   if(tab==="progress")  renderProgress();
   if(tab==="audits")    renderAudits();
+  if(tab==="examens")   renderExamens();
   if(tab==="challenge") renderChallenge();
   if(tab==="duels")     renderDuels();
   if(tab==="calib")     renderCalib();
@@ -914,9 +927,18 @@ async function loadCourses(){
 function fillSelect(sel, opts){
   sel.innerHTML=""; opts.forEach(o=>{ const op=document.createElement("option"); op.value=o; op.textContent=o; sel.appendChild(op); });
 }
-function catKey(s){            // tri numérique : Chapitres (g=0) puis Séries (g=1), par numéro
+function catGroup(t){          // famille d'une catégorie (pour grouper l'écran Réviser)
+  t=(t||"").trim();
+  if(/^ch/i.test(t)) return "Chapitres";
+  if(/s[ée]rie/i.test(t)) return "Séries";
+  if(/^formules?$/i.test(t)) return "Formules";
+  if(/^tricks?$/i.test(t)) return "Tricks";
+  return "Autres";
+}
+const CAT_ORDER=["Chapitres","Séries","Formules","Tricks","Autres"];
+function catKey(s){            // tri : par famille puis par numéro
   const t=(s||"").trim(); const m=t.match(/(\d+)/);
-  return [/^ch/i.test(t)?0:(/s[ée]rie/i.test(t)?1:2), m?parseInt(m[1],10):999];
+  return [CAT_ORDER.indexOf(catGroup(t)), m?parseInt(m[1],10):0];
 }
 function renderCats(){
   const course=$("#rv-course").value;
@@ -924,19 +946,22 @@ function renderCats(){
     const ka=catKey(a.category), kb=catKey(b.category);
     return ka[0]-kb[0] || ka[1]-kb[1] || a.category.localeCompare(b.category);
   });
-  const groups={"Chapitres":[],"Séries":[],"Autres":[]};
-  cats.forEach(c=>{ const g=/^ch/i.test(c.category.trim())?"Chapitres":(/s[ée]rie/i.test(c.category)?"Séries":"Autres"); groups[g].push(c); });
+  const groups={}; CAT_ORDER.forEach(g=>groups[g]=[]);
+  cats.forEach(c=>{ groups[catGroup(c.category)].push(c); });
   const box=$("#rv-cats"); box.innerHTML="";
-  Object.keys(groups).forEach(gname=>{
+  CAT_ORDER.forEach(gname=>{
     const list=groups[gname]; if(!list.length) return;
-    const head=document.createElement("div"); head.className="cat-group-head";
-    head.innerHTML=`<span>${gname}</span><span class="cat-links"><a href="#" data-all>tout</a> · <a href="#" data-none>rien</a></span>`;
     const row=document.createElement("div"); row.className="checks";
     list.forEach(c=>{
       const l=document.createElement("label");
       l.innerHTML=`<input type="checkbox" value="${escapeHtml(c.category)}" checked> ${escapeHtml(c.category)} <span class="muted">(${c.count})</span>`;
       row.appendChild(l);
     });
+    // En-tête + "tout · rien" — sauf un groupe à 1 chip dont le nom == le groupe (redondant).
+    const solo = list.length===1 && list[0].category.trim().toLowerCase()===gname.toLowerCase();
+    if(solo){ box.append(row); return; }
+    const head=document.createElement("div"); head.className="cat-group-head";
+    head.innerHTML=`<span>${gname}</span><span class="cat-links"><a href="#" data-all>tout</a> · <a href="#" data-none>rien</a></span>`;
     head.querySelector("[data-all]").onclick=e=>{ e.preventDefault(); row.querySelectorAll("input").forEach(i=>i.checked=true); };
     head.querySelector("[data-none]").onclick=e=>{ e.preventDefault(); row.querySelectorAll("input").forEach(i=>i.checked=false); };
     box.append(head, row);
@@ -1032,7 +1057,8 @@ function auditCard(a){
   const head=document.createElement("div"); head.className="head";
   const src=document.createElement("span"); src.className="src "+a.source;
   src.textContent = a.source==="challenge" ? `challenge${a.challenger?` · ${a.challenger}`:""}`
-                  : a.source==="duel" ? "duel" : "audit";
+                  : a.source==="duel" ? "duel"
+                  : a.source==="exam_check" ? "vérif examen" : "audit";
   const cat=document.createElement("span"); cat.className="kindtag"; cat.textContent=`${a.category} · ${a.kind}`;
   head.append(src,cat);
   if(a.source!=="duel" && a.q){
@@ -1127,6 +1153,84 @@ async function renderChallenge(){
     }
     row.append(h, btn); box.appendChild(row);
   });
+}
+
+/* =================================================================
+   EXAMENS TS (note déclarée + vérification)
+   ================================================================= */
+async function renderExamens(){
+  await refreshHeader();
+  const box=$("#ex-list");
+  let exams;
+  try{ exams = await api("/ts/exams"); }
+  catch(err){ box.innerHTML='<p class="empty">'+escapeHtml(err.message)+'</p>'; return; }
+  box.innerHTML="";
+  if(!exams.length){ box.innerHTML='<p class="empty">Aucun examen Time Series chargé.</p>'; return; }
+  const hint=document.createElement("p"); hint.className="small muted";
+  hint.innerHTML=`Tu as <b>${state.me.tokens}</b> jeton(s) — utilisable(s) pour contester une note de ton pote.`;
+  box.appendChild(hint);
+  exams.forEach(e=>box.appendChild(examCard(e)));
+}
+function statusIcon(s){ return s==="verified"?"✅":(s==="flagged"?"⚠️":"⏳"); }
+function examCard(e){
+  const d=document.createElement("div"); d.className="aud";
+  const head=document.createElement("div"); head.className="head";
+  const t=document.createElement("span"); t.className="kindtag"; t.textContent=`${e.title} · ${e.n_exercises} exos`;
+  head.appendChild(t);
+  const st=document.createElement("span"); st.className="small muted";
+  if(e.status){ st.innerHTML=`ta note : <b>${e.note20}/20</b> ${statusIcon(e.status)} · ${Math.round(e.xp_awarded)} XP`; }
+  else { st.textContent="pas encore déclarée"; }
+  head.appendChild(st);
+  d.appendChild(head);
+
+  if(!e.status){
+    const row=document.createElement("div");
+    row.style.cssText="margin-top:10px;display:flex;gap:8px;align-items:center;flex-wrap:wrap";
+    const inp=document.createElement("input");
+    inp.type="number"; inp.min="0"; inp.max="20"; inp.step="0.5"; inp.placeholder="note /20";
+    inp.style.cssText="width:110px;padding:7px 10px;border:1px solid var(--line);border-radius:10px";
+    const btn=document.createElement("button"); btn.className="btn primary sm"; btn.textContent="Déclarer ma note";
+    btn.onclick=async()=>{
+      const v=parseFloat(inp.value);
+      if(isNaN(v)||v<0||v>20){ toast("Note entre 0 et 20.","alert"); return; }
+      if(!confirm(`Déclarer ${v}/20 sur ${e.title} ?\n\nC'est DÉFINITIF (non modifiable) et une vérification sera tirée au sort.`)) return;
+      btn.disabled=true; const oldXp=state.me?state.me.xp:0;
+      try{
+        const r=await api(`/ts/exams/${encodeURIComponent(e.id)}/declare`, {method:"POST", body:{note20:v}});
+        toast(`🎓 ${v}/20 déclaré (+${r.upfront_xp} XP, ${r.checks} vérif.)`,"good");
+        await refreshHeader(); maybeRankUp(oldXp, state.me.xp); renderExamens();
+      }catch(err){ toast(err.message,"alert"); btn.disabled=false; }
+    };
+    row.append(inp, btn); d.appendChild(row);
+  } else if(e.pending_check){
+    const p=document.createElement("p"); p.className="small"; p.style.marginTop="8px";
+    p.innerHTML=`⏳ Vérification en attente — prouve l'exo tiré au sort dans l'onglet <b>Audits</b> pour débloquer le solde d'XP.`;
+    d.appendChild(p);
+  }
+
+  if(e.opponent){
+    const o=e.opponent;
+    const orow=document.createElement("div"); orow.className="head"; orow.style.marginTop="12px";
+    const os=document.createElement("span"); os.className="small muted";
+    os.innerHTML=`${escapeHtml(o.name)} : <b>${o.note20}/20</b> ${statusIcon(o.status)}`;
+    orow.appendChild(os);
+    const cbtn=document.createElement("button"); cbtn.className="btn sm";
+    if(o.challenged){ cbtn.textContent="Contestation en cours"; cbtn.disabled=true; }
+    else if(state.me.tokens<1){ cbtn.innerHTML="Contester (1 "+icon('jeton',14)+")"; cbtn.disabled=true; }
+    else{
+      cbtn.innerHTML="Contester (1 "+icon('jeton',14)+")";
+      cbtn.onclick=async()=>{
+        if(!confirm(`Dépenser 1 jeton pour forcer ${o.name} à prouver un exercice de ${e.title} ?`)) return;
+        cbtn.disabled=true;
+        try{
+          await api("/ts/challenge", {method:"POST", body:{opponent:o.name, exam_id:e.id}});
+          toast("⚔️ Note contestée !","good"); renderExamens();
+        }catch(err){ toast(err.message,"alert"); cbtn.disabled=false; }
+      };
+    }
+    orow.appendChild(cbtn); d.appendChild(orow);
+  }
+  return d;
 }
 
 /* =================================================================
