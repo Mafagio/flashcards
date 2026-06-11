@@ -103,6 +103,19 @@ CREATE TABLE IF NOT EXISTS ts_results (
     UNIQUE(user_id, exam_id)
 );
 
+-- Scores PAR COURS : chaque cours est une compétition séparée (XP, jetons, rangs,
+-- classement). L'XP globale héritée (colonnes users.*) est versée dans "Martingales"
+-- par la migration. known_since_audit = compteur du batch d'audit, par cours.
+CREATE TABLE IF NOT EXISTS scores (
+    user_id           INTEGER NOT NULL REFERENCES users(id),
+    course            TEXT NOT NULL,
+    xp                REAL NOT NULL DEFAULT 0,
+    tokens            INTEGER NOT NULL DEFAULT 0,
+    xp_milestone      REAL NOT NULL DEFAULT 0,
+    known_since_audit INTEGER NOT NULL DEFAULT 0,
+    PRIMARY KEY (user_id, course)
+);
+
 CREATE TABLE IF NOT EXISTS duels (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
     challenger_id INTEGER NOT NULL REFERENCES users(id),
@@ -147,6 +160,15 @@ def _migrate(db: sqlite3.Connection) -> None:
     cols = {r["name"] for r in db.execute("PRAGMA table_info(audits)").fetchall()}
     if "exam_id" not in cols:
         db.execute("ALTER TABLE audits ADD COLUMN exam_id TEXT")
+
+    # Compétitions par cours : verse l'XP globale héritée des comptes existants dans
+    # la compétition "Martingales" (l'ancien MATH-330), une seule fois (les comptes
+    # sans aucune ligne scores = état d'avant la séparation).
+    for u in db.execute("SELECT id, xp, tokens, xp_milestone, known_since_audit FROM users").fetchall():
+        if not db.execute("SELECT 1 FROM scores WHERE user_id=?", (u["id"],)).fetchone():
+            db.execute("INSERT INTO scores(user_id, course, xp, tokens, xp_milestone, known_since_audit) "
+                       "VALUES (?,?,?,?,?,?)",
+                       (u["id"], "Martingales", u["xp"], u["tokens"], u["xp_milestone"], u["known_since_audit"]))
 
 
 # ---- passphrases (pbkdf2, suffisant pour 2 amis derrière HTTPS) -------------

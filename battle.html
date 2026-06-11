@@ -114,6 +114,13 @@ header.bar .btn.ghost:hover{background:var(--chip-bg2);color:var(--page-text)}
 .btn.sm{padding:6px 10px;font-size:13px;border-radius:10px}
 
 /* ---------- Tabs ---------- */
+.course-switch{display:inline-flex;gap:4px;padding:4px;margin:0 0 14px;border-radius:13px;
+  background:var(--chip-bg2);border:1px solid var(--line)}
+.course-switch button{border:none;background:transparent;border-radius:9px;cursor:pointer;
+  padding:8px 18px;font-size:14.5px;font-weight:700;color:var(--page-muted);display:inline-flex;align-items:center;gap:7px}
+.course-switch button:hover{color:var(--page-text)}
+.course-switch button.active{background:var(--accent);color:#fff;box-shadow:0 1px 6px rgba(0,0,0,.18)}
+.course-switch .cs-xp{font-size:12px;font-weight:600;opacity:.85}
 nav.tabs{display:flex;gap:4px;flex-wrap:wrap;margin-bottom:22px}
 nav.tabs button{
   border:none;background:transparent;border-radius:10px;
@@ -366,6 +373,9 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
     <span class="chip" id="profil-chip" title="Réglages" role="button" tabindex="0"><img src="battle-assets/ui/ic-profil.png" width="18" height="18" style="object-fit:contain;vertical-align:-4px" alt=""> <span id="hp-name"></span><svg class="gear" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></span>
     <button class="btn ghost sm" id="logout">Déconnexion</button>
   </header>
+
+  <!-- Sélecteur de compétition : chaque cours a son XP / classement / rangs / jetons -->
+  <div class="course-switch" id="course-switch" role="tablist" aria-label="Compétition"></div>
 
   <nav class="tabs" id="tabs">
     <button data-tab="dash" class="active">Tableau de bord</button>
@@ -622,7 +632,9 @@ const $  = (s,r=document)=>r.querySelector(s);
 const $$ = (s,r=document)=>[...r.querySelectorAll(s)];
 
 let creds = JSON.parse(localStorage.getItem("battle_creds") || "null");
-const state = { me:null, opponent:null, deck:[], idx:0, session:{seen:0,xp0:0}, displayedXP:0 };
+const state = { me:null, opponent:null, deck:[], idx:0, session:{seen:0,xp0:0}, displayedXP:0,
+                course: localStorage.getItem("battle_course") || "Martingales" };
+function cq(){ return "?course="+encodeURIComponent(state.course); }   // compétition courante
 
 /* ---------- API helper ---------- */
 async function api(path, {method="GET", body=null}={}){
@@ -752,14 +764,13 @@ document.addEventListener("keydown", e=>{ if(e.key==="Escape") closeSettings(); 
 renderSettings();
 
 async function enterApp(){
-  // valide les identifiants
-  state.me = await api("/me");
   $("#login").classList.add("hidden");
   $("#app").classList.remove("hidden");
+  await loadCourses();              // remplit COURSES -> valide state.course + rend le sélecteur
+  state.me = await api("/me"+cq()); // valide les identifiants (et l'XP de la compétition courante)
   $("#hp-name").textContent = state.me.name;
   state.displayedXP = Math.round(state.me.xp);
   await refreshHeader();
-  await loadCourses();
   switchTab("dash");
 }
 
@@ -767,7 +778,7 @@ async function enterApp(){
    HEADER / refresh global
    ================================================================= */
 async function refreshHeader(){
-  state.me = await api("/me");
+  state.me = await api("/me"+cq());
   $("#hp-tok").textContent = state.me.tokens;
   animXP(state.me.xp);
   const rk = rankOf(state.me.xp);
@@ -799,7 +810,7 @@ function switchTab(tab){
    ================================================================= */
 async function renderDash(){
   await refreshHeader();
-  const [lb, feed] = await Promise.all([api("/leaderboard"), api("/feed")]);
+  const [lb, feed] = await Promise.all([api("/leaderboard"+cq()), api("/feed")]);
   const me = lb.find(x=>x.me) || {name:state.me.name, xp:state.me.xp, tokens:state.me.tokens};
   const opp = lb.find(x=>!x.me);
   state.opponent = opp ? opp.name : null;
@@ -919,10 +930,49 @@ let COURSES={};
 async function loadCourses(){
   COURSES = await api("/courses");
   const names=Object.keys(COURSES);
+  if(!names.includes(state.course)) state.course = names[0] || "Martingales";
   fillSelect($("#rv-course"), names);
   fillSelect($("#dl-course"), names);
+  $("#rv-course").value = state.course;   // par défaut : le cours de la compétition courante
+  $("#dl-course").value = state.course;
   $("#rv-course").onchange = renderCats;
   renderCats();
+  renderCourseSwitch();
+  updateExamTabVisibility();
+}
+
+/* ---------- Sélecteur de compétition (cours) ---------- */
+function renderCourseSwitch(){
+  const box=$("#course-switch"); if(!box) return;
+  const names=Object.keys(COURSES);
+  box.classList.toggle("hidden", names.length<2);   // inutile s'il n'y a qu'un cours
+  box.innerHTML="";
+  names.forEach(c=>{
+    const b=document.createElement("button");
+    b.className = (c===state.course)?"active":"";
+    b.setAttribute("role","tab");
+    b.textContent = c;
+    b.onclick = ()=>setCourse(c);
+    box.appendChild(b);
+  });
+}
+function updateExamTabVisibility(){
+  const t=$('#tabs button[data-tab="examens"]'); if(!t) return;
+  const show = state.course==="Time Series";        // les examens n'existent que pour Time Series
+  t.classList.toggle("hidden", !show);
+  if(!show && t.classList.contains("active")) switchTab("dash");
+}
+async function setCourse(c){
+  if(c===state.course || !COURSES[c]) return;
+  state.course=c; try{ localStorage.setItem("battle_course", c); }catch(e){}
+  state.opponent=null;
+  if($("#rv-course")){ $("#rv-course").value=c; renderCats(); }
+  if($("#dl-course")) $("#dl-course").value=c;
+  renderCourseSwitch();
+  updateExamTabVisibility();
+  await refreshHeader();
+  const active=$("#tabs button.active");            // re-rend l'onglet courant pour le nouveau cours
+  switchTab(active ? active.dataset.tab : "dash");
 }
 function fillSelect(sel, opts){
   sel.innerHTML=""; opts.forEach(o=>{ const op=document.createElement("option"); op.value=o; op.textContent=o; sel.appendChild(op); });
@@ -1123,7 +1173,7 @@ function resultBox(r, a){
    ================================================================= */
 async function renderChallenge(){
   await refreshHeader();
-  const claims = await api("/opponent/claims");
+  const claims = await api("/opponent/claims"+cq());
   const box=$("#ch-list"); box.innerHTML="";
   if(!claims.length){ box.innerHTML='<p class="empty">Ton pote n\'a encore rien déclaré connaître.</p>'; return; }
   const head=document.createElement("p"); head.className="small muted";
@@ -1248,7 +1298,7 @@ $("#dl-start").onclick = async()=>{
 };
 async function renderDuels(){
   await refreshHeader();
-  if(!state.opponent){ const lb=await api("/leaderboard"); const o=lb.find(x=>!x.me); state.opponent=o?o.name:null; }
+  if(!state.opponent){ const lb=await api("/leaderboard"+cq()); const o=lb.find(x=>!x.me); state.opponent=o?o.name:null; }
   $("#dl-opp").textContent = state.opponent ? state.opponent : "";
   const duels = await api("/duels");
   const box=$("#dl-list"); box.innerHTML="";

@@ -18,14 +18,15 @@ with TestClient(main.app) as cli:
 
     cards = cli.get("/cards", params={"course": "MATH-330"}, headers=hdr("Tom")).json()
     print(f"cards MATH-330: {len(cards)}")
-    ids = [c["id"] for c in cli.get("/cards", headers=hdr("Tom")).json()]
+    # une compétition = un cours : on grind UN SEUL cours (sinon l'XP se répartit).
+    ids = [c["id"] for c in cards]
 
     # Tom grind 60 cartes "connues" (confiance 0.95) -> 3 batches d'audit, >50 XP -> 1 jeton
     last = None
     for i in range(60):
         last = cli.post("/review", json={"card_id": ids[i % len(ids)], "known": True, "q": 0.95},
                         headers=hdr("Tom")).json()
-    me = cli.get("/me", headers=hdr("Tom")).json()
+    me = cli.get("/me", params={"course": "MATH-330"}, headers=hdr("Tom")).json()
     print(f"Tom: xp={me['xp']} tokens={me['tokens']} pending_audits={me['pending_audits']}")
     assert me["pending_audits"] == 3 * S.AUDIT_SAMPLE, me
     assert me["tokens"] >= 1, "devrait avoir >=1 jeton à 60 XP"
@@ -64,7 +65,7 @@ with TestClient(main.app) as cli:
     assert chal and chal[0]["challenger"] == "Matteo"
 
     # leaderboard + calibration + feed
-    lb = cli.get("/leaderboard", headers=hdr("Tom")).json()
+    lb = cli.get("/leaderboard", params={"course": "MATH-330"}, headers=hdr("Tom")).json()
     print("leaderboard:", [(r["name"], r["xp"], r["tokens"]) for r in lb])
     cal = cli.get("/calibration", headers=hdr("Tom")).json()
     print("calibration overall:", cal["overall"])

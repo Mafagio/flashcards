@@ -55,16 +55,38 @@ def other_user(uid: int):
 # XP / jetons (helper central)
 # ---------------------------------------------------------------------------
 
-def apply_xp(db, user_id: int, delta: float) -> tuple[float, int, int]:
-    row = db.execute("SELECT id,name,xp,tokens,xp_milestone FROM users WHERE id=?", (user_id,)).fetchone()
+DEFAULT_COURSE = "Martingales"
+
+
+def ensure_score(db, user_id: int, course: str):
+    """Ligne scores (user, course) ; la crée à 0 si absente. Renvoie la ligne."""
+    row = db.execute("SELECT * FROM scores WHERE user_id=? AND course=?", (user_id, course)).fetchone()
+    if not row:
+        db.execute("INSERT INTO scores(user_id, course) VALUES (?,?)", (user_id, course))
+        row = db.execute("SELECT * FROM scores WHERE user_id=? AND course=?", (user_id, course)).fetchone()
+    return row
+
+
+def read_score(db, user_id: int, course: str):
+    """Lecture seule (pas d'écriture) : 0 partout si la ligne n'existe pas encore."""
+    row = db.execute("SELECT xp, tokens, xp_milestone FROM scores WHERE user_id=? AND course=?",
+                     (user_id, course)).fetchone()
+    return row if row else {"xp": 0.0, "tokens": 0, "xp_milestone": 0.0}
+
+
+def apply_xp(db, user_id: int, course: str, delta: float) -> tuple[float, int, int]:
+    """Crédite (ou débite) l'XP de l'utilisateur DANS LA COMPÉTITION `course`.
+    Jetons et record (milestone) sont propres à ce cours."""
+    row = ensure_score(db, user_id, course)
     new_xp = round(row["xp"] + delta, 2)
     granted, new_ms = S.tokens_for_xp(row["xp_milestone"], new_xp)
     new_tokens = row["tokens"] + granted
-    db.execute("UPDATE users SET xp=?, tokens=?, xp_milestone=? WHERE id=?",
-               (new_xp, new_tokens, new_ms, user_id))
+    db.execute("UPDATE scores SET xp=?, tokens=?, xp_milestone=? WHERE user_id=? AND course=?",
+               (new_xp, new_tokens, new_ms, user_id, course))
     if granted > 0:
+        name = db.execute("SELECT name FROM users WHERE id=?", (user_id,)).fetchone()["name"]
         DB.log_event(db, user_id, "token",
-                     f'🪙 {row["name"]} gagne {granted} jeton(s) challenge ({int(new_xp)} XP) !')
+                     f'🪙 {name} gagne {granted} jeton(s) {course} ({int(new_xp)} XP) !')
     return new_xp, new_tokens, granted
 
 
@@ -117,19 +139,24 @@ def pending_count(db, uid):
 
 
 @app.get("/me")
-def me(u=Depends(current_user)):
+def me(course: Optional[str] = None, u=Depends(current_user)):
     db = DB.get_db()
+    course = course or DEFAULT_COURSE
+    s = read_score(db, u["id"], course)
     return {
-        "name": u["name"], "xp": u["xp"], "tokens": u["tokens"],
+        "name": u["name"], "course": course, "xp": s["xp"], "tokens": s["tokens"],
         "pending_audits": pending_count(db, u["id"]),
-        "next_token_in": round(S.TOKEN_EVERY - (u["xp_milestone"] % S.TOKEN_EVERY), 1),
+        "next_token_in": round(S.TOKEN_EVERY - (s["xp_milestone"] % S.TOKEN_EVERY), 1),
     }
 
 
 @app.get("/leaderboard")
-def leaderboard(u=Depends(current_user)):
+def leaderboard(course: Optional[str] = None, u=Depends(current_user)):
+    course = course or DEFAULT_COURSE
     rows = DB.get_db().execute(
-        "SELECT name, xp, tokens FROM users ORDER BY xp DESC").fetchall()
+        """SELECT us.name, COALESCE(sc.xp,0) xp, COALESCE(sc.tokens,0) tokens
+           FROM users us LEFT JOIN scores sc ON sc.user_id=us.id AND sc.course=?
+           ORDER BY xp DESC, us.name""", (course,)).fetchall()
     return [{"name": r["name"], "xp": r["xp"], "tokens": r["tokens"],
              "me": r["name"] == u["name"]} for r in rows]
 
@@ -244,44 +271,47 @@ def review(r: ReviewIn, u=Depends(current_user)):
             raise HTTPException(404, "Carte inconnue.")
 
         batched, new_audits = False, 0
+        course = card["course"]   # la révision compte dans la compétition de ce cours
 
         # Profil du cours : Time Series ne rapporte qu'un petit XP en révision
         # (base_known=0.3) car son XP vient surtout des examens à note déclarée.
-        base_known = S.profile_for(card["course"])["base_known"]
+        base_known = S.profile_for(course)["base_known"]
 
         if not r.known:
             db.execute("""INSERT INTO reviews(user_id,card_id,known,q,base_points,status)
                           VALUES (?,?,0,NULL,?, 'cleared')""",
                        (u["id"], r.card_id, S.BASE_UNKNOWN))
-            apply_xp(db, u["id"], S.BASE_UNKNOWN)
+            apply_xp(db, u["id"], course, S.BASE_UNKNOWN)
         else:
             q = r.q if r.q in S.CONF_LEVELS else 0.80
             cur = db.execute("INSERT INTO reviews(user_id,card_id,known,q,base_points,status) "
                              "VALUES (?,?,1,?,?, 'provisional')",
                              (u["id"], r.card_id, q, base_known))
-            apply_xp(db, u["id"], base_known)
-            db.execute("UPDATE users SET known_since_audit = known_since_audit + 1 WHERE id=?",
-                       (u["id"],))
+            apply_xp(db, u["id"], course, base_known)   # crée la ligne scores si besoin
+            db.execute("UPDATE scores SET known_since_audit = known_since_audit + 1 "
+                       "WHERE user_id=? AND course=?", (u["id"], course))
 
-            counter = db.execute("SELECT known_since_audit FROM users WHERE id=?",
-                                 (u["id"],)).fetchone()["known_since_audit"]
+            counter = db.execute("SELECT known_since_audit FROM scores WHERE user_id=? AND course=?",
+                                 (u["id"], course)).fetchone()["known_since_audit"]
             if counter >= S.AUDIT_BATCH:
                 batched = True
-                new_audits = _form_audit_batch(db, u["id"])
-                db.execute("UPDATE users SET known_since_audit=0 WHERE id=?", (u["id"],))
+                new_audits = _form_audit_batch(db, u["id"], course)
+                db.execute("UPDATE scores SET known_since_audit=0 WHERE user_id=? AND course=?",
+                           (u["id"], course))
 
         db.commit()
-        urow = db.execute("SELECT xp,tokens FROM users WHERE id=?", (u["id"],)).fetchone()
-        return {"xp": urow["xp"], "tokens": urow["tokens"],
+        s = read_score(db, u["id"], course)
+        return {"xp": s["xp"], "tokens": s["tokens"], "course": course,
                 "batched": batched, "new_audits": new_audits,
                 "pending_audits": pending_count(db, u["id"])}
 
 
-def _form_audit_batch(db, uid: int) -> int:
-    """Tire AUDIT_SAMPLE cartes parmi les AUDIT_BATCH dernières 'provisional'."""
+def _form_audit_batch(db, uid: int, course: str) -> int:
+    """Tire AUDIT_SAMPLE cartes parmi les AUDIT_BATCH dernières 'provisional' DU COURS."""
     batch = db.execute(
-        "SELECT * FROM reviews WHERE user_id=? AND status='provisional' "
-        "ORDER BY id DESC LIMIT ?", (uid, S.AUDIT_BATCH)).fetchall()
+        "SELECT r.* FROM reviews r JOIN cards c ON c.id=r.card_id "
+        "WHERE r.user_id=? AND r.status='provisional' AND c.course=? "
+        "ORDER BY r.id DESC LIMIT ?", (uid, course, S.AUDIT_BATCH)).fetchall()
     if not batch:
         return 0
 
@@ -372,15 +402,17 @@ def answer_audit(audit_id: int, a: AnswerIn, u=Depends(current_user)):
 
         verdict = "réussi ✅" if outcome else "raté ❌"
 
+        course = card["course"]   # compétition de la carte auditée
+
         if is_exam:
-            # Vérification anti-triche d'une note d'examen déclarée.
+            # Vérification anti-triche d'une note d'examen déclarée (compétition Time Series).
             DB.log_event(db, u["id"], "exam",
                          f'📝 {u["name"]} — vérif {card["category"]} : {res["score"]}/6 ({verdict}).')
             exam_delta, _st = _finalize_exam_check(db, u["id"], au["exam_id"])
             reported_mastery = round(exam_delta, 1) if exam_delta is not None else 0.0
         else:
-            # Maîtrise (règle propre) appliquée à l'audité. (Duels : q=0.5 -> mastery 0.)
-            apply_xp(db, u["id"], mastery)
+            # Maîtrise (règle propre) appliquée à l'audité DANS LE COURS de la carte.
+            apply_xp(db, u["id"], course, mastery)
             DB.log_event(db, u["id"], "graded",
                          f'📝 {u["name"]} — {card["category"]} : {res["score"]}/6 ({verdict}, {mastery:+.1f} XP).')
 
@@ -388,11 +420,11 @@ def answer_audit(audit_id: int, a: AnswerIn, u=Depends(current_user)):
             if au["source"] == "challenge" and au["challenger_id"]:
                 ch = db.execute("SELECT name FROM users WHERE id=?", (au["challenger_id"],)).fetchone()
                 if outcome == 0:  # l'adversaire a bluffé : le challenger touche la prime
-                    apply_xp(db, au["challenger_id"], S.CHALLENGE_BOUNTY)
+                    apply_xp(db, au["challenger_id"], course, S.CHALLENGE_BOUNTY)
                     DB.log_event(db, au["challenger_id"], "challenge",
                                  f'🎯 {ch["name"]} avait raison : challenge gagné (+{S.CHALLENGE_BOUNTY:.0f} XP) !')
                 else:             # défense réussie : bonus pour l'audité
-                    apply_xp(db, u["id"], S.CHALLENGE_DEFENSE)
+                    apply_xp(db, u["id"], course, S.CHALLENGE_DEFENSE)
                     DB.log_event(db, u["id"], "challenge",
                                  f'🛡️ {u["name"]} défend son point (+{S.CHALLENGE_DEFENSE:.0f} XP).')
 
@@ -401,12 +433,12 @@ def answer_audit(audit_id: int, a: AnswerIn, u=Depends(current_user)):
             reported_mastery = mastery
 
         db.commit()
-        urow = db.execute("SELECT xp,tokens FROM users WHERE id=?", (u["id"],)).fetchone()
+        s = read_score(db, u["id"], "Time Series" if is_exam else course)
         return {
             "score": res["score"], "outcome": outcome, "mastery": reported_mastery,
             "justification": res["justification"], "hits": res.get("hits", []),
             "back": card["back"], "bareme": bareme,
-            "xp": urow["xp"], "tokens": urow["tokens"],
+            "xp": s["xp"], "tokens": s["tokens"],
             "pending_audits": pending_count(db, u["id"]),
         }
 
@@ -442,7 +474,7 @@ def _finalize_exam_check(db, uid: int, exam_id: str):
     if obtained >= expected - S.EXAM_TOL:
         # cohérent : crédite le solde retenu (full - acompte) + bonus de vérification
         delta = (full - res["xp_awarded"]) + S.EXAM_VERIFY_BONUS
-        apply_xp(db, uid, delta)
+        apply_xp(db, uid, "Time Series", delta)
         db.execute("UPDATE ts_results SET status='verified', xp_awarded=xp_awarded+? WHERE id=?",
                    (delta, res["id"]))
         DB.log_event(db, uid, "exam",
@@ -453,7 +485,7 @@ def _finalize_exam_check(db, uid: int, exam_id: str):
     note_eff = 20.0 * obtained
     xp_final = S.exam_full_xp(note_eff)
     delta = xp_final - res["xp_awarded"]
-    apply_xp(db, uid, delta)
+    apply_xp(db, uid, "Time Series", delta)
     db.execute("UPDATE ts_results SET status='flagged', xp_awarded=? WHERE id=?",
                (xp_final, res["id"]))
     DB.log_event(db, uid, "exam",
@@ -475,8 +507,6 @@ class ChallengeIn(BaseModel):
 def challenge(c: ChallengeIn, u=Depends(current_user)):
     db = DB.get_db()
     with DB.LOCK:
-        if u["tokens"] < 1:
-            raise HTTPException(400, "Pas assez de jetons.")
         opp = db.execute("SELECT * FROM users WHERE name=?", (c.opponent,)).fetchone()
         if not opp or opp["id"] == u["id"]:
             raise HTTPException(400, "Adversaire invalide.")
@@ -484,37 +514,44 @@ def challenge(c: ChallengeIn, u=Depends(current_user)):
                            ORDER BY id DESC LIMIT 1""", (opp["id"], c.card_id)).fetchone()
         if not rv:
             raise HTTPException(400, "Ton pote n'a jamais prétendu connaître cette carte.")
+        card = db.execute("SELECT course, category FROM cards WHERE id=?", (c.card_id,)).fetchone()
+        course = card["course"]   # le jeton dépensé est celui de la compétition de la carte
+        if read_score(db, u["id"], course)["tokens"] < 1:
+            raise HTTPException(400, f"Pas assez de jetons {course}.")
         already = db.execute("""SELECT 1 FROM audits WHERE user_id=? AND card_id=?
                                 AND source='challenge' AND status='pending'""",
                              (opp["id"], c.card_id)).fetchone()
         if already:
             raise HTTPException(400, "Challenge déjà en cours sur cette carte.")
 
-        db.execute("UPDATE users SET tokens=tokens-1 WHERE id=?", (u["id"],))
+        db.execute("UPDATE scores SET tokens=tokens-1 WHERE user_id=? AND course=?", (u["id"], course))
         db.execute("""INSERT INTO audits(user_id,card_id,review_id,q,source,challenger_id,status)
                       VALUES (?,?,?,?, 'challenge', ?, 'pending')""",
                    (opp["id"], c.card_id, rv["id"], rv["q"], u["id"]))
-        cat = db.execute("SELECT category FROM cards WHERE id=?", (c.card_id,)).fetchone()["category"]
         DB.log_event(db, u["id"], "challenge",
-                     f'⚔️ {u["name"]} défie {opp["name"]} sur {cat} — prouve-le !')
+                     f'⚔️ {u["name"]} défie {opp["name"]} sur {card["category"]} — prouve-le !')
         db.commit()
     return {"ok": True}
 
 
 @app.get("/opponent/claims")
-def opponent_claims(u=Depends(current_user)):
-    """Cartes que l'adversaire a marquées 'connue' (cibles de challenge)."""
+def opponent_claims(course: Optional[str] = None, u=Depends(current_user)):
+    """Cartes que l'adversaire a marquées 'connue' DANS LE COURS (cibles de challenge)."""
     db = DB.get_db()
     opp = other_user(u["id"])
     if not opp:
         return []
-    rows = db.execute("""
+    args = [opp["id"]]
+    where = "r.user_id=? AND r.known=1 AND c.kind!='exam'"
+    if course:
+        where += " AND c.course=?"; args.append(course)
+    rows = db.execute(f"""
         SELECT c.id, c.category, c.course, c.kind, MAX(r.q) q,
                EXISTS(SELECT 1 FROM audits a WHERE a.user_id=r.user_id AND a.card_id=c.id
                       AND a.status='pending' AND a.source='challenge') AS challenged
         FROM reviews r JOIN cards c ON c.id=r.card_id
-        WHERE r.user_id=? AND r.known=1
-        GROUP BY c.id ORDER BY q DESC LIMIT 60""", (opp["id"],)).fetchall()
+        WHERE {where}
+        GROUP BY c.id ORDER BY q DESC LIMIT 60""", args).fetchall()
     return [dict(r) | {"opponent": opp["name"]} for r in rows]
 
 
@@ -573,13 +610,14 @@ def _maybe_resolve_duel(db, duel_id: int):
                        (duel_id, pid)).fetchone()["s"]
         scores[pid] = s
     a, b = duel["challenger_id"], duel["opponent_id"]
+    crs = duel["course"]   # le duel crédite la compétition de son cours
     if scores[a] == scores[b]:
         bonus = (S.DUEL_WIN + S.DUEL_PARTICIPATE) / 2
-        apply_xp(db, a, bonus); apply_xp(db, b, bonus); winner = None
+        apply_xp(db, a, crs, bonus); apply_xp(db, b, crs, bonus); winner = None
     else:
         winner = a if scores[a] > scores[b] else b
         loser = b if winner == a else a
-        apply_xp(db, winner, S.DUEL_WIN); apply_xp(db, loser, S.DUEL_PARTICIPATE)
+        apply_xp(db, winner, crs, S.DUEL_WIN); apply_xp(db, loser, crs, S.DUEL_PARTICIPATE)
     db.execute("UPDATE duels SET status='done', winner_id=? WHERE id=?", (winner, duel_id))
     names = {r["id"]: r["name"] for r in db.execute("SELECT id,name FROM users")}
     txt = (f'🏆 Duel terminé : {names.get(winner)} gagne '
@@ -724,7 +762,7 @@ def ts_declare(exam_id: str, d: DeclareIn, u=Depends(current_user)):
         upfront = S.exam_upfront_xp(note)
         db.execute("INSERT INTO ts_results(user_id, exam_id, note20, xp_awarded, status) "
                    "VALUES (?,?,?,?, 'declared')", (u["id"], exam_id, note, upfront))
-        apply_xp(db, u["id"], upfront)
+        apply_xp(db, u["id"], "Time Series", upfront)
 
         # Tire 1 exercice (2 si note >= 16) en vérification anti-triche.
         n_checks = min(2 if note >= S.EXAM_TWO_CHECKS_AT else 1, len(payload))
@@ -751,8 +789,8 @@ def ts_challenge(c: TsChallengeIn, u=Depends(current_user)):
     déclarée par l'adversaire (mêmes gains/pertes que les challenges classiques)."""
     db = DB.get_db()
     with DB.LOCK:
-        if u["tokens"] < 1:
-            raise HTTPException(400, "Pas assez de jetons.")
+        if read_score(db, u["id"], "Time Series")["tokens"] < 1:
+            raise HTTPException(400, "Pas assez de jetons Time Series.")
         opp = db.execute("SELECT * FROM users WHERE name=?", (c.opponent,)).fetchone()
         if not opp or opp["id"] == u["id"]:
             raise HTTPException(400, "Adversaire invalide.")
@@ -769,7 +807,7 @@ def ts_challenge(c: TsChallengeIn, u=Depends(current_user)):
             raise HTTPException(400, "Challenge déjà en cours sur cette note.")
 
         x = random.choice(payload)
-        db.execute("UPDATE users SET tokens=tokens-1 WHERE id=?", (u["id"],))
+        db.execute("UPDATE scores SET tokens=tokens-1 WHERE user_id=? AND course='Time Series'", (u["id"],))
         db.execute("""INSERT INTO audits(user_id, card_id, q, source, challenger_id, exam_id, status)
                       VALUES (?,?,0.5,'challenge',?,?, 'pending')""",
                    (opp["id"], x["id"], u["id"], c.exam_id))
