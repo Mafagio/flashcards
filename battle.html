@@ -174,8 +174,15 @@ select:focus,input:focus,textarea:focus{outline:none;border-color:var(--accent);
   display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);
   border-radius:10px;padding:7px 11px;font-size:13.5px;cursor:pointer;background:var(--chip-bg);
 }
-.checks label:has(input:checked){background:var(--accent-soft);border-color:#cfe0ff;color:var(--accent)}
+.checks label:has(input:checked){background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
 .checks input{accent-color:var(--accent)}
+/* groupes de catégories (Réviser) : Chapitres / Séries triés */
+.cat-groups{display:flex;flex-direction:column;gap:6px}
+.cat-group-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:10px 0 1px;
+  font-size:12px;font-weight:700;letter-spacing:.04em;text-transform:uppercase;color:var(--muted)}
+.cat-group-head:first-child{margin-top:0}
+.cat-links{font-weight:600;text-transform:none;letter-spacing:0;font-size:12.5px}
+.cat-links a{color:var(--accent)}
 
 /* review card */
 .flash{min-height:120px}
@@ -414,7 +421,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
       </div>
       <div style="margin-top:14px">
         <label class="fld">Chapitres / séries</label>
-        <div class="checks" id="rv-cats"></div>
+        <div id="rv-cats" class="cat-groups"></div>
       </div>
       <div style="margin-top:18px">
         <button class="btn primary" id="rv-start">Commencer la session</button>
@@ -907,14 +914,32 @@ async function loadCourses(){
 function fillSelect(sel, opts){
   sel.innerHTML=""; opts.forEach(o=>{ const op=document.createElement("option"); op.value=o; op.textContent=o; sel.appendChild(op); });
 }
+function catKey(s){            // tri numérique : Chapitres (g=0) puis Séries (g=1), par numéro
+  const t=(s||"").trim(); const m=t.match(/(\d+)/);
+  return [/^ch/i.test(t)?0:(/s[ée]rie/i.test(t)?1:2), m?parseInt(m[1],10):999];
+}
 function renderCats(){
-  const course=$("#rv-course").value; const cats=COURSES[course]||[];
+  const course=$("#rv-course").value;
+  const cats=(COURSES[course]||[]).slice().sort((a,b)=>{
+    const ka=catKey(a.category), kb=catKey(b.category);
+    return ka[0]-kb[0] || ka[1]-kb[1] || a.category.localeCompare(b.category);
+  });
+  const groups={"Chapitres":[],"Séries":[],"Autres":[]};
+  cats.forEach(c=>{ const g=/^ch/i.test(c.category.trim())?"Chapitres":(/s[ée]rie/i.test(c.category)?"Séries":"Autres"); groups[g].push(c); });
   const box=$("#rv-cats"); box.innerHTML="";
-  cats.forEach(c=>{
-    const id="cat_"+Math.random().toString(36).slice(2);
-    const l=document.createElement("label");
-    l.innerHTML=`<input type="checkbox" value="${escapeHtml(c.category)}" id="${id}" checked> ${escapeHtml(c.category)} <span class="muted">(${c.count})</span>`;
-    box.appendChild(l);
+  Object.keys(groups).forEach(gname=>{
+    const list=groups[gname]; if(!list.length) return;
+    const head=document.createElement("div"); head.className="cat-group-head";
+    head.innerHTML=`<span>${gname}</span><span class="cat-links"><a href="#" data-all>tout</a> · <a href="#" data-none>rien</a></span>`;
+    const row=document.createElement("div"); row.className="checks";
+    list.forEach(c=>{
+      const l=document.createElement("label");
+      l.innerHTML=`<input type="checkbox" value="${escapeHtml(c.category)}" checked> ${escapeHtml(c.category)} <span class="muted">(${c.count})</span>`;
+      row.appendChild(l);
+    });
+    head.querySelector("[data-all]").onclick=e=>{ e.preventDefault(); row.querySelectorAll("input").forEach(i=>i.checked=true); };
+    head.querySelector("[data-none]").onclick=e=>{ e.preventDefault(); row.querySelectorAll("input").forEach(i=>i.checked=false); };
+    box.append(head, row);
   });
 }
 
