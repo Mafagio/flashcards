@@ -494,9 +494,13 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
           <button data-shuffle="0">↕︎ Dans l'ordre</button>
         </div>
       </div>
-      <div style="margin-top:18px">
+      <div style="margin-top:18px;display:flex;gap:10px;flex-wrap:wrap">
         <button class="btn primary" id="rv-start">Commencer la session</button>
+        <button class="btn" id="rv-start-loop">🔁 Tout réviser jusqu'à savoir</button>
       </div>
+      <p class="small muted" style="margin-top:8px">
+        🔁 <b>Mode boucle</b> : les cartes que tu ne marques pas « Très sûr » reviennent dans la
+        pile, jusqu'à ce que tu maîtrises toute la sélection.</p>
     </div>
 
     <div class="card hidden" id="review-card">
@@ -1125,6 +1129,7 @@ function renderCats(){
    REVIEW (mode battle)
    ================================================================= */
 $("#rv-start").onclick = ()=>startReview();
+$("#rv-start-loop").onclick = ()=>startReview({loop:true});
 $("#rv-again").onclick = ()=>{ show("#review-setup"); reviewSetupRefresh(); };
 $("#rv-flip").onclick  = flipCard;
 $("#rv-exit").onclick  = ()=>{ persistSession(); show("#review-setup"); reviewSetupRefresh(); };  // quitter en cours -> proposé en "Reprendre"
@@ -1142,9 +1147,9 @@ $("#rv-cats").addEventListener("change", ()=>updateBanners());
   });
 })();
 /* ---------- Sessions de révision : reprendre une session commencée ---------- */
-function sessSig(course, cats, shuffled, filter){
+function sessSig(course, cats, shuffled, filter, loop){
   const f = filter==='unsure' ? "u" : filter==='seen' ? "v" : "a";
-  return [course, [...cats].sort().join("~"), shuffled?"s":"o", f].join("|");
+  return [course, [...cats].sort().join("~"), shuffled?"s":"o", f, loop?"L":"1"].join("|");
 }
 function loadSessions(){ try{ return JSON.parse(localStorage.getItem("battle_reviews")||"{}"); }catch(e){ return {}; } }
 function saveSessions(m){ try{ localStorage.setItem("battle_reviews", JSON.stringify(m)); }catch(e){} }
@@ -1152,6 +1157,7 @@ function persistSession(){
   const s=state.session; if(!s||!s.sig||!state.deck) return;
   const m=loadSessions();
   m[s.sig]={ course:s.course, cats:s.cats, shuffled:!!s.shuffled, filter:s.filter||null,
+             loop:!!s.loop, toMaster:(s.loop&&s.toMaster)?[...s.toMaster]:undefined, totalMaster:s.totalMaster,
              ids: state.deck.map(c=>c.id), idx: state.idx, seen: s.seen,
              total: state.deck.length, ts: Date.now() };
   const keys=Object.keys(m).sort((a,b)=>(m[b].ts||0)-(m[a].ts||0));
@@ -1163,7 +1169,7 @@ function renderResume(){
   const box=$("#rv-resume"); if(!box) return;
   const m=loadSessions();
   const list=Object.keys(m).map(k=>({sig:k,...m[k]}))
-    .filter(s=> (s.idx||0) < (s.total||0))      // sessions non terminées
+    .filter(s=> s.loop ? ((s.toMaster||[]).length>0) : ((s.idx||0) < (s.total||0)))   // non terminées
     .sort((a,b)=>(b.ts||0)-(a.ts||0));
   if(!list.length){ box.classList.add("hidden"); box.innerHTML=""; return; }
   box.classList.remove("hidden"); box.innerHTML="";
@@ -1171,13 +1177,17 @@ function renderResume(){
     const cats=s.cats||[];
     const catsTxt = cats.length>3 ? `${cats.length} catégories` : cats.join(", ");
     const f = s.filter || (s.unsure ? "unsure" : null);   // rétrocompat anciennes sessions
-    const mode = (s.shuffled?"mélangé":"dans l'ordre") + (f==='unsure'?" · pas sûres":f==='seen'?" · déjà vues":"");
+    const mode = (s.loop?"🔁 jusqu'à savoir":(s.shuffled?"mélangé":"dans l'ordre")) + (f==='unsure'?" · pas sûres":f==='seen'?" · déjà vues":"");
+    // progression : maîtrisées pour une boucle, cartes faites sinon
+    const prog = s.loop
+      ? `${(s.totalMaster||0)-((s.toMaster||[]).length)}/${s.totalMaster||0} maîtrisées`
+      : `${s.idx}/${s.total} cartes faites`;
     const row=document.createElement("div"); row.className="rv-resume-row";
     const info=document.createElement("div"); info.className="rr-info";
     info.innerHTML=`<b>Reprendre</b> · ${escapeHtml(s.course)} <span class="rr-sub">— ${escapeHtml(catsTxt)} · ${escapeHtml(mode)}</span><br>`+
-                   `<span class="rr-sub">${s.idx}/${s.total} cartes faites</span>`;
+                   `<span class="rr-sub">${prog}</span>`;
     const actions=document.createElement("div"); actions.className="rr-actions";
-    const cont=document.createElement("button"); cont.className="btn primary sm"; cont.textContent=`Continuer (${s.idx}/${s.total})`;
+    const cont=document.createElement("button"); cont.className="btn primary sm"; cont.textContent="Continuer";
     cont.onclick=()=>resumeSession(s.sig);
     const drop=document.createElement("button"); drop.className="rv-resume-drop"; drop.title="Abandonner cette session"; drop.textContent="✕";
     drop.onclick=()=>{ clearSession(s.sig); renderResume(); };
@@ -1195,9 +1205,10 @@ async function resumeSession(sig){
   if(!deck.length){ toast("Cette session n'a plus de cartes.","alert"); clearSession(sig); renderResume(); return; }
   state.deck=deck; state.idx=Math.min(s.idx||0, deck.length);
   const filter=s.filter || (s.unsure ? "unsure" : null);   // rétrocompat
-  state.session={seen:s.seen||0, xp0:state.me.xp, shuffled:!!s.shuffled, filter, course:s.course, cats:s.cats, sig};
+  state.session={seen:s.seen||0, xp0:state.me.xp, shuffled:!!s.shuffled, filter, loop:!!s.loop, course:s.course, cats:s.cats, sig};
+  if(s.loop){ state.session.toMaster=new Set(s.toMaster||[]); state.session.totalMaster=s.totalMaster||(s.toMaster||[]).length; }
   if($("#rv-course")) $("#rv-course").value=s.course;
-  if(state.idx>=deck.length){ finishReview(); return; }
+  if(state.session.loop ? (state.session.toMaster.size===0) : (state.idx>=deck.length)){ finishReview(); return; }
   show("#review-card"); renderFlash();
 }
 
@@ -1285,6 +1296,7 @@ async function startReview(opts){
   if(!cats.length){ toast("Choisis au moins un chapitre.","alert"); return; }
   const shuffled = ($("#rv-order-seg button.sel")||{}).dataset?.shuffle === "1";
   const filter = opts.filter || null;       // null (toutes) | 'unsure' (niveau<3) | 'seen' (niveau 0/1/2)
+  const loop = !!opts.loop;                 // boucle : remet les non-maîtrisées jusqu'à tout savoir
   let deck = await api(`/cards?course=${encodeURIComponent(course)}&categories=${encodeURIComponent(cats.join(","))}`);
   if(!deck.length){ toast("Aucune carte ici.","alert"); return; }
   if(filter){
@@ -1306,7 +1318,8 @@ async function startReview(opts){
       return ka[0]-kb[0] || ka[1]-kb[1] || String(a.id).localeCompare(String(b.id),undefined,{numeric:true}); });
   }
   state.deck=deck; state.idx=0;
-  state.session={seen:0, xp0:state.me.xp, shuffled, filter, course, cats, sig:sessSig(course,cats,shuffled,filter)};
+  state.session={seen:0, xp0:state.me.xp, shuffled, filter, loop, course, cats, sig:sessSig(course,cats,shuffled,filter,loop)};
+  if(loop){ state.session.toMaster=new Set(deck.map(c=>c.id)); state.session.totalMaster=state.session.toMaster.size; }
   persistSession();
   show("#review-card"); renderFlash();
 }
@@ -1314,9 +1327,16 @@ function show(sel){ ["#review-setup","#review-card","#review-done"].forEach(s=>$
 
 function renderFlash(){
   const c=state.deck[state.idx];
-  $("#rv-progress").style.width = (100*state.idx/state.deck.length)+"%";
+  const s=state.session;
+  if(s && s.loop){
+    const done=(s.totalMaster||0)-s.toMaster.size;
+    $("#rv-progress").style.width = (100*done/Math.max(1,s.totalMaster))+"%";
+    $("#rv-count").textContent = `🔁 ${done}/${s.totalMaster} maîtrisées · ${s.toMaster.size} à revoir`;
+  }else{
+    $("#rv-progress").style.width = (100*state.idx/state.deck.length)+"%";
+    $("#rv-count").textContent = `${state.idx+1} / ${state.deck.length}`;
+  }
   $("#rv-cat").textContent = `${c.category} · ${c.kind}`;
-  $("#rv-count").textContent = `${state.idx+1} / ${state.deck.length}`;
   tex($("#rv-front"), cardField(c, "front"));
   $("#rv-back-wrap").classList.add("hidden");
   $("#rv-flip").classList.remove("hidden");
@@ -1344,16 +1364,28 @@ async function declare(btn){
     await refreshHeader();
     maybeRankUp(oldXp, r.xp);
   }catch(err){ toast(err.message,"alert"); return; }
-  state.idx++;
-  if(state.idx>=state.deck.length) finishReview();
-  else { persistSession(); renderFlash(); }
+  if(state.session && state.session.loop){
+    // boucle : "Très sûr" (95%) -> maîtrisée ; sinon la carte revient dans la pile
+    const mastered = known && parseFloat(btn.dataset.q)===0.95;
+    if(mastered) state.session.toMaster.delete(c.id);
+    else state.deck.push(c);
+    state.idx++;
+    if(state.session.toMaster.size===0) finishReview();
+    else { persistSession(); renderFlash(); }
+  }else{
+    state.idx++;
+    if(state.idx>=state.deck.length) finishReview();
+    else { persistSession(); renderFlash(); }
+  }
 }
 function finishReview(){
+  const wasLoop = !!(state.session && state.session.loop);
   if(state.session && state.session.sig) clearSession(state.session.sig);   // session terminée
   const gained = Math.round((state.me.xp - state.session.xp0)*10)/10;
   $("#rv-progress").style.width="100%";
+  const head = wasLoop ? `🎉 Toute la sélection est maîtrisée ! ` : "";
   $("#rv-summary").textContent =
-    `${state.session.seen} cartes passées, ${gained>=0?"+":""}${gained} XP. `+
+    head + `${state.session.seen} cartes passées, ${gained>=0?"+":""}${gained} XP. `+
     (state.me.pending_audits>0 ? `Tu as ${state.me.pending_audits} audit(s) à faire.` : `Aucun audit en attente.`);
   show("#review-done");
 }
