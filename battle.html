@@ -181,8 +181,21 @@ select:focus,input:focus,textarea:focus{outline:none;border-color:var(--accent);
   display:inline-flex;align-items:center;gap:7px;border:1px solid var(--line);
   border-radius:10px;padding:7px 11px;font-size:13.5px;cursor:pointer;background:var(--chip-bg);
 }
-.checks label:has(input:checked){background:var(--accent-soft);border-color:var(--accent);color:var(--accent)}
+/* couleur de progression du chip (où j'en suis dans ce chapitre/série) */
+.checks label.pg-started{background:rgba(229,72,77,.14);border-color:rgba(229,72,77,.5)}
+.checks label.pg-progress{background:rgba(245,158,11,.17);border-color:rgba(245,158,11,.55)}
+.checks label.pg-done{background:rgba(22,163,74,.18);border-color:rgba(22,163,74,.6)}
+/* sélection = anneau accent (laisse voir la couleur de progression : fond ET bordure) */
+.checks label:has(input:checked){box-shadow:inset 0 0 0 2px var(--accent);font-weight:600}
 .checks input{accent-color:var(--accent)}
+/* légende des couleurs de progression */
+.cat-legend{display:flex;flex-wrap:wrap;gap:13px;margin:0 0 12px;font-size:12px;color:var(--muted)}
+.cat-legend span{display:inline-flex;align-items:center;gap:5px}
+.cat-legend i{width:11px;height:11px;border-radius:3px;display:inline-block;border:1px solid var(--line)}
+.cat-legend .lg-none{background:var(--chip-bg)}
+.cat-legend .lg-started{background:rgba(229,72,77,.6);border-color:rgba(229,72,77,.7)}
+.cat-legend .lg-progress{background:rgba(245,158,11,.62);border-color:rgba(245,158,11,.72)}
+.cat-legend .lg-done{background:rgba(22,163,74,.7);border-color:rgba(22,163,74,.8)}
 /* groupes de catégories (Réviser) : Chapitres / Séries triés */
 .cat-groups{display:flex;flex-direction:column;gap:6px}
 .cat-group-head{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:10px 0 1px;
@@ -457,6 +470,12 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
       </div>
       <div style="margin-top:14px">
         <label class="fld">Chapitres / séries</label>
+        <div class="cat-legend">
+          <span><i class="lg-none"></i>pas commencé</span>
+          <span><i class="lg-started"></i>commencé</span>
+          <span><i class="lg-progress"></i>en cours</span>
+          <span><i class="lg-done"></i>validé</span>
+        </div>
         <div id="rv-cats" class="cat-groups"></div>
       </div>
       <div style="margin-top:16px">
@@ -1074,7 +1093,8 @@ function renderCats(){
     head.querySelector("[data-none]").onclick=e=>{ e.preventDefault(); row.querySelectorAll("input").forEach(i=>i.checked=false); updateBanners(); };
     box.append(head, row);
   });
-  updateBanners();   // recalcule le compte "pas sûres" pour la sélection courante
+  updateBanners();    // recalcule le compte "pas sûres" pour la sélection courante
+  colorizeCats();     // colore les chips selon la progression
 }
 
 /* =================================================================
@@ -1159,10 +1179,33 @@ async function resumeSession(sig){
 
 /* ---------- Bandeau "À revoir" (cartes pas encore sûres à 100%) ---------- */
 let PROG_CACHE=null;
-async function reviewSetupRefresh(){          // à l'affichage du setup : reprises + compteurs
+async function reviewSetupRefresh(){          // à l'affichage du setup : reprises + compteurs + couleurs
   renderResume();
   try{ PROG_CACHE = await api("/progress"); }catch(e){ PROG_CACHE=null; }
   updateBanners();
+  colorizeCats();
+}
+/* couleur d'un chip selon la progression (mastered = niveau >= 3 "Très sûr"/validé) */
+function catProgClass(course, category){
+  if(!PROG_CACHE) return null;
+  const cat=(PROG_CACHE[course]||[]).find(c=>c.category===category);
+  if(!cat || !cat.total) return null;
+  const L=cat.levels||{};
+  const mastered=(+L["3"]||0)+(+L["4"]||0);
+  const seen=mastered+(+L["0"]||0)+(+L["1"]||0)+(+L["2"]||0);
+  if(mastered>=cat.total) return "pg-done";       // tout validé -> vert
+  if(mastered>0)          return "pg-progress";   // partiellement maîtrisé -> orange
+  if(seen>0)              return "pg-started";     // vu mais rien de sûr -> rouge
+  return null;                                     // pas commencé -> gris (défaut)
+}
+function colorizeCats(){
+  const course=$("#rv-course") ? $("#rv-course").value : null; if(!course) return;
+  $$("#rv-cats .checks label").forEach(l=>{
+    const inp=l.querySelector("input"); if(!inp) return;
+    l.classList.remove("pg-started","pg-progress","pg-done");
+    const cls=catProgClass(course, inp.value);
+    if(cls) l.classList.add(cls);
+  });
 }
 function levelCounts(course, cats){           // total par niveau sur les catégories sélectionnées
   if(!PROG_CACHE) return null;
