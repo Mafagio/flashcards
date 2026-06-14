@@ -1,21 +1,24 @@
 """
-fix_stub_audits.py — répare les audits notés par le correcteur « stub » (mots-clés) au lieu
-du vrai correcteur LLM (justification contenant « stub »), et SUPPRIME les notifications
-« raté » erronées du fil d'activité.
+fix_stub_audits.py — corrige une bonne fois les audits notés 0/6 (souvent à tort par le
+correcteur « stub » quand le vrai correcteur n'avait pas tourné), et SUPPRIME du fil les
+notifications « 0/6 (raté …) » correspondantes.
 
-Pour chaque audit concerné (source='audit') :
-  - on RE-CORRIGE la réponse stockée avec le correcteur (réparé) ; s'il répond pour de vrai,
-    on ajuste l'XP du score stub vers le vrai score et on met à jour l'audit ;
-  - s'il n'y a pas de vrai correcteur (encore stub), on retire la pénalité injuste et on
-    remet l'audit en attente.
-  - dans les deux cas, on efface l'évènement « raté … XP » correspondant du fil.
+Au boot, UNE seule fois (marqueur sur le volume) :
+  - pour chaque audit source='audit' échoué à 0/6 (avec une réponse stockée), on RE-CORRIGE
+    avec le correcteur (réparé) : s'il répond pour de vrai, on applique le vrai score et on
+    ajuste l'XP ; sinon (toujours pas de vrai correcteur) on retire la pénalité et on remet
+    l'audit en attente ;
+  - on efface les évènements de fil « … 0/6 (raté … XP) ».
 
-Idempotent : après traitement la justification ne contient plus « stub » -> plus re-traité.
+Une seule fois (marqueur) : ne re-traite pas les vrais 0/6 futurs aux redémarrages suivants.
 """
+import os
 import json
 import db as DB
 import scoring as S
 from grader import grade
+
+MARKER = os.path.join(os.path.dirname(DB.DB_PATH) or ".", ".audit_zero_recheck_done")
 
 
 def _adjust_xp(con, uid, course, delta):
@@ -31,15 +34,17 @@ def _adjust_xp(con, uid, course, delta):
 
 
 def main():
+    if os.path.exists(MARKER):
+        print("STUB_AUDIT_FIX: déjà fait (marqueur présent).")
+        return
     DB.init_db()
     con = DB.get_db()
     rows = con.execute("""
-        SELECT a.id, a.user_id, a.q, a.mastery, a.answer, c.course, c.category,
+        SELECT a.id, a.user_id, a.q, a.mastery, a.answer, c.course,
                c.front, c.back, c.bareme_json
         FROM audits a JOIN cards c ON c.id = a.card_id
-        WHERE a.justification LIKE '%stub%'
-              AND a.status IN ('passed','failed') AND a.source='audit'
-        LIMIT 50
+        WHERE a.status='failed' AND a.score=0 AND a.source='audit'
+        LIMIT 60
     """).fetchall()
 
     # 1) re-correction (appels API HORS verrou)
@@ -53,15 +58,13 @@ def main():
             res = {"stub": True}
         graded.append((a, res))
 
-    # 2) application en base (sous verrou) + nettoyage du fil
-    regraded = refunded = events_del = 0
-    pairs = set()
+    # 2) application (sous verrou) + purge du fil
+    regraded = refunded = 0
     with DB.LOCK:
         for a, res in graded:
-            old_gain = round((a["mastery"] or 0) + S.AUDIT_BONUS, 2)   # XP nette qu'avait appliquée le stub
+            old_gain = round((a["mastery"] or 0) + S.AUDIT_BONUS, 2)   # XP nette appliquée par le 0/6
             if res.get("stub"):
-                # pas de vrai correcteur -> on enlève la pénalité injuste et on remet en attente
-                _adjust_xp(con, a["user_id"], a["course"], -old_gain)
+                _adjust_xp(con, a["user_id"], a["course"], -old_gain)  # retire la pénalité
                 con.execute("UPDATE audits SET status='pending', score=NULL, justification=NULL, "
                             "mastery=0, graded_at=NULL WHERE id=?", (a["id"],))
                 refunded += 1
@@ -74,17 +77,16 @@ def main():
                             ("passed" if outcome else "failed", res["score"],
                              str(res.get("justification", "")), new_mastery, a["id"]))
                 regraded += 1
-            pairs.add((a["user_id"], a["category"]))
-
-        # 3) supprime les notifications « raté … XP » erronées (par utilisateur+catégorie)
-        for uid, cat in pairs:
-            cur = con.execute(
-                "DELETE FROM events WHERE user_id=? AND type='graded' "
-                "AND text LIKE ? AND text LIKE '%raté%'", (uid, f"%— {cat} :%"))
-            events_del += cur.rowcount or 0
+        # purge les notifications « 0/6 (raté … » du fil (une seule fois)
+        cur = con.execute("DELETE FROM events WHERE type='graded' AND text LIKE '%0/6 (raté%'")
+        events_del = cur.rowcount or 0
         con.commit()
-    print(f"STUB_AUDIT_FIX: {regraded} re-corrigé(s), {refunded} pénalité(s) retirée(s), "
-          f"{events_del} notification(s) erronée(s) supprimée(s).")
+    try:
+        open(MARKER, "w").write("done")
+    except Exception:
+        pass
+    print(f"STUB_AUDIT_FIX: {regraded} 0/6 re-corrigé(s), {refunded} pénalité(s) retirée(s), "
+          f"{events_del} notification(s) « 0/6 raté » supprimée(s).")
 
 
 if __name__ == "__main__":
