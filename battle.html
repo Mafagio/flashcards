@@ -149,17 +149,19 @@ nav.tabs button.active{background:var(--accent-soft-page);color:var(--accent)}
 .tex.lg{font-size:17px}
 
 /* ---------- Versus (dashboard) ---------- */
-.versus{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:10px}
-.player{padding:16px;border-radius:14px;background:var(--panel);border:1px solid var(--line)}
+/* grille de joueurs (tous inclus) : s'adapte au nombre de joueurs */
+.versus{display:grid;grid-template-columns:repeat(auto-fit,minmax(208px,1fr));gap:12px;margin-top:4px}
+.player{position:relative;padding:16px;border-radius:14px;background:var(--panel);border:1px solid var(--line)}
 .player.me{background:var(--accent-soft);border-color:#d4e3ff}
-.player .name{font-weight:700;font-size:15px;margin-bottom:6px;display:flex;align-items:center;gap:6px}
+.player.top1{border-color:#e3b341;box-shadow:0 0 0 1px #e3b34155 inset}
+.player .name{font-weight:700;font-size:15px;margin-bottom:6px;display:flex;align-items:center;gap:6px;padding-right:34px}
 .player .xp{font-size:30px;font-weight:800;letter-spacing:-.03em;line-height:1}
 .player .meta{margin-top:6px;color:var(--muted);font-size:13px}
-.vs{font-weight:800;color:var(--muted);font-size:15px;
-   border:1px solid var(--line);border-radius:999px;padding:8px 12px;background:var(--panel)}
-.xpbar{height:10px;border-radius:999px;background:var(--track);overflow:hidden;margin-top:16px;display:flex}
-.xpbar .mine{background:var(--accent)}
-.xpbar .theirs{background:var(--track2)}
+.player-pos{position:absolute;top:13px;right:14px;font-weight:800;font-size:13px;color:var(--muted)}
+.player.top1 .player-pos{color:#d8a200}
+.player-pos.medal{font-size:16px}
+.versus-empty{padding:16px;border-radius:14px;border:1px dashed var(--line);color:var(--muted);
+  display:flex;align-items:center;justify-content:center;text-align:center;font-size:13.5px}
 .token-hint{margin-top:14px;font-size:13.5px;color:var(--muted)}
 
 /* feed */
@@ -427,13 +429,10 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
   <!-- DASHBOARD -->
   <section data-panel="dash">
     <div class="card">
+      <h2 id="dash-title">Classement</h2>
+      <p class="sub" id="dash-sub"></p>
       <div class="versus" id="versus"></div>
-      <div class="xpbar" id="xpbar"><div class="mine" style="width:50%"></div><div class="theirs" style="width:50%"></div></div>
       <div class="token-hint" id="token-hint"></div>
-    </div>
-    <div class="card">
-      <h2>Classement</h2>
-      <ol class="lb-list" id="lb-list"></ol>
     </div>
     <div class="card">
       <h2><img src="battle-assets/ui/ic-activite.png" width="20" height="20" style="object-fit:contain;vertical-align:-4px" alt=""> Activité</h2>
@@ -566,8 +565,12 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
           <label class="fld">Cours</label>
           <select id="dl-course"></select>
         </div>
+        <div class="grow">
+          <label class="fld">Adversaire</label>
+          <select id="dl-opp-select"></select>
+        </div>
         <div style="display:flex;align-items:flex-end">
-          <button class="btn primary" id="dl-start">Défier <span id="dl-opp"></span></button>
+          <button class="btn primary" id="dl-start">Défier</button>
         </div>
       </div>
     </div>
@@ -888,34 +891,22 @@ function switchTab(tab){
 async function renderDash(){
   await refreshHeader();
   const [lb, feed] = await Promise.all([api("/leaderboard"+cq()), api("/feed")]);
-  const me = lb.find(x=>x.me) || {name:state.me.name, xp:state.me.xp, tokens:state.me.tokens};
-  const opp = lb.find(x=>!x.me);
-  state.opponent = opp ? opp.name : null;
+  // tous les joueurs sont inclus ; on retient les adversaires pour duels/challenges
+  state.opponents = lb.filter(x=>!x.me).map(x=>x.name);
+  state.opponent = state.opponents[0] || null;
+
+  $("#dash-title").textContent = `Classement ${state.course}`;
+  $("#dash-sub").textContent = lb.length>1
+    ? `${lb.length} joueurs en lice — à toi de grimper.`
+    : `Tu es seul ici pour l'instant. Invite tes amis à se créer un compte !`;
 
   const V=$("#versus"); V.innerHTML="";
-  V.appendChild(playerCard(me, true));
-  const vs=document.createElement("div"); vs.className="vs"; vs.innerHTML=icon('vs',34); V.appendChild(vs);
-  V.appendChild(playerCard(opp || {name:"En attente…", xp:0, tokens:0}, false));
-
-  // classement avec rangs
-  const Lb=$("#lb-list");
-  if(Lb){
-    Lb.innerHTML="";
-    lb.forEach((x,i)=>{
-      const rr=rankOf(x.xp||0);
-      const li=document.createElement("li");
-      li.innerHTML=`<span class="lb-rank">${i+1}</span>${rankImg(rr,26)}`+
-        `<span class="lb-name${x.me?' me':''}">${escapeHtml(x.name)}</span>`+
-        `<span class="lb-tier" style="color:${rr.text}">${rr.name}</span>`+
-        `<span class="lb-xp">${Math.round(x.xp)} XP</span>`;
-      Lb.appendChild(li);
-    });
+  lb.forEach((p,i)=> V.appendChild(playerCard(p, !!p.me, i+1)));   // déjà triés par XP desc
+  if(lb.length<2){
+    const ph=document.createElement("div"); ph.className="versus-empty";
+    ph.textContent="En attente d'autres joueurs… 👀";
+    V.appendChild(ph);
   }
-
-  const total=(me.xp + (opp?opp.xp:0)) || 1;
-  const mine=Math.max(2, Math.round(100*me.xp/total));
-  $("#xpbar").innerHTML =
-    `<div class="mine" style="width:${mine}%"></div><div class="theirs" style="width:${100-mine}%"></div>`;
 
   $("#token-hint").innerHTML =
     `${icon('jeton',16)} Prochain jeton challenge dans <b>${state.me.next_token_in}</b> XP (1 jeton / 50 XP de record).`;
@@ -929,14 +920,17 @@ async function renderDash(){
     li.append(span,tm); F.appendChild(li);
   });
 }
-function playerCard(p, isMe){
-  const d=document.createElement("div"); d.className="player"+(isMe?" me":"");
+function playerCard(p, isMe, pos){
+  const d=document.createElement("div");
+  d.className="player"+(isMe?" me":"")+(pos===1?" top1":"");
   const r=rankOf(p.xp||0);
   const prog = r.next
     ? `<div class="rk-bar"><div style="width:${Math.round(r.progress*100)}%"></div></div>
        <div class="rk-next small muted">plus que <b>${Math.round(r.toNext)}</b> XP pour ${escapeHtml(r.next.name)}</div>`
-    : `<div class="rk-next small muted">Rang max</div>`;
-  d.innerHTML=`<div class="name">${icon('joueur',20)} ${escapeHtml(p.name)}${isMe?" <span class='small muted'>(toi)</span>":""}</div>
+    : `<div class="rk-next small muted">Rang max 🏆</div>`;
+  const medal = (pos>=1 && pos<=3) ? ["🥇","🥈","🥉"][pos-1] : null;
+  const posBadge = pos ? `<span class="player-pos${medal?' medal':''}">${medal||('#'+pos)}</span>` : "";
+  d.innerHTML=`${posBadge}<div class="name">${icon('joueur',20)} ${escapeHtml(p.name)}${isMe?" <span class='small muted'>(toi)</span>":""}</div>
     <div class="rk-row">${rankImg(r,56)}<span class="rk-name" style="color:${r.text}">${r.name}</span></div>
     <div class="xp">${Math.round(p.xp)}<span class="small muted" style="font-weight:600"> XP</span></div>
     <div class="meta">${icon('jeton',16)} ${p.tokens||0} jeton(s)</div>
@@ -1538,19 +1532,27 @@ function examCard(e){
    DUELS
    ================================================================= */
 $("#dl-start").onclick = async()=>{
-  if(!state.opponent){ await renderDash(); }
-  if(!state.opponent){ toast("Pas encore d'adversaire.","alert"); return; }
+  const opp = $("#dl-opp-select").value;
+  if(!opp){ toast("Choisis un adversaire (personne d'autre n'a encore de compte).","alert"); return; }
   const course=$("#dl-course").value;
   try{
-    await api("/duels", {method:"POST", body:{opponent:state.opponent, course}});
-    toast("🤺 Duel lancé ! Réponds dans l'onglet Audits.","good");
+    await api("/duels", {method:"POST", body:{opponent:opp, course}});
+    toast(`🤺 Duel lancé contre ${opp} ! Réponds dans l'onglet Audits.`,"good");
     renderDuels();
   }catch(err){ toast(err.message,"alert"); }
 };
 async function renderDuels(){
   await refreshHeader();
-  if(!state.opponent){ const lb=await api("/leaderboard"+cq()); const o=lb.find(x=>!x.me); state.opponent=o?o.name:null; }
-  $("#dl-opp").textContent = state.opponent ? state.opponent : "";
+  // liste des adversaires possibles (tous les autres joueurs)
+  if(!state.opponents){ const lb=await api("/leaderboard"+cq()); state.opponents=lb.filter(x=>!x.me).map(x=>x.name); }
+  const sel=$("#dl-opp-select");
+  if(sel){
+    const cur=sel.value;
+    sel.innerHTML="";
+    (state.opponents||[]).forEach(n=>{ const o=document.createElement("option"); o.value=n; o.textContent=n; sel.appendChild(o); });
+    if(!state.opponents || !state.opponents.length){ const o=document.createElement("option"); o.value=""; o.textContent="(aucun adversaire)"; sel.appendChild(o); }
+    if(cur && (state.opponents||[]).includes(cur)) sel.value=cur;
+  }
   const duels = await api("/duels");
   const box=$("#dl-list"); box.innerHTML="";
   if(!duels.length){ box.innerHTML='<p class="empty">Aucun duel pour l\'instant.</p>'; return; }

@@ -553,23 +553,21 @@ def challenge(c: ChallengeIn, u=Depends(current_user)):
 
 @app.get("/opponent/claims")
 def opponent_claims(course: Optional[str] = None, u=Depends(current_user)):
-    """Cartes que l'adversaire a marquées 'connue' DANS LE COURS (cibles de challenge)."""
+    """Cartes que les AUTRES joueurs ont marquées 'connue' DANS LE COURS (cibles de
+    challenge). Renvoie une entrée par (adversaire, carte) -> on peut défier n'importe qui."""
     db = DB.get_db()
-    opp = other_user(u["id"])
-    if not opp:
-        return []
-    args = [opp["id"]]
-    where = "r.user_id=? AND r.known=1 AND c.kind!='exam' AND c.no_audit=0"
+    args = [u["id"]]
+    where = "r.user_id != ? AND r.known=1 AND c.kind!='exam' AND c.no_audit=0"
     if course:
         where += " AND c.course=?"; args.append(course)
     rows = db.execute(f"""
-        SELECT c.id, c.category, c.course, c.kind, MAX(r.q) q,
+        SELECT us.name opponent, c.id, c.category, c.course, c.kind, MAX(r.q) q,
                EXISTS(SELECT 1 FROM audits a WHERE a.user_id=r.user_id AND a.card_id=c.id
                       AND a.status='pending' AND a.source='challenge') AS challenged
-        FROM reviews r JOIN cards c ON c.id=r.card_id
+        FROM reviews r JOIN cards c ON c.id=r.card_id JOIN users us ON us.id=r.user_id
         WHERE {where}
-        GROUP BY c.id ORDER BY q DESC LIMIT 60""", args).fetchall()
-    return [dict(r) | {"opponent": opp["name"]} for r in rows]
+        GROUP BY r.user_id, c.id ORDER BY q DESC LIMIT 80""", args).fetchall()
+    return [dict(r) for r in rows]
 
 
 # ---------------------------------------------------------------------------
