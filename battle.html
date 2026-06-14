@@ -190,6 +190,18 @@ select:focus,input:focus,textarea:focus{outline:none;border-color:var(--accent);
 .cat-group-head:first-child{margin-top:0}
 .cat-links{font-weight:600;text-transform:none;letter-spacing:0;font-size:12.5px}
 .cat-links a{color:var(--accent)}
+/* Reprendre une session + option "pas encore sûres" */
+.rv-resume{display:flex;flex-direction:column;gap:8px;margin:4px 0 16px}
+.rv-resume-row{display:flex;align-items:center;gap:10px;justify-content:space-between;
+  border:1px solid var(--accent);background:var(--accent-soft);border-radius:12px;padding:10px 12px}
+.rv-resume-row .rr-info{font-size:13.5px;line-height:1.35}
+.rv-resume-row .rr-info b{color:var(--accent)}
+.rv-resume-row .rr-sub{color:var(--muted);font-size:12px}
+.rv-resume-row .rr-actions{display:flex;gap:6px;flex-shrink:0;align-items:center}
+.rv-resume-drop{border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:4px}
+.rv-resume-drop:hover{color:#e5484d}
+.rv-check{display:flex;align-items:flex-start;gap:9px;font-size:13.5px;cursor:pointer;line-height:1.4}
+.rv-check input{margin-top:2px;accent-color:var(--accent)}
 
 /* review card */
 .flash{min-height:120px}
@@ -426,6 +438,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
       <h2>Réviser en mode Battle</h2>
       <p class="sub">Chaque carte « connue » te donne de l'XP tout de suite. Mais toutes les
         20 cartes, 4 sont tirées au sort en <b>audit écrit</b> : déclare ta confiance honnêtement.</p>
+      <div id="rv-resume" class="rv-resume hidden"></div>
       <div class="row">
         <div class="grow">
           <label class="fld">Cours</label>
@@ -443,6 +456,11 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
           <button data-shuffle="0">↕︎ Dans l'ordre</button>
         </div>
       </div>
+      <label class="rv-check" style="margin-top:14px">
+        <input type="checkbox" id="rv-unsure">
+        <span>Seulement les cartes <b>pas encore sûres à 100%</b>
+          <span class="muted">— exclut celles marquées « Très sûr » / validées en audit (à refaire jusqu'à les maîtriser)</span></span>
+      </label>
       <div style="margin-top:18px">
         <button class="btn primary" id="rv-start">Commencer la session</button>
       </div>
@@ -828,6 +846,7 @@ function switchTab(tab){
   $$("#app section[data-panel]").forEach(s=>s.classList.toggle("hidden", s.dataset.panel!==tab));
   if(tab==="dash")      renderDash();
   if(tab==="progress")  renderProgress();
+  if(tab==="review")    renderResume();
   if(tab==="audits")    renderAudits();
   if(tab==="examens")   renderExamens();
   if(tab==="challenge") renderChallenge();
@@ -1053,7 +1072,7 @@ function renderCats(){
    REVIEW (mode battle)
    ================================================================= */
 $("#rv-start").onclick = startReview;
-$("#rv-again").onclick = ()=>{ show("#review-setup"); };
+$("#rv-again").onclick = ()=>{ show("#review-setup"); renderResume(); };
 $("#rv-flip").onclick  = flipCard;
 
 /* Ordre des cartes (mélangé = +25% XP) — sélection + persistance */
@@ -1067,14 +1086,88 @@ $("#rv-flip").onclick  = flipCard;
     try{ localStorage.setItem("battle_shuffle", b.dataset.shuffle); }catch(e){}
   });
 })();
+/* Option "seulement les cartes pas encore sûres" — persistée */
+(function(){
+  const cb=$("#rv-unsure"); if(!cb) return;
+  cb.checked = localStorage.getItem("battle_unsure")==="1";
+  cb.onchange=()=>{ try{ localStorage.setItem("battle_unsure", cb.checked?"1":"0"); }catch(e){} };
+})();
+
+/* ---------- Sessions de révision : reprendre une session commencée ---------- */
+function sessSig(course, cats, shuffled, unsure){
+  return [course, [...cats].sort().join("~"), shuffled?"s":"o", unsure?"u":"a"].join("|");
+}
+function loadSessions(){ try{ return JSON.parse(localStorage.getItem("battle_reviews")||"{}"); }catch(e){ return {}; } }
+function saveSessions(m){ try{ localStorage.setItem("battle_reviews", JSON.stringify(m)); }catch(e){} }
+function persistSession(){
+  const s=state.session; if(!s||!s.sig||!state.deck) return;
+  const m=loadSessions();
+  m[s.sig]={ course:s.course, cats:s.cats, shuffled:!!s.shuffled, unsure:!!s.unsure,
+             ids: state.deck.map(c=>c.id), idx: state.idx, seen: s.seen,
+             total: state.deck.length, ts: Date.now() };
+  const keys=Object.keys(m).sort((a,b)=>(m[b].ts||0)-(m[a].ts||0));
+  if(keys.length>8) keys.slice(8).forEach(k=>delete m[k]);   // garde les 8 plus récentes
+  saveSessions(m);
+}
+function clearSession(sig){ const m=loadSessions(); if(m[sig]){ delete m[sig]; saveSessions(m); } }
+function renderResume(){
+  const box=$("#rv-resume"); if(!box) return;
+  const m=loadSessions();
+  const list=Object.keys(m).map(k=>({sig:k,...m[k]}))
+    .filter(s=> (s.idx||0) < (s.total||0))      // sessions non terminées
+    .sort((a,b)=>(b.ts||0)-(a.ts||0));
+  if(!list.length){ box.classList.add("hidden"); box.innerHTML=""; return; }
+  box.classList.remove("hidden"); box.innerHTML="";
+  list.forEach(s=>{
+    const cats=s.cats||[];
+    const catsTxt = cats.length>3 ? `${cats.length} catégories` : cats.join(", ");
+    const mode = (s.shuffled?"mélangé":"dans l'ordre") + (s.unsure?" · pas sûres":"");
+    const row=document.createElement("div"); row.className="rv-resume-row";
+    const info=document.createElement("div"); info.className="rr-info";
+    info.innerHTML=`<b>Reprendre</b> · ${escapeHtml(s.course)} <span class="rr-sub">— ${escapeHtml(catsTxt)} · ${escapeHtml(mode)}</span><br>`+
+                   `<span class="rr-sub">${s.idx}/${s.total} cartes faites</span>`;
+    const actions=document.createElement("div"); actions.className="rr-actions";
+    const cont=document.createElement("button"); cont.className="btn primary sm"; cont.textContent=`Continuer (${s.idx}/${s.total})`;
+    cont.onclick=()=>resumeSession(s.sig);
+    const drop=document.createElement("button"); drop.className="rv-resume-drop"; drop.title="Abandonner cette session"; drop.textContent="✕";
+    drop.onclick=()=>{ clearSession(s.sig); renderResume(); };
+    actions.append(cont, drop); row.append(info, actions); box.appendChild(row);
+  });
+}
+async function resumeSession(sig){
+  const s=loadSessions()[sig];
+  if(!s){ renderResume(); return; }
+  let cards;
+  try{ cards=await api(`/cards?course=${encodeURIComponent(s.course)}&categories=${encodeURIComponent((s.cats||[]).join(","))}`); }
+  catch(err){ toast(err.message,"alert"); return; }
+  const byId={}; cards.forEach(c=>byId[c.id]=c);
+  const deck=(s.ids||[]).map(id=>byId[id]).filter(Boolean);
+  if(!deck.length){ toast("Cette session n'a plus de cartes.","alert"); clearSession(sig); renderResume(); return; }
+  state.deck=deck; state.idx=Math.min(s.idx||0, deck.length);
+  state.session={seen:s.seen||0, xp0:state.me.xp, shuffled:!!s.shuffled, unsure:!!s.unsure, course:s.course, cats:s.cats, sig};
+  if($("#rv-course")) $("#rv-course").value=s.course;
+  if(state.idx>=deck.length){ finishReview(); return; }
+  show("#review-card"); renderFlash();
+}
 
 async function startReview(){
   const course=$("#rv-course").value;
   const cats=$$("#rv-cats input:checked").map(i=>i.value);
   if(!cats.length){ toast("Choisis au moins un chapitre.","alert"); return; }
+  const shuffled = ($("#rv-order-seg button.sel")||{}).dataset?.shuffle === "1";
+  const unsure = !!($("#rv-unsure") && $("#rv-unsure").checked);
   let deck = await api(`/cards?course=${encodeURIComponent(course)}&categories=${encodeURIComponent(cats.join(","))}`);
   if(!deck.length){ toast("Aucune carte ici.","alert"); return; }
-  const shuffled = ($("#rv-order-seg button.sel")||{}).dataset?.shuffle === "1";
+  if(unsure){
+    // garde seulement les cartes pas encore "sûres" : niveau < 3 (pas "Très sûr"/validées) d'après /progress
+    let sure=new Set();
+    try{
+      const prog=await api("/progress");
+      (prog[course]||[]).forEach(cat=>(cat.cards||[]).forEach(c=>{ if(c.level>=3) sure.add(c.id); }));
+    }catch(e){}
+    deck=deck.filter(c=>!sure.has(c.id));
+    if(!deck.length){ toast("Toutes ces cartes sont déjà sûres à 100% 🎉","good"); return; }
+  }
   if(shuffled){
     for(let i=deck.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; }
   }else{
@@ -1082,7 +1175,9 @@ async function startReview(){
     deck.sort((a,b)=>{ const ka=catKey(a.category), kb=catKey(b.category);
       return ka[0]-kb[0] || ka[1]-kb[1] || String(a.id).localeCompare(String(b.id),undefined,{numeric:true}); });
   }
-  state.deck=deck; state.idx=0; state.session={seen:0, xp0:state.me.xp, shuffled};
+  state.deck=deck; state.idx=0;
+  state.session={seen:0, xp0:state.me.xp, shuffled, unsure, course, cats, sig:sessSig(course,cats,shuffled,unsure)};
+  persistSession();
   show("#review-card"); renderFlash();
 }
 function show(sel){ ["#review-setup","#review-card","#review-done"].forEach(s=>$(s).classList.toggle("hidden", s!==sel)); }
@@ -1121,9 +1216,10 @@ async function declare(btn){
   }catch(err){ toast(err.message,"alert"); return; }
   state.idx++;
   if(state.idx>=state.deck.length) finishReview();
-  else renderFlash();
+  else { persistSession(); renderFlash(); }
 }
 function finishReview(){
+  if(state.session && state.session.sig) clearSession(state.session.sig);   // session terminée
   const gained = Math.round((state.me.xp - state.session.xp0)*10)/10;
   $("#rv-progress").style.width="100%";
   $("#rv-summary").textContent =
