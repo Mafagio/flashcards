@@ -202,6 +202,10 @@ select:focus,input:focus,textarea:focus{outline:none;border-color:var(--accent);
 .rv-resume-row.orange .rr-info b{color:#b26a00}
 .rv-resume-row.orange .btn.primary{background:#f3920c;border-color:#f3920c}
 .rv-resume-row.orange .rr-count{font-weight:800;color:#b26a00}
+.rv-resume-row.teal{border-color:#14b8a6;background:rgba(20,184,166,.14)}
+.rv-resume-row.teal .rr-info b{color:#0f766e}
+.rv-resume-row.teal .btn.primary{background:#0d9488;border-color:#0d9488}
+.rv-resume-row.teal .rr-count{font-weight:800;color:#0f766e}
 .rv-resume-drop{border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:4px}
 .rv-resume-drop:hover{color:#e5484d}
 .rv-check{display:flex;align-items:flex-start;gap:9px;font-size:13.5px;cursor:pointer;line-height:1.4}
@@ -444,6 +448,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
         20 cartes, 4 sont tirées au sort en <b>audit écrit</b> : déclare ta confiance honnêtement.</p>
       <div id="rv-resume" class="rv-resume hidden"></div>
       <div id="rv-unsure-banner" class="rv-resume hidden"></div>
+      <div id="rv-seen-banner" class="rv-resume hidden"></div>
       <div class="row">
         <div class="grow">
           <label class="fld">Cours</label>
@@ -1065,11 +1070,11 @@ function renderCats(){
     if(solo){ box.append(row); return; }
     const head=document.createElement("div"); head.className="cat-group-head";
     head.innerHTML=`<span>${gname}</span><span class="cat-links"><a href="#" data-all>tout</a> · <a href="#" data-none>rien</a></span>`;
-    head.querySelector("[data-all]").onclick=e=>{ e.preventDefault(); row.querySelectorAll("input").forEach(i=>i.checked=true); updateUnsureBanner(); };
-    head.querySelector("[data-none]").onclick=e=>{ e.preventDefault(); row.querySelectorAll("input").forEach(i=>i.checked=false); updateUnsureBanner(); };
+    head.querySelector("[data-all]").onclick=e=>{ e.preventDefault(); row.querySelectorAll("input").forEach(i=>i.checked=true); updateBanners(); };
+    head.querySelector("[data-none]").onclick=e=>{ e.preventDefault(); row.querySelectorAll("input").forEach(i=>i.checked=false); updateBanners(); };
     box.append(head, row);
   });
-  updateUnsureBanner();   // recalcule le compte "pas sûres" pour la sélection courante
+  updateBanners();   // recalcule le compte "pas sûres" pour la sélection courante
 }
 
 /* =================================================================
@@ -1079,7 +1084,7 @@ $("#rv-start").onclick = ()=>startReview();
 $("#rv-again").onclick = ()=>{ show("#review-setup"); reviewSetupRefresh(); };
 $("#rv-flip").onclick  = flipCard;
 $("#rv-exit").onclick  = ()=>{ persistSession(); show("#review-setup"); reviewSetupRefresh(); };  // quitter en cours -> proposé en "Reprendre"
-$("#rv-cats").addEventListener("change", ()=>updateUnsureBanner());
+$("#rv-cats").addEventListener("change", ()=>updateBanners());
 
 /* Ordre des cartes (mélangé = +25% XP) — sélection + persistance */
 (function(){
@@ -1093,15 +1098,16 @@ $("#rv-cats").addEventListener("change", ()=>updateUnsureBanner());
   });
 })();
 /* ---------- Sessions de révision : reprendre une session commencée ---------- */
-function sessSig(course, cats, shuffled, unsure){
-  return [course, [...cats].sort().join("~"), shuffled?"s":"o", unsure?"u":"a"].join("|");
+function sessSig(course, cats, shuffled, filter){
+  const f = filter==='unsure' ? "u" : filter==='seen' ? "v" : "a";
+  return [course, [...cats].sort().join("~"), shuffled?"s":"o", f].join("|");
 }
 function loadSessions(){ try{ return JSON.parse(localStorage.getItem("battle_reviews")||"{}"); }catch(e){ return {}; } }
 function saveSessions(m){ try{ localStorage.setItem("battle_reviews", JSON.stringify(m)); }catch(e){} }
 function persistSession(){
   const s=state.session; if(!s||!s.sig||!state.deck) return;
   const m=loadSessions();
-  m[s.sig]={ course:s.course, cats:s.cats, shuffled:!!s.shuffled, unsure:!!s.unsure,
+  m[s.sig]={ course:s.course, cats:s.cats, shuffled:!!s.shuffled, filter:s.filter||null,
              ids: state.deck.map(c=>c.id), idx: state.idx, seen: s.seen,
              total: state.deck.length, ts: Date.now() };
   const keys=Object.keys(m).sort((a,b)=>(m[b].ts||0)-(m[a].ts||0));
@@ -1120,7 +1126,8 @@ function renderResume(){
   list.forEach(s=>{
     const cats=s.cats||[];
     const catsTxt = cats.length>3 ? `${cats.length} catégories` : cats.join(", ");
-    const mode = (s.shuffled?"mélangé":"dans l'ordre") + (s.unsure?" · pas sûres":"");
+    const f = s.filter || (s.unsure ? "unsure" : null);   // rétrocompat anciennes sessions
+    const mode = (s.shuffled?"mélangé":"dans l'ordre") + (f==='unsure'?" · pas sûres":f==='seen'?" · déjà vues":"");
     const row=document.createElement("div"); row.className="rv-resume-row";
     const info=document.createElement("div"); info.className="rr-info";
     info.innerHTML=`<b>Reprendre</b> · ${escapeHtml(s.course)} <span class="rr-sub">— ${escapeHtml(catsTxt)} · ${escapeHtml(mode)}</span><br>`+
@@ -1143,7 +1150,8 @@ async function resumeSession(sig){
   const deck=(s.ids||[]).map(id=>byId[id]).filter(Boolean);
   if(!deck.length){ toast("Cette session n'a plus de cartes.","alert"); clearSession(sig); renderResume(); return; }
   state.deck=deck; state.idx=Math.min(s.idx||0, deck.length);
-  state.session={seen:s.seen||0, xp0:state.me.xp, shuffled:!!s.shuffled, unsure:!!s.unsure, course:s.course, cats:s.cats, sig};
+  const filter=s.filter || (s.unsure ? "unsure" : null);   // rétrocompat
+  state.session={seen:s.seen||0, xp0:state.me.xp, shuffled:!!s.shuffled, filter, course:s.course, cats:s.cats, sig};
   if($("#rv-course")) $("#rv-course").value=s.course;
   if(state.idx>=deck.length){ finishReview(); return; }
   show("#review-card"); renderFlash();
@@ -1151,39 +1159,53 @@ async function resumeSession(sig){
 
 /* ---------- Bandeau "À revoir" (cartes pas encore sûres à 100%) ---------- */
 let PROG_CACHE=null;
-async function reviewSetupRefresh(){          // à l'affichage du setup : reprises + compte "pas sûres"
+async function reviewSetupRefresh(){          // à l'affichage du setup : reprises + compteurs
   renderResume();
   try{ PROG_CACHE = await api("/progress"); }catch(e){ PROG_CACHE=null; }
-  updateUnsureBanner();
+  updateBanners();
 }
-function unsureCount(course, cats){
+function levelCounts(course, cats){           // total par niveau sur les catégories sélectionnées
   if(!PROG_CACHE) return null;
-  const sel=new Set(cats); let n=0;
+  const sel=new Set(cats); const acc={"-1":0,"0":0,"1":0,"2":0,"3":0,"4":0};
   (PROG_CACHE[course]||[]).forEach(cat=>{
     if(!sel.has(cat.category)) return;
     const L=cat.levels||{};
-    n += (+L["-1"]||0)+(+L["0"]||0)+(+L["1"]||0)+(+L["2"]||0);   // niveaux < 3 = pas encore sûres
+    Object.keys(acc).forEach(k=>acc[k]+=(+L[k]||0));
   });
-  return n;
+  return acc;
 }
-function updateUnsureBanner(){
-  const box=$("#rv-unsure-banner"); if(!box) return;
+function updateBanners(){
   const course=$("#rv-course") ? $("#rv-course").value : null;
   const cats=$$("#rv-cats input:checked").map(i=>i.value);
-  const n=(course && cats.length) ? unsureCount(course,cats) : null;
+  const acc=(course && cats.length) ? levelCounts(course,cats) : null;
+  // orange : pas encore sûres (niveau < 3, jamais vues incluses)
+  renderFilterBanner($("#rv-unsure-banner"), "orange", "unsure",
+    acc ? acc["-1"]+acc["0"]+acc["1"]+acc["2"] : null,
+    {label:"À revoir", word:"pas encore sûres à 100%",
+     sub:"exclut les « Très sûr » / validées en audit — à refaire jusqu'à les maîtriser",
+     zero:"tout est sûr à 100% 🎉"});
+  // teal : déjà vues mais pas sûres (niveau 0/1/2 — jamais vues exclues)
+  renderFilterBanner($("#rv-seen-banner"), "teal", "seen",
+    acc ? acc["0"]+acc["1"]+acc["2"] : null,
+    {label:"Déjà vues à revoir", word:"vues mais pas encore sûres",
+     sub:"cartes vues au moins une fois mais pas encore « Très sûr » (jamais vues exclues)",
+     zero:"rien à revoir parmi les cartes déjà vues ✨"});
+}
+function renderFilterBanner(box, cls, filter, n, txt){
+  if(!box) return;
   if(n===null){ box.classList.add("hidden"); box.innerHTML=""; return; }
   box.classList.remove("hidden"); box.innerHTML="";
-  const row=document.createElement("div"); row.className="rv-resume-row orange";
+  const row=document.createElement("div"); row.className="rv-resume-row "+cls;
   const info=document.createElement("div"); info.className="rr-info";
   if(n>0){
-    info.innerHTML=`<b>À revoir</b> · <span class="rr-count">${n}</span> carte(s) <b>pas encore sûres à 100%</b>`+
-                   `<br><span class="rr-sub">exclut les « Très sûr » / validées en audit — à refaire jusqu'à les maîtriser</span>`;
+    info.innerHTML=`<b>${txt.label}</b> · <span class="rr-count">${n}</span> carte(s) <b>${txt.word}</b>`+
+                   `<br><span class="rr-sub">${txt.sub}</span>`;
     const actions=document.createElement("div"); actions.className="rr-actions";
     const btn=document.createElement("button"); btn.className="btn primary sm"; btn.textContent=`Réviser ces ${n}`;
-    btn.onclick=()=>startReview({unsure:true});
+    btn.onclick=()=>startReview({filter});
     actions.appendChild(btn); row.append(info, actions);
   }else{
-    info.innerHTML=`<b>À revoir</b> · <span class="rr-count">0</span> — tout est sûr à 100% 🎉`;
+    info.innerHTML=`<b>${txt.label}</b> · <span class="rr-count">0</span> — ${txt.zero}`;
     row.append(info);
   }
   box.appendChild(row);
@@ -1195,18 +1217,19 @@ async function startReview(opts){
   const cats=$$("#rv-cats input:checked").map(i=>i.value);
   if(!cats.length){ toast("Choisis au moins un chapitre.","alert"); return; }
   const shuffled = ($("#rv-order-seg button.sel")||{}).dataset?.shuffle === "1";
-  const unsure = !!opts.unsure;
+  const filter = opts.filter || null;       // null (toutes) | 'unsure' (niveau<3) | 'seen' (niveau 0/1/2)
   let deck = await api(`/cards?course=${encodeURIComponent(course)}&categories=${encodeURIComponent(cats.join(","))}`);
   if(!deck.length){ toast("Aucune carte ici.","alert"); return; }
-  if(unsure){
-    // garde seulement les cartes pas encore "sûres" : niveau < 3 (pas "Très sûr"/validées) d'après /progress
-    let sure=new Set();
+  if(filter){
+    // niveau par carte d'après /progress ('seen' = déjà vue au moins une fois mais pas sûre)
+    let lvl={};
     try{
       const prog=await api("/progress");
-      (prog[course]||[]).forEach(cat=>(cat.cards||[]).forEach(c=>{ if(c.level>=3) sure.add(c.id); }));
+      (prog[course]||[]).forEach(cat=>(cat.cards||[]).forEach(c=>{ lvl[c.id]=c.level; }));
     }catch(e){}
-    deck=deck.filter(c=>!sure.has(c.id));
-    if(!deck.length){ toast("Toutes ces cartes sont déjà sûres à 100% 🎉","good"); return; }
+    deck=deck.filter(c=>{ const L=(c.id in lvl)?lvl[c.id]:-1;
+      return filter==='seen' ? (L>=0 && L<3) : (L<3); });
+    if(!deck.length){ toast(filter==='seen' ? "Aucune carte déjà vue à revoir ✨" : "Toutes ces cartes sont déjà sûres à 100% 🎉","good"); return; }
   }
   if(shuffled){
     for(let i=deck.length-1;i>0;i--){ const j=Math.floor(Math.random()*(i+1)); [deck[i],deck[j]]=[deck[j],deck[i]]; }
@@ -1216,7 +1239,7 @@ async function startReview(opts){
       return ka[0]-kb[0] || ka[1]-kb[1] || String(a.id).localeCompare(String(b.id),undefined,{numeric:true}); });
   }
   state.deck=deck; state.idx=0;
-  state.session={seen:0, xp0:state.me.xp, shuffled, unsure, course, cats, sig:sessSig(course,cats,shuffled,unsure)};
+  state.session={seen:0, xp0:state.me.xp, shuffled, filter, course, cats, sig:sessSig(course,cats,shuffled,filter)};
   persistSession();
   show("#review-card"); renderFlash();
 }
