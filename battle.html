@@ -198,6 +198,10 @@ select:focus,input:focus,textarea:focus{outline:none;border-color:var(--accent);
 .rv-resume-row .rr-info b{color:var(--accent)}
 .rv-resume-row .rr-sub{color:var(--muted);font-size:12px}
 .rv-resume-row .rr-actions{display:flex;gap:6px;flex-shrink:0;align-items:center}
+.rv-resume-row.orange{border-color:#f5a524;background:rgba(245,165,36,.14)}
+.rv-resume-row.orange .rr-info b{color:#b26a00}
+.rv-resume-row.orange .btn.primary{background:#f3920c;border-color:#f3920c}
+.rv-resume-row.orange .rr-count{font-weight:800;color:#b26a00}
 .rv-resume-drop{border:none;background:transparent;color:var(--muted);cursor:pointer;font-size:16px;line-height:1;padding:4px}
 .rv-resume-drop:hover{color:#e5484d}
 .rv-check{display:flex;align-items:flex-start;gap:9px;font-size:13.5px;cursor:pointer;line-height:1.4}
@@ -439,6 +443,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
       <p class="sub">Chaque carte « connue » te donne de l'XP tout de suite. Mais toutes les
         20 cartes, 4 sont tirées au sort en <b>audit écrit</b> : déclare ta confiance honnêtement.</p>
       <div id="rv-resume" class="rv-resume hidden"></div>
+      <div id="rv-unsure-banner" class="rv-resume hidden"></div>
       <div class="row">
         <div class="grow">
           <label class="fld">Cours</label>
@@ -456,11 +461,6 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
           <button data-shuffle="0">↕︎ Dans l'ordre</button>
         </div>
       </div>
-      <label class="rv-check" style="margin-top:14px">
-        <input type="checkbox" id="rv-unsure">
-        <span>Seulement les cartes <b>pas encore sûres à 100%</b>
-          <span class="muted">— exclut celles marquées « Très sûr » / validées en audit (à refaire jusqu'à les maîtriser)</span></span>
-      </label>
       <div style="margin-top:18px">
         <button class="btn primary" id="rv-start">Commencer la session</button>
       </div>
@@ -468,9 +468,12 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
 
     <div class="card hidden" id="review-card">
       <div class="progress"><div id="rv-progress" style="width:0%"></div></div>
-      <div class="head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px">
-        <span class="kindtag" id="rv-cat"></span>
-        <span class="small muted" id="rv-count"></span>
+      <div class="head" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;gap:10px">
+        <button class="btn ghost sm" id="rv-exit">← Accueil</button>
+        <div style="display:flex;gap:10px;align-items:center">
+          <span class="kindtag" id="rv-cat"></span>
+          <span class="small muted" id="rv-count"></span>
+        </div>
       </div>
       <div class="tex lg flash" id="rv-front"></div>
       <div class="answer-reveal hidden" id="rv-back-wrap">
@@ -846,7 +849,7 @@ function switchTab(tab){
   $$("#app section[data-panel]").forEach(s=>s.classList.toggle("hidden", s.dataset.panel!==tab));
   if(tab==="dash")      renderDash();
   if(tab==="progress")  renderProgress();
-  if(tab==="review")    renderResume();
+  if(tab==="review")    reviewSetupRefresh();
   if(tab==="audits")    renderAudits();
   if(tab==="examens")   renderExamens();
   if(tab==="challenge") renderChallenge();
@@ -1062,18 +1065,21 @@ function renderCats(){
     if(solo){ box.append(row); return; }
     const head=document.createElement("div"); head.className="cat-group-head";
     head.innerHTML=`<span>${gname}</span><span class="cat-links"><a href="#" data-all>tout</a> · <a href="#" data-none>rien</a></span>`;
-    head.querySelector("[data-all]").onclick=e=>{ e.preventDefault(); row.querySelectorAll("input").forEach(i=>i.checked=true); };
-    head.querySelector("[data-none]").onclick=e=>{ e.preventDefault(); row.querySelectorAll("input").forEach(i=>i.checked=false); };
+    head.querySelector("[data-all]").onclick=e=>{ e.preventDefault(); row.querySelectorAll("input").forEach(i=>i.checked=true); updateUnsureBanner(); };
+    head.querySelector("[data-none]").onclick=e=>{ e.preventDefault(); row.querySelectorAll("input").forEach(i=>i.checked=false); updateUnsureBanner(); };
     box.append(head, row);
   });
+  updateUnsureBanner();   // recalcule le compte "pas sûres" pour la sélection courante
 }
 
 /* =================================================================
    REVIEW (mode battle)
    ================================================================= */
-$("#rv-start").onclick = startReview;
-$("#rv-again").onclick = ()=>{ show("#review-setup"); renderResume(); };
+$("#rv-start").onclick = ()=>startReview();
+$("#rv-again").onclick = ()=>{ show("#review-setup"); reviewSetupRefresh(); };
 $("#rv-flip").onclick  = flipCard;
+$("#rv-exit").onclick  = ()=>{ persistSession(); show("#review-setup"); reviewSetupRefresh(); };  // quitter en cours -> proposé en "Reprendre"
+$("#rv-cats").addEventListener("change", ()=>updateUnsureBanner());
 
 /* Ordre des cartes (mélangé = +25% XP) — sélection + persistance */
 (function(){
@@ -1086,13 +1092,6 @@ $("#rv-flip").onclick  = flipCard;
     try{ localStorage.setItem("battle_shuffle", b.dataset.shuffle); }catch(e){}
   });
 })();
-/* Option "seulement les cartes pas encore sûres" — persistée */
-(function(){
-  const cb=$("#rv-unsure"); if(!cb) return;
-  cb.checked = localStorage.getItem("battle_unsure")==="1";
-  cb.onchange=()=>{ try{ localStorage.setItem("battle_unsure", cb.checked?"1":"0"); }catch(e){} };
-})();
-
 /* ---------- Sessions de révision : reprendre une session commencée ---------- */
 function sessSig(course, cats, shuffled, unsure){
   return [course, [...cats].sort().join("~"), shuffled?"s":"o", unsure?"u":"a"].join("|");
@@ -1150,12 +1149,53 @@ async function resumeSession(sig){
   show("#review-card"); renderFlash();
 }
 
-async function startReview(){
+/* ---------- Bandeau "À revoir" (cartes pas encore sûres à 100%) ---------- */
+let PROG_CACHE=null;
+async function reviewSetupRefresh(){          // à l'affichage du setup : reprises + compte "pas sûres"
+  renderResume();
+  try{ PROG_CACHE = await api("/progress"); }catch(e){ PROG_CACHE=null; }
+  updateUnsureBanner();
+}
+function unsureCount(course, cats){
+  if(!PROG_CACHE) return null;
+  const sel=new Set(cats); let n=0;
+  (PROG_CACHE[course]||[]).forEach(cat=>{
+    if(!sel.has(cat.category)) return;
+    const L=cat.levels||{};
+    n += (+L["-1"]||0)+(+L["0"]||0)+(+L["1"]||0)+(+L["2"]||0);   // niveaux < 3 = pas encore sûres
+  });
+  return n;
+}
+function updateUnsureBanner(){
+  const box=$("#rv-unsure-banner"); if(!box) return;
+  const course=$("#rv-course") ? $("#rv-course").value : null;
+  const cats=$$("#rv-cats input:checked").map(i=>i.value);
+  const n=(course && cats.length) ? unsureCount(course,cats) : null;
+  if(n===null){ box.classList.add("hidden"); box.innerHTML=""; return; }
+  box.classList.remove("hidden"); box.innerHTML="";
+  const row=document.createElement("div"); row.className="rv-resume-row orange";
+  const info=document.createElement("div"); info.className="rr-info";
+  if(n>0){
+    info.innerHTML=`<b>À revoir</b> · <span class="rr-count">${n}</span> carte(s) <b>pas encore sûres à 100%</b>`+
+                   `<br><span class="rr-sub">exclut les « Très sûr » / validées en audit — à refaire jusqu'à les maîtriser</span>`;
+    const actions=document.createElement("div"); actions.className="rr-actions";
+    const btn=document.createElement("button"); btn.className="btn primary sm"; btn.textContent=`Réviser ces ${n}`;
+    btn.onclick=()=>startReview({unsure:true});
+    actions.appendChild(btn); row.append(info, actions);
+  }else{
+    info.innerHTML=`<b>À revoir</b> · <span class="rr-count">0</span> — tout est sûr à 100% 🎉`;
+    row.append(info);
+  }
+  box.appendChild(row);
+}
+
+async function startReview(opts){
+  opts = opts || {};
   const course=$("#rv-course").value;
   const cats=$$("#rv-cats input:checked").map(i=>i.value);
   if(!cats.length){ toast("Choisis au moins un chapitre.","alert"); return; }
   const shuffled = ($("#rv-order-seg button.sel")||{}).dataset?.shuffle === "1";
-  const unsure = !!($("#rv-unsure") && $("#rv-unsure").checked);
+  const unsure = !!opts.unsure;
   let deck = await api(`/cards?course=${encodeURIComponent(course)}&categories=${encodeURIComponent(cats.join(","))}`);
   if(!deck.length){ toast("Aucune carte ici.","alert"); return; }
   if(unsure){
