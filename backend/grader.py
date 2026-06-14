@@ -60,7 +60,27 @@ def _parse_json(text: str) -> dict:
     m = re.search(r"\{.*\}", text, flags=re.DOTALL)
     if m:
         text = m.group(0)
-    return json.loads(text)
+    try:
+        return json.loads(text)
+    except Exception:
+        pass
+    # Claude met parfois du LaTeX BRUT (\mathbb, \mid…) dans la justification : ce sont des
+    # échappements JSON invalides. On double les backslash isolés (hors \" \\ \/ \b \f \n \r \t \u).
+    try:
+        return json.loads(re.sub(r'\\(?!["\\/bfnrtu])', r'\\\\', text))
+    except Exception:
+        pass
+    # Dernier repli : extraire au moins le score (et la justification) par regex.
+    out = {}
+    ms = re.search(r'"score"\s*:\s*(\d+)', text)
+    if ms:
+        out["score"] = int(ms.group(1))
+    else:
+        raise ValueError("score introuvable dans la réponse du correcteur")
+    mj = re.search(r'"justification"\s*:\s*"(.*)"', text, flags=re.DOTALL)
+    if mj:
+        out["justification"] = mj.group(1)[:500]
+    return out
 
 
 def grade(front: str, back: str, bareme: dict, answer: str) -> dict:
@@ -102,12 +122,13 @@ def grade(front: str, back: str, bareme: dict, answer: str) -> dict:
             "justification": str(out.get("justification", "")),
             "hits": out.get("hits", []),
         }
-    except Exception as e:  # repli sûr : on ne casse jamais le flux de jeu
+    except Exception as e:  # correcteur LLM en échec -> on SIGNALE l'indisponibilité
         code = getattr(e, "code", None)
-        print(f"[grader] correcteur LLM indisponible (repli stub) : {type(e).__name__}"
+        print(f"[grader] correcteur LLM indisponible : {type(e).__name__}"
               f"{' HTTP '+str(code) if code else ''}: {e}", flush=True)
         res = _stub_grade(back, bareme, answer)
-        res["justification"] = f"[correcteur indisponible, note approximative] {res['justification']}"
+        res["unavailable"] = True   # l'appelant NE DOIT PAS pénaliser sur cette base
+        res["justification"] = f"[correcteur indisponible] {res['justification']}"
         return res
 
 

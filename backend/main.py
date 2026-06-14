@@ -402,6 +402,11 @@ def answer_audit(audit_id: int, a: AnswerIn, u=Depends(current_user)):
         bareme = json.loads(card["bareme_json_en"] if use_en else card["bareme_json"])
 
         res = grade(front, back, bareme, a.answer)
+        # Correcteur LLM indisponible : on NE pénalise PAS sur le repli stub. L'audit reste
+        # en attente, aucune XP appliquée -> l'utilisateur réessaie quand le correcteur revient.
+        if res.get("unavailable"):
+            raise HTTPException(503, "Le correcteur est momentanément indisponible — réessaie dans "
+                                     "un instant. Ta réponse n'est pas perdue et rien ne t'est retiré.")
         outcome = S.outcome_from_score(res["score"])
         is_exam = au["source"] == "exam_check"
         # Pas de maîtrise Brier pour un exam_check : son XP vient de la logique d'examen.

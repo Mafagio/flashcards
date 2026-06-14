@@ -10,21 +10,27 @@ import os, sqlite3, threading, hashlib, secrets
 
 DB_PATH = os.getenv("DB_PATH", "/data/battle.db")
 
-_conn: sqlite3.Connection | None = None
+# Une connexion SQLite n'est PAS sûre en usage concurrent par plusieurs threads
+# (-> "bad parameter or other API misuse"). On donne donc UNE CONNEXION PAR THREAD
+# (uvicorn sert chaque requête dans un thread du pool). WAL autorise plusieurs lecteurs ;
+# LOCK sérialise les écritures de l'app (SQLite = un seul writer).
+_local = threading.local()
 LOCK = threading.Lock()
 
 
 def get_db() -> sqlite3.Connection:
-    global _conn
-    if _conn is None:
+    conn = getattr(_local, "conn", None)
+    if conn is None:
         d = os.path.dirname(DB_PATH)
         if d:
             os.makedirs(d, exist_ok=True)
-        _conn = sqlite3.connect(DB_PATH, check_same_thread=False)
-        _conn.row_factory = sqlite3.Row
-        _conn.execute("PRAGMA journal_mode=WAL;")
-        _conn.execute("PRAGMA foreign_keys=ON;")
-    return _conn
+        conn = sqlite3.connect(DB_PATH, check_same_thread=False, timeout=30)
+        conn.row_factory = sqlite3.Row
+        conn.execute("PRAGMA journal_mode=WAL;")
+        conn.execute("PRAGMA foreign_keys=ON;")
+        conn.execute("PRAGMA busy_timeout=5000;")
+        _local.conn = conn
+    return conn
 
 
 SCHEMA = """
