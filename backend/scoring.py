@@ -34,7 +34,7 @@ BASE_UNKNOWN: float = 0.3    # XP immédiat pour un honnête "pas connue" (revie
 SHUFFLE_MULT: float = 1.25   # +25% d'XP de base quand la session est mélangée
 
 AUDIT_BATCH: int = 20        # toutes les 20 cartes "connues"...
-AUDIT_SAMPLE: int = 4        # ...4 sont tirées au sort en audit (test écrit)
+AUDIT_SAMPLE: int = 5        # ...5 sont tirées au sort en audit (test écrit)
 
 MASTERY_W: float = 10.0      # échelle de la règle de score propre (Brier)
 PASS_SCORE: int = 4          # note /6 à partir de laquelle l'audit est "réussi"
