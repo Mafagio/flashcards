@@ -320,6 +320,16 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
 .prog-legend span{display:inline-flex;align-items:center;gap:5px}
 .prog-legend i{width:13px;height:13px;border-radius:4px;display:inline-block}
 .prog-course-title{font-weight:700;font-size:14px;margin:14px 0 8px}
+/* récap global d'un cours : % de matière connue */
+.prog-summary{margin:0 0 14px;padding:13px 15px;border-radius:13px;background:var(--accent-soft);border:1px solid var(--line)}
+.prog-summary+.prog-summary, .prog-cat+.prog-summary{margin-top:18px}
+.prog-summary-top{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap}
+.prog-summary-name{font-weight:800;font-size:16px}
+.prog-summary-pct{font-size:14px;color:var(--muted)}
+.prog-summary-pct b{font-size:24px;color:var(--accent);font-weight:800}
+.prog-bar.big{width:auto;height:13px;margin:11px 0 7px}
+.prog-summary-sub{font-size:12.5px;color:var(--muted)}
+.prog-summary-sub b{color:var(--ink)}
 .prog-cat{border:1px solid var(--line);border-radius:12px;margin-bottom:9px;overflow:hidden;background:var(--chip-bg)}
 .prog-cat-head{display:flex;align-items:center;gap:12px;padding:11px 14px;cursor:pointer;user-select:none}
 .prog-cat-head:hover{background:var(--accent-soft)}
@@ -972,8 +982,28 @@ async function renderProgress(){
   const courses=Object.keys(data||{});
   if(!courses.length){ body.innerHTML='<p class="empty">Aucune carte pour l\'instant.</p>'; return; }
   courses.forEach(course=>{
-    if(courses.length>1){ const t=document.createElement("div"); t.className="prog-course-title"; t.textContent=course; body.appendChild(t); }
-    data[course].forEach(cat=>{
+    const cats=data[course];
+    // récap global du cours : % de la matière connue (niveau >= 1) et maîtrisée (>= Très sûr)
+    const agg={"-1":0,"0":0,"1":0,"2":0,"3":0,"4":0};
+    let total=0, known=0, mastered=0;
+    cats.forEach(cat=>{
+      total += cat.total||0; known += cat.known||0;
+      const L=cat.levels||{};
+      ["-1","0","1","2","3","4"].forEach(k=>agg[k]+=(+L[k]||0));
+      mastered += (+L["3"]||0)+(+L["4"]||0);
+    });
+    const pctKnown = total ? Math.round(100*known/total) : 0;
+    const pctMast  = total ? Math.round(100*mastered/total) : 0;
+    let sbar='<div class="prog-bar big">';
+    [0,1,2,3,4].forEach(lv=>{ const n=agg[String(lv)]; if(n) sbar+=`<i class="lv${lv}" style="width:${(100*n/(total||1)).toFixed(2)}%"></i>`; });
+    sbar+='</div>';
+    const sum=document.createElement("div"); sum.className="prog-summary";
+    sum.innerHTML=`<div class="prog-summary-top"><span class="prog-summary-name">${escapeHtml(course)}</span>`
+      +`<span class="prog-summary-pct"><b>${pctKnown}%</b> de la matière connue</span></div>`
+      +sbar
+      +`<div class="prog-summary-sub"><b>${known}</b>/${total} cartes connues · <b>${mastered}</b> maîtrisées (≥ « Très sûr ») = <b>${pctMast}%</b></div>`;
+    body.appendChild(sum);
+    cats.forEach(cat=>{
       const wrap=document.createElement("div"); wrap.className="prog-cat";
       const head=document.createElement("div"); head.className="prog-cat-head";
       let bar='<div class="prog-bar">';
