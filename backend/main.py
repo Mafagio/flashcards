@@ -134,8 +134,9 @@ def login(c: Creds):
 
 
 def pending_count(db, uid):
-    return db.execute("SELECT COUNT(*) c FROM audits WHERE user_id=? AND status='pending'",
-                      (uid,)).fetchone()["c"]
+    # Les cartes d'un DUEL se répondent dans l'onglet Duels (pas dans Audits) -> exclues du compteur.
+    return db.execute("SELECT COUNT(*) c FROM audits WHERE user_id=? AND status='pending' "
+                      "AND source!='duel'", (uid,)).fetchone()["c"]
 
 
 @app.get("/me")
@@ -316,7 +317,7 @@ def review(r: ReviewIn, u=Depends(current_user)):
 
 
 def _form_audit_batch(db, uid: int, course: str) -> int:
-    """Tire AUDIT_SAMPLE cartes parmi les AUDIT_BATCH dernières 'provisional' DU COURS."""
+    """Tire AUDIT_SAMPLE cartes DISTINCTES parmi les AUDIT_BATCH dernières 'provisional' DU COURS."""
     batch = db.execute(
         "SELECT r.* FROM reviews r JOIN cards c ON c.id=r.card_id "
         "WHERE r.user_id=? AND r.status='provisional' AND c.course=? AND c.no_audit=0 "
@@ -331,13 +332,24 @@ def _form_audit_batch(db, uid: int, course: str) -> int:
             "SELECT DISTINCT card_id FROM audits WHERE user_id=? AND status='failed'",
             (opp["id"],)).fetchall()}
 
-    items, weights = [], []
+    # On n'audite JAMAIS deux fois le même exo dans un audit : on déduplique le pool de tirage
+    # par carte (on garde la review la plus récente, batch trié par id DESC) et on écarte toute
+    # carte qui a DÉJÀ un audit en attente (audit/challenge/duel) pour cet utilisateur.
+    already_pending = {x["card_id"] for x in db.execute(
+        "SELECT DISTINCT card_id FROM audits WHERE user_id=? AND status='pending'",
+        (uid,)).fetchall()}
+
+    items, weights, seen = [], [], set()
     for rv in batch:
-        c = db.execute("SELECT difficulty FROM cards WHERE id=?", (rv["card_id"],)).fetchone()
+        cid = rv["card_id"]
+        if cid in seen or cid in already_pending:
+            continue
+        seen.add(cid)
+        c = db.execute("SELECT difficulty FROM cards WHERE id=?", (cid,)).fetchone()
         never = db.execute("SELECT 1 FROM audits WHERE user_id=? AND card_id=? LIMIT 1",
-                           (uid, rv["card_id"])).fetchone() is None
+                           (uid, cid)).fetchone() is None
         items.append(rv)
-        weights.append(S.audit_weight(c["difficulty"], never, rv["card_id"] in opp_failed))
+        weights.append(S.audit_weight(c["difficulty"], never, cid in opp_failed))
 
     chosen = weighted_sample(items, weights, S.AUDIT_SAMPLE)
     chosen_ids = {rv["id"] for rv in chosen}
@@ -368,7 +380,8 @@ def audits_pending(u=Depends(current_user)):
         SELECT a.id, a.source, a.q, a.challenger_id, a.duel_id,
                c.front, c.front_en, c.category, c.course, c.kind
         FROM audits a JOIN cards c ON c.id=a.card_id
-        WHERE a.user_id=? AND a.status='pending' ORDER BY a.id""", (u["id"],)).fetchall()
+        WHERE a.user_id=? AND a.status='pending' AND a.source!='duel'
+        ORDER BY a.id""", (u["id"],)).fetchall()
     out = []
     for r in rows:
         d = dict(r)
@@ -659,14 +672,18 @@ def list_duels(u=Depends(current_user)):
     names = {r["id"]: r["name"] for r in db.execute("SELECT id,name FROM users")}
     out = []
     for d in rows:
-        my_remaining = db.execute(
-            "SELECT COUNT(*) c FROM audits WHERE duel_id=? AND user_id=? AND status='pending'",
-            (d["id"], u["id"])).fetchone()["c"]
+        # Les cartes du duel restant à faire par CE joueur : on les répond dans la page Duels.
+        my_cards = db.execute(
+            """SELECT a.id AS audit_id, c.category, c.kind, c.front, c.front_en
+               FROM audits a JOIN cards c ON c.id=a.card_id
+               WHERE a.duel_id=? AND a.user_id=? AND a.status='pending'
+               ORDER BY a.id""", (d["id"], u["id"])).fetchall()
         out.append(dict(d) | {
             "challenger": names.get(d["challenger_id"]),
             "opponent": names.get(d["opponent_id"]),
             "winner": names.get(d["winner_id"]),
-            "my_remaining": my_remaining,
+            "my_remaining": len(my_cards),
+            "my_cards": [dict(x) for x in my_cards],
         })
     return out
 

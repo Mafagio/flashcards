@@ -1421,7 +1421,7 @@ async function renderAudits(){
   if(!list.length){ box.innerHTML='<p class="empty">Aucun audit en attente. 👌</p>'; return; }
   list.forEach(a=>box.appendChild(auditCard(a)));
 }
-function auditCard(a){
+function auditCard(a, onAnswered){
   const d=document.createElement("div"); d.className="aud"; d.dataset.id=a.id;
   const head=document.createElement("div"); head.className="head";
   const src=document.createElement("span"); src.className="src "+a.source;
@@ -1451,6 +1451,7 @@ function auditCard(a){
       await refreshHeader();
       toast(`${fmtScore(r.score)}/6 — ${r.outcome?"réussi ✅":"raté ❌"} (${r.mastery>=0?"+":""}${r.mastery} XP)`, r.outcome?"good":"alert");
       maybeRankUp(oldXp, r.xp);
+      if(onAnswered){ setTimeout(onAnswered, 1400); }   // ex. duel : rafraîchit la liste après avoir montré le résultat
     }catch(err){ toast(err.message,"alert"); btn.disabled=false; btn.textContent="Soumettre la réponse"; }
   };
   d.append(head, front, ta, btn, out);
@@ -1631,15 +1632,23 @@ async function renderDuels(){
   const box=$("#dl-list"); box.innerHTML="";
   if(!duels.length){ box.innerHTML='<p class="empty">Aucun duel pour l\'instant.</p>'; return; }
   duels.forEach(d=>{
-    const row=document.createElement("div"); row.className="aud";
+    const wrap=document.createElement("div"); wrap.style.margin="0 0 20px";
+    const head=document.createElement("div"); head.className="head";
+    head.innerHTML=`<span class="kindtag">${escapeHtml(d.course)}</span>
+        <span class="small muted">${escapeHtml(d.challenger)} vs ${escapeHtml(d.opponent)}</span>`;
     const status = d.status==="done"
       ? (d.winner ? `${icon('recompense',16)} ${escapeHtml(d.winner)} gagne` : "🤝 Nul")
-      : (d.my_remaining>0 ? `${icon('attente',16)} ${d.my_remaining} carte(s) à faire (onglet Audits)` : `${icon('attente',16)} En attente de ton pote`);
-    row.innerHTML=`<div class="head">
-        <span class="kindtag">${escapeHtml(d.course)}</span>
-        <span class="small muted">${escapeHtml(d.challenger)} vs ${escapeHtml(d.opponent)}</span>
-      </div><div style="font-size:14px">${status}</div>`;
-    box.appendChild(row);
+      : (d.my_remaining>0 ? `${icon('attente',16)} ${d.my_remaining} carte(s) à faire — réponds ci-dessous`
+                          : `${icon('attente',16)} En attente de ton pote`);
+    const st=document.createElement("div"); st.style.fontSize="14px"; st.style.margin="4px 0"; st.innerHTML=status;
+    wrap.append(head, st);
+    // Les cartes de CE duel se répondent ici même (plus dans l'onglet Audits).
+    (d.my_cards||[]).forEach(c=>{
+      const cardObj={ id:c.audit_id, source:"duel", category:c.category, kind:c.kind,
+                      front:c.front, front_en:c.front_en };
+      wrap.appendChild(auditCard(cardObj, renderDuels));
+    });
+    box.appendChild(wrap);
   });
 }
 

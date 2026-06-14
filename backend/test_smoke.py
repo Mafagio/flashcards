@@ -29,7 +29,9 @@ with TestClient(main.app) as cli:
                         headers=hdr("Tom")).json()
     me = cli.get("/me", params={"course": "MATH-330"}, headers=hdr("Tom")).json()
     print(f"Tom: xp={me['xp']} tokens={me['tokens']} pending_audits={me['pending_audits']}")
-    assert me["pending_audits"] == 3 * S.AUDIT_SAMPLE, me
+    # dédup : une même carte n'est jamais auditée deux fois ; avec len(ids) cartes distinctes
+    # auditables, on ne peut pas avoir plus de len(ids) audits en attente sur ce cours.
+    assert me["pending_audits"] == len(ids), me
     assert me["tokens"] >= 1, "devrait avoir >=1 jeton à 60 XP"
 
     # Tom répond à un audit avec une bonne réponse (mots-clés du barème -> stub note haut)
@@ -78,9 +80,13 @@ with TestClient(main.app) as cli:
     d = cli.post("/duels", json={"opponent": "Matteo", "course": "MATH-330"}, headers=hdr("Tom"))
     print("duel create:", d.status_code, d.json())
     duel_id = d.json()["duel_id"]
+    # les cartes de duel se répondent via /duels (my_cards), plus via /audits/pending
+    assert not [x for x in cli.get("/audits/pending", headers=hdr("Tom")).json() if x["source"] == "duel"], \
+        "les audits de duel ne doivent PAS apparaître dans /audits/pending"
     for name in ("Tom", "Matteo"):
-        for au in [x for x in cli.get("/audits/pending", headers=hdr(name)).json() if x["source"] == "duel"]:
-            cli.post(f"/audits/{au['id']}/answer", json={"answer": good}, headers=hdr(name))
+        for dd in cli.get("/duels", headers=hdr(name)).json():
+            for c in dd.get("my_cards", []):
+                cli.post(f"/audits/{c['audit_id']}/answer", json={"answer": good}, headers=hdr(name))
     duels = cli.get("/duels", headers=hdr("Tom")).json()
     print("duel résolu:", duels[0]["status"], "winner:", duels[0]["winner"])
     assert duels[0]["status"] == "done"
