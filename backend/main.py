@@ -409,10 +409,12 @@ def answer_audit(audit_id: int, a: AnswerIn, u=Depends(current_user)):
         if res.get("stub") and not os.getenv("GRADER_ALLOW_STUB"):
             raise HTTPException(503, "Le correcteur n'est pas disponible pour l'instant — réessaie dans "
                                      "un instant. Ta réponse n'est pas perdue et rien ne t'est retiré.")
-        outcome = S.outcome_from_score(res["score"])
+        outcome = S.outcome_from_score(res["score"])   # réussi/raté : statut, duel, challenge
         is_exam = au["source"] == "exam_check"
+        # Maîtrise CONTINUE (crédit partiel) : dépend de la note exacte, plus d'un seuil
+        # binaire -> une mini imprécision ne coûte plus un point entier. Propreté préservée.
         # Pas de maîtrise Brier pour un exam_check : son XP vient de la logique d'examen.
-        mastery = 0.0 if is_exam else round(S.mastery_points(au["q"], outcome), 2)
+        mastery = 0.0 if is_exam else round(S.mastery_from_score(au["q"], res["score"]), 2)
 
         db.execute("""UPDATE audits SET status=?, score=?, justification=?, answer=?,
                       mastery=?, graded_at=datetime('now') WHERE id=?""",
@@ -428,7 +430,7 @@ def answer_audit(audit_id: int, a: AnswerIn, u=Depends(current_user)):
         if is_exam:
             # Vérification anti-triche d'une note d'examen déclarée (compétition Time Series).
             DB.log_event(db, u["id"], "exam",
-                         f'📝 {u["name"]} — vérif {card["category"]} : {res["score"]}/6 ({verdict}).')
+                         f'📝 {u["name"]} — vérif {card["category"]} : {res["score"]:g}/6 ({verdict}).')
             exam_delta, _st = _finalize_exam_check(db, u["id"], au["exam_id"])
             reported_mastery = round(exam_delta, 1) if exam_delta is not None else 0.0
         else:
@@ -438,7 +440,7 @@ def answer_audit(audit_id: int, a: AnswerIn, u=Depends(current_user)):
             gain = round(mastery + bonus, 2)
             apply_xp(db, u["id"], course, gain)
             DB.log_event(db, u["id"], "graded",
-                         f'📝 {u["name"]} — {card["category"]} : {res["score"]}/6 ({verdict}, {gain:+.1f} XP).')
+                         f'📝 {u["name"]} — {card["category"]} : {res["score"]:g}/6 ({verdict}, {gain:+.1f} XP).')
 
             # Conséquences spécifiques challenge (vaut aussi pour un challenge ciblant un exo d'examen)
             if au["source"] == "challenge" and au["challenger_id"]:
@@ -642,9 +644,10 @@ def _maybe_resolve_duel(db, duel_id: int):
         apply_xp(db, winner, crs, S.DUEL_WIN); apply_xp(db, loser, crs, S.DUEL_PARTICIPATE)
     db.execute("UPDATE duels SET status='done', winner_id=? WHERE id=?", (winner, duel_id))
     names = {r["id"]: r["name"] for r in db.execute("SELECT id,name FROM users")}
+    sa, sb = f'{scores[a]:g}', f'{scores[b]:g}'   # notes fractionnaires : pas de "9.0"/"9.75000"
     txt = (f'🏆 Duel terminé : {names.get(winner)} gagne '
-           f'({scores[a]}–{scores[b]}).' if winner else
-           f'🤝 Duel nul ({scores[a]}–{scores[b]}).')
+           f'({sa}–{sb}).' if winner else
+           f'🤝 Duel nul ({sa}–{sb}).')
     DB.log_event(db, winner, "duel", txt)
 
 
@@ -681,7 +684,7 @@ def calibration(u=Depends(current_user)):
         WHERE a.user_id=? AND a.status IN ('passed','failed')""", (u["id"],)).fetchall()
     groups, overall = {}, {"n": 0, "sum_o": 0.0, "sum_q": 0.0, "brier": 0.0}
     for r in rows:
-        o = S.outcome_from_score(r["score"])
+        o = S.score_fraction(r["score"])   # fraction réelle obtenue (cohérent avec la maîtrise continue)
         key = (r["course"], r["category"])
         g = groups.setdefault(key, {"n": 0, "sum_o": 0.0, "sum_q": 0.0, "brier": 0.0})
         for d in (g, overall):

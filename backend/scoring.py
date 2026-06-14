@@ -11,9 +11,10 @@ Idée centrale (le problème d'honnêteté) :
     - toutes les AUDIT_BATCH cartes "connues", AUDIT_SAMPLE sont tirées au sort
       en test écrit obligatoire (proba d'audit p = SAMPLE / BATCH) ;
     - une carte auditée est notée /6 par un correcteur (LLM) ;
-    - tu déclares en plus un NIVEAU DE CONFIANCE q ; le gain à l'audit suit une
-      règle de score PROPRE (Brier) -> ton espérance est maximale quand tu
-      déclares ta VRAIE proba de réussir. Bluffer une confiance haute brûle.
+    - tu déclares en plus un NIVEAU DE CONFIANCE q = la PART DU BARÈME que tu
+      penses décrocher ; le gain à l'audit suit une règle de score PROPRE (Brier
+      sur la fraction obtenue o = note/6) -> ton espérance est maximale quand tu
+      déclares ta VRAIE part attendue E[note/6]. Bluffer une confiance haute brûle.
 
 On veut RÉCOMPENSER LE GRIND : chaque carte travaillée donne des points de base
 tout de suite (dopamine + progression linéaire). Les audits ne servent qu'à
@@ -47,6 +48,8 @@ MAX_SCORE: int = 6
 AUDIT_BONUS: float = 2.5
 
 # Niveaux de confiance déclarables (touches 2 / 3 / 4 en révision).
+# q s'interprète comme la PART DU BARÈME attendue (≈ note/6), pas une proba binaire
+# de réussir : c'est la grandeur que la règle de maîtrise CONTINUE élicite proprement.
 CONF_LEVELS: list[float] = [0.60, 0.80, 0.95]
 
 TOKEN_EVERY: float = 50.0    # 1 jeton "challenge" par 50 XP de RECORD personnel
@@ -108,8 +111,9 @@ def exam_upfront_xp(note20: float) -> int:
 # FONCTIONS PURES
 # ---------------------------------------------------------------------------
 
-def outcome_from_score(score: int) -> int:
-    """1 si l'audit est réussi (note >= PASS_SCORE), 0 sinon."""
+def outcome_from_score(score: float) -> int:
+    """1 si l'audit est réussi (note >= PASS_SCORE), 0 sinon. Note au quart de point.
+    Sert au STATUT (réussi/raté), au duel et au challenge — PAS à la maîtrise (continue)."""
     return 1 if score >= PASS_SCORE else 0
 
 
@@ -130,6 +134,33 @@ def mastery_points(q: float, outcome: int) -> float:
     pénalité (c'est ça qui rend le bluff non rentable). Voir la table en bas.
     """
     return MASTERY_W * ((outcome - 0.5) ** 2 - (outcome - q) ** 2)
+
+
+def score_fraction(score: float) -> float:
+    """Fraction du barème réellement obtenue, ramenée dans [0, 1] (note / MAX_SCORE)."""
+    return max(0.0, min(1.0, float(score) / MAX_SCORE))
+
+
+def mastery_from_score(q: float, score: float) -> float:
+    """
+    Maîtrise gagnée/perdue à un audit — version CONTINUE (crédit partiel).
+
+    L'ancienne règle ne regardait qu'un SEUIL binaire (réussi si note >= PASS_SCORE),
+    ce qui crée une « falaise » : 3.75 ≈ 0, 4.00 ≈ jackpot, et 6/6 = 4/6. Une mini
+    imprécision pouvait donc coûter un point entier de récompense.
+
+    Ici on note la FRACTION du barème obtenue  o = score / MAX_SCORE ∈ [0, 1]  et on
+    la passe dans la MÊME règle quadratique que la version binaire :
+
+        m(q, o) = W * [ (o - 0.5)^2 - (o - q)^2 ]
+
+    La PROPRETÉ est préservée :  E[m] = W * [ E(o-0.5)^2 - Var(o) - (E[o] - q)^2 ]
+    est maximale en  q = E[o].  Déclarer sa VRAIE performance attendue reste donc la
+    stratégie optimale (bluffer une confiance haute brûle toujours), MAIS une petite
+    imprécision (5.75 au lieu de 6) ne coûte plus qu'un petit delta, et un 3.5 n'est
+    plus un zéro sec : plus de falaise au seuil.
+    """
+    return mastery_points(q, score_fraction(score))
 
 
 def tokens_for_xp(old_milestone: float, new_xp: float) -> tuple[int, float]:

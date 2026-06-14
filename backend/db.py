@@ -84,7 +84,7 @@ CREATE TABLE IF NOT EXISTS audits (
     duel_id       INTEGER,
     status        TEXT NOT NULL,              -- 'pending' | 'passed' | 'failed'
     answer        TEXT,
-    score         INTEGER,
+    score         INTEGER,                    -- note /6 au quart de point (ex. 5.75) ; SQLite la conserve en REAL sans perte
     justification TEXT,
     mastery       REAL NOT NULL DEFAULT 0,
     exam_id       TEXT,                       -- si source='exam_check' : examen visé (ts_exams.id)

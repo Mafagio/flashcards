@@ -27,7 +27,7 @@ def main():
         """).fetchall()
         refunded = 0
         for a in failed:
-            new_m = round(S.mastery_points(a["q"], 1), 2)          # maîtrise d'un audit réussi
+            new_m = round(S.mastery_from_score(a["q"], S.MAX_SCORE), 2)  # maîtrise d'un audit 6/6
             delta = round(new_m - (a["mastery"] or 0), 2)         # rend la pénalité + crédite la réussite
             sc = con.execute("SELECT xp, xp_milestone, tokens FROM scores WHERE user_id=? AND course=?",
                              (a["user_id"], a["course"])).fetchone()

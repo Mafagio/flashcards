@@ -471,7 +471,8 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
     <div class="card" id="review-setup">
       <h2>Réviser en mode Battle</h2>
       <p class="sub">Chaque carte « connue » te donne de l'XP tout de suite. Mais toutes les
-        20 cartes, 4 sont tirées au sort en <b>audit écrit</b> : déclare ta confiance honnêtement.</p>
+        20 cartes, 5 sont tirées au sort en <b>audit écrit</b> : ta confiance = la <b>part du
+        barème</b> que tu penses décrocher. Déclare-la honnêtement.</p>
       <div id="rv-resume" class="rv-resume hidden"></div>
       <div id="rv-unsure-banner" class="rv-resume hidden"></div>
       <div id="rv-seen-banner" class="rv-resume hidden"></div>
@@ -528,7 +529,9 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
         <button class="conf c95" data-known="1" data-q="0.95"><span class="k">4</span>Très sûr · 95%</button>
       </div>
       <p class="small muted" style="margin-top:12px">
-        Surévaluer ta confiance se paie cher si la carte tombe en audit (règle de score propre).
+        Ta confiance = la part du barème que tu vises. La note d'audit est au <b>quart de point</b>
+        près : une mini imprécision ne coûte qu'un mini peu (5.75 ≈ 6), mais annoncer 95% puis
+        n'en rédiger que la moitié se paie cher (règle de score propre).
       </p>
     </div>
 
@@ -599,7 +602,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
   <section data-panel="calib" class="hidden">
     <div class="card">
       <h2>Calibration</h2>
-      <p class="sub">Ta confiance déclarée vs ta réussite réelle en audit, par chapitre.
+      <p class="sub">La part du barème que tu visais vs celle réellement obtenue en audit, par chapitre.
         <span class="gap-over">Écart &gt; 0 = surconfiant</span>,
         <span class="gap-under">&lt; 0 = sous-confiant</span>. (Non compétitif — juste pour viser juste.)</p>
       <div id="calib-body"></div>
@@ -1446,7 +1449,7 @@ function auditCard(a){
       out.appendChild(resultBox(r, a));
       ta.disabled=true; btn.classList.add("hidden");
       await refreshHeader();
-      toast(`${r.score}/6 — ${r.outcome?"réussi ✅":"raté ❌"} (${r.mastery>=0?"+":""}${r.mastery} XP)`, r.outcome?"good":"alert");
+      toast(`${fmtScore(r.score)}/6 — ${r.outcome?"réussi ✅":"raté ❌"} (${r.mastery>=0?"+":""}${r.mastery} XP)`, r.outcome?"good":"alert");
       maybeRankUp(oldXp, r.xp);
     }catch(err){ toast(err.message,"alert"); btn.disabled=false; btn.textContent="Soumettre la réponse"; }
   };
@@ -1457,7 +1460,7 @@ function resultBox(r, a){
   const box=document.createElement("div");
   box.className="result "+(r.outcome?"pass":"fail");
   const top=document.createElement("div");
-  top.innerHTML=`<span class="score-ring">${r.score}/6</span>
+  top.innerHTML=`<span class="score-ring">${fmtScore(r.score)}/6</span>
      <span style="font-weight:700;margin-left:10px">${r.outcome?"Réussi "+icon('validation',16):"Raté ❌"}</span>
      <span class="small muted" style="margin-left:10px">${r.mastery>=0?"+":""}${r.mastery} XP</span>`;
   const just=document.createElement("p"); just.style.margin="10px 0 0"; just.style.fontSize="14px"; just.textContent=r.justification;
@@ -1649,7 +1652,7 @@ async function renderCalib(){
   if(!data.overall){ box.innerHTML='<p class="empty">Pas encore d\'audit corrigé — reviens après quelques audits.</p>'; return; }
   const t=document.createElement("table");
   t.innerHTML=`<thead><tr><th>Cours</th><th>Chapitre</th><th class="num">n</th>
-     <th class="num">Réussite</th><th class="num">Confiance</th><th class="num">Brier</th><th class="num">Écart</th></tr></thead>`;
+     <th class="num">Obtenu (moy.)</th><th class="num">Visé (moy.)</th><th class="num">Brier</th><th class="num">Écart</th></tr></thead>`;
   const tb=document.createElement("tbody");
   data.by_category.forEach(r=> tb.appendChild(calibRow(r)));
   // overall
@@ -1670,6 +1673,7 @@ function calibRow(r, bold){
 }
 
 /* ---------- utils ---------- */
+function fmtScore(s){ const n=Number(s); return Number.isFinite(n)?(Math.round(n*100)/100).toString():"0"; }  // 5.75 -> "5.75", 5 -> "5"
 function pct(x){ return Math.round(x*100)+"%"; }
 function escapeHtml(s){ return (s==null?"":String(s)).replace(/[&<>"']/g, c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
 function fmtTime(s){
