@@ -5585,5 +5585,1220 @@
         }
       ]
     }
+  },
+  {
+    "id": "m330-ch2-ex01",
+    "course": "Martingales",
+    "category": "Ch. 2",
+    "kind": "exercice",
+    "difficulty": 2,
+    "front_en": "Let $\\mathcal{G} = \\sigma(A_i ; i \\in I)$, where $(A_i)_{i \\in I}$ is a countable collection of events that partitions $\\Omega$. For any non-negative or integrable random variable $X$, show that\n$$E[X \\mid \\mathcal{G}] = \\sum_{i \\in I'} E[X \\mid A_i] \\cdot \\mathbf{1}_{A_i} \\quad \\text{a.s.},$$\nwhere $I' = \\{i \\in I : P(A_i) > 0\\}$ and $E[X \\mid A_i] = E[X ; A_i]/P(A_i)$. You may take for granted that $\\mathcal{G} = \\{\\bigcup_{i \\in J} A_i ; J \\subseteq I\\}$.",
+    "back_en": "The right-hand side $Y = \\sum_{i \\in I'} E[X \\mid A_i]\\, \\mathbf{1}_{A_i}$ is non-negative (resp. integrable) and $\\mathcal{G}$-measurable. It suffices to check the characteristic property (2.1): $E[Y ; A] = E[X ; A]$ for all $A \\in \\mathcal{G}$.\n\nFix $A = \\bigcup_{i \\in J} A_i \\in \\mathcal{G}$. Then\n$$E[X ; A] = \\sum_{i \\in J} E[X ; A_i] = \\sum_{i \\in J \\cap I'} E[X ; A_i] = \\sum_{i \\in J \\cap I'} E[X \\mid A_i]\\, P(A_i),$$\nwhere the second equality drops indices with $P(A_i)=0$ (which contribute $0$) and the third uses $E[X ; A_i] = E[X \\mid A_i]\\,P(A_i)$.\n\nSince the $A_i$ are disjoint, $P(A_i \\cap A) = P(A_i)$ for $i \\in J$ and $= 0$ otherwise, so\n$$\\sum_{i \\in J \\cap I'} E[X \\mid A_i]\\, P(A_i) = \\sum_{i \\in I'} E[X \\mid A_i]\\, P(A_i \\cap A) = \\sum_{i \\in I'} E\\big[ E[X \\mid A_i]\\, \\mathbf{1}_{A_i} ; A \\big] = E[Y ; A],$$\nthe last equality by monotone convergence (exchanging sum and expectation). Hence $Y$ satisfies (2.1) and $E[X \\mid \\mathcal{G}] = Y$ a.s.",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Identifies that the candidate $Y$ is non-negative/integrable and $\\mathcal{G}$-measurable, and that one must verify the characteristic property $E[Y;A]=E[X;A]$ for all $A\\in\\mathcal{G}$",
+          "weight": 2
+        },
+        {
+          "label": "For $A=\\bigcup_{i\\in J}A_i$, computes $E[X;A]=\\sum_{i\\in J\\cap I'} E[X\\mid A_i]P(A_i)$, correctly discarding null events and using $E[X;A_i]=E[X\\mid A_i]P(A_i)$",
+          "weight": 2
+        },
+        {
+          "label": "Rewrites the sum as $\\sum_{i\\in I'}E[X\\mid A_i]P(A_i\\cap A)=E[Y;A]$ using disjointness and monotone convergence, concluding $E[X\\mid\\mathcal{G}]=Y$ a.s.",
+          "weight": 2
+        }
+      ]
+    },
+    "front": "Soit $\\mathcal{G} = \\sigma(A_i ; i \\in I)$, où $(A_i)_{i \\in I}$ est une collection dénombrable d'événements qui partitionne $\\Omega$. Pour toute variable aléatoire $X$ positive ou intégrable, montrer que\n$$E[X \\mid \\mathcal{G}] = \\sum_{i \\in I'} E[X \\mid A_i] \\cdot \\mathbf{1}_{A_i} \\quad \\text{p.s.},$$\noù $I' = \\{i \\in I : P(A_i) > 0\\}$ et $E[X \\mid A_i] = E[X ; A_i]/P(A_i)$. On pourra admettre que $\\mathcal{G} = \\{\\bigcup_{i \\in J} A_i ; J \\subseteq I\\}$.",
+    "back": "Le membre de droite $Y = \\sum_{i \\in I'} E[X \\mid A_i]\\, \\mathbf{1}_{A_i}$ est positif (resp. intégrable) et $\\mathcal{G}$-mesurable. Il suffit de vérifier la propriété caractéristique (2.1) : $E[Y ; A] = E[X ; A]$ pour tout $A \\in \\mathcal{G}$.\n\nFixons $A = \\bigcup_{i \\in J} A_i \\in \\mathcal{G}$. Alors\n$$E[X ; A] = \\sum_{i \\in J} E[X ; A_i] = \\sum_{i \\in J \\cap I'} E[X ; A_i] = \\sum_{i \\in J \\cap I'} E[X \\mid A_i]\\, P(A_i),$$\noù la deuxième égalité supprime les indices avec $P(A_i)=0$ (qui contribuent $0$) et la troisième utilise $E[X ; A_i] = E[X \\mid A_i]\\,P(A_i)$.\n\nComme les $A_i$ sont disjoints, $P(A_i \\cap A) = P(A_i)$ pour $i \\in J$ et $= 0$ sinon, donc\n$$\\sum_{i \\in J \\cap I'} E[X \\mid A_i]\\, P(A_i) = \\sum_{i \\in I'} E[X \\mid A_i]\\, P(A_i \\cap A) = \\sum_{i \\in I'} E\\big[ E[X \\mid A_i]\\, \\mathbf{1}_{A_i} ; A \\big] = E[Y ; A],$$\nla dernière égalité par convergence monotone (échange somme et espérance). Ainsi $Y$ satisfait (2.1) et $E[X \\mid \\mathcal{G}] = Y$ p.s.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Identifie que le candidat $Y$ est positif/intégrable et $\\mathcal{G}$-mesurable, et qu'il faut vérifier la propriété caractéristique $E[Y;A]=E[X;A]$ pour tout $A\\in\\mathcal{G}$",
+          "weight": 2
+        },
+        {
+          "label": "Pour $A=\\bigcup_{i\\in J}A_i$, calcule $E[X;A]=\\sum_{i\\in J\\cap I'} E[X\\mid A_i]P(A_i)$, en écartant correctement les événements négligeables et en utilisant $E[X;A_i]=E[X\\mid A_i]P(A_i)$",
+          "weight": 2
+        },
+        {
+          "label": "Réécrit la somme en $\\sum_{i\\in I'}E[X\\mid A_i]P(A_i\\cap A)=E[Y;A]$ via la disjonction et la convergence monotone, concluant $E[X\\mid\\mathcal{G}]=Y$ p.s.",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch2-ex02",
+    "course": "Martingales",
+    "category": "Ch. 2",
+    "kind": "exercice",
+    "difficulty": 1,
+    "front_en": "Compute the conditional expectation $E[X \\mid \\mathcal{G}]$ in the two extreme cases of conditioning $\\sigma$-algebra:\n(a) $\\mathcal{G} = \\mathcal{F}$ (the full $\\sigma$-algebra);\n(b) $\\mathcal{G} = \\{\\emptyset, \\Omega\\}$ (the trivial $\\sigma$-algebra).\nJustify using the specific properties of conditional expectation.",
+    "back_en": "(a) If $\\mathcal{G} = \\mathcal{F}$, then $X$ is automatically $\\mathcal{G}$-measurable. By Proposition 2.2(i) (if $X$ is $\\mathcal{G}$-measurable then $E[X \\mid \\mathcal{G}] = X$ a.s.), we get\n$$E[X \\mid \\mathcal{F}] = X \\quad \\text{a.s.}$$\nIntuitively, conditioning on full information returns $X$ itself.\n\n(b) If $\\mathcal{G} = \\{\\emptyset, \\Omega\\}$, then $X$ is independent of $\\mathcal{G}$ (every random variable is independent of the trivial $\\sigma$-algebra). By Proposition 2.2(ii) (if $X$ is independent of $\\mathcal{G}$ then $E[X \\mid \\mathcal{G}] = E[X]$ a.s.), we get\n$$E[X \\mid \\{\\emptyset, \\Omega\\}] = E[X] \\quad \\text{a.s.}$$\nIntuitively, conditioning on no information returns the ordinary expectation (a constant).",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Case $\\mathcal{G}=\\mathcal{F}$: notes $X$ is $\\mathcal{G}$-measurable and applies Prop. 2.2(i) to get $E[X\\mid\\mathcal{F}]=X$ a.s.",
+          "weight": 2
+        },
+        {
+          "label": "Case $\\mathcal{G}=\\{\\emptyset,\\Omega\\}$: notes $X$ is independent of the trivial $\\sigma$-algebra and applies Prop. 2.2(ii) to get $E[X\\mid\\{\\emptyset,\\Omega\\}]=E[X]$ a.s.",
+          "weight": 2
+        },
+        {
+          "label": "Gives the correct interpretation (full information returns $X$; no information returns the constant $E[X]$)",
+          "weight": 2
+        }
+      ]
+    },
+    "front": "Calculer l'espérance conditionnelle $E[X \\mid \\mathcal{G}]$ dans les deux cas extrêmes de $\\sigma$-algèbre de conditionnement :\n(a) $\\mathcal{G} = \\mathcal{F}$ (la $\\sigma$-algèbre entière) ;\n(b) $\\mathcal{G} = \\{\\emptyset, \\Omega\\}$ (la $\\sigma$-algèbre triviale).\nJustifier à l'aide des propriétés spécifiques de l'espérance conditionnelle.",
+    "back": "(a) Si $\\mathcal{G} = \\mathcal{F}$, alors $X$ est automatiquement $\\mathcal{G}$-mesurable. Par la Proposition 2.2(i) (si $X$ est $\\mathcal{G}$-mesurable alors $E[X \\mid \\mathcal{G}] = X$ p.s.), on obtient\n$$E[X \\mid \\mathcal{F}] = X \\quad \\text{p.s.}$$\nIntuitivement, conditionner par l'information totale redonne $X$ lui-même.\n\n(b) Si $\\mathcal{G} = \\{\\emptyset, \\Omega\\}$, alors $X$ est indépendante de $\\mathcal{G}$ (toute variable aléatoire est indépendante de la $\\sigma$-algèbre triviale). Par la Proposition 2.2(ii) (si $X$ est indépendante de $\\mathcal{G}$ alors $E[X \\mid \\mathcal{G}] = E[X]$ p.s.), on obtient\n$$E[X \\mid \\{\\emptyset, \\Omega\\}] = E[X] \\quad \\text{p.s.}$$\nIntuitivement, conditionner par aucune information redonne l'espérance ordinaire (une constante).",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Cas $\\mathcal{G}=\\mathcal{F}$ : remarque que $X$ est $\\mathcal{G}$-mesurable et applique la Prop. 2.2(i) pour obtenir $E[X\\mid\\mathcal{F}]=X$ p.s.",
+          "weight": 2
+        },
+        {
+          "label": "Cas $\\mathcal{G}=\\{\\emptyset,\\Omega\\}$ : remarque que $X$ est indépendante de la $\\sigma$-algèbre triviale et applique la Prop. 2.2(ii) pour obtenir $E[X\\mid\\{\\emptyset,\\Omega\\}]=E[X]$ p.s.",
+          "weight": 2
+        },
+        {
+          "label": "Donne l'interprétation correcte (information totale redonne $X$ ; aucune information redonne la constante $E[X]$)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch2-ex03",
+    "course": "Martingales",
+    "category": "Ch. 2",
+    "kind": "exercice",
+    "difficulty": 3,
+    "front_en": "Let $(\\mathsf{X}, \\mathcal{A}, \\mu)$ and $(\\mathsf{Y}, \\mathcal{B}, \\nu)$ be measure spaces, and let $(X, Y)$ be a random variable with values in $(\\mathsf{X} \\times \\mathsf{Y})$ whose distribution has density $f$ with respect to $\\lambda = \\mu \\otimes \\nu$ (so $\\int_{\\mathsf{X} \\times \\mathsf{Y}} f \\, d\\lambda = 1$). For a measurable $\\varphi : \\mathsf{Y} \\to [0, \\infty]$, compute $E[\\varphi(Y) \\mid X]$. Show that $E[\\varphi(Y) \\mid X] = \\Psi(X)$ a.s., where $\\Psi$ satisfies\n$$\\Psi(x) \\cdot \\int_{\\mathsf{Y}} f(x,y)\\,\\nu(dy) = \\int_{\\mathsf{Y}} \\varphi(y) f(x,y)\\,\\nu(dy) \\quad \\text{for $\\mu$-a.e. } x.$$",
+    "back_en": "By the Doob–Dynkin lemma, $\\Psi(X)$ is $X$-measurable. It suffices to show $\\Psi(X)$ satisfies the characteristic property (2.4): for every measurable $\\eta : \\mathsf{X} \\to [0,\\infty]$, $E[\\varphi(Y)\\eta(X)] = E[\\Psi(X)\\eta(X)]$.\n\nSince $(X,Y)$ has density $f$ w.r.t. $\\mu \\otimes \\nu$, by Fubini\n$$E[\\varphi(Y)\\eta(X)] = \\int_{\\mathsf{X}}\\int_{\\mathsf{Y}} \\varphi(y)\\eta(x) f(x,y)\\,\\nu(dy)\\,\\mu(dx) = \\int_{\\mathsf{X}} \\Big( \\int_{\\mathsf{Y}} \\varphi(y) f(x,y)\\,\\nu(dy) \\Big)\\eta(x)\\,\\mu(dx).$$\nTaking $\\varphi \\equiv 1$ shows that $X$ has density $x \\mapsto \\int_{\\mathsf{Y}} f(x,y)\\,\\nu(dy)$ w.r.t. $\\mu$.\n\nUsing the defining relation for $\\Psi$ and this last fact,\n$$E[\\varphi(Y)\\eta(X)] = \\int_{\\mathsf{X}} \\Big( \\Psi(x) \\int_{\\mathsf{Y}} f(x,y)\\,\\nu(dy) \\Big)\\eta(x)\\,\\mu(dx) = \\int_{\\mathsf{X}} \\Psi(x)\\eta(x)\\Big(\\int_{\\mathsf{Y}} f(x,y)\\,\\nu(dy)\\Big)\\mu(dx) = E[\\Psi(X)\\eta(X)].$$\nHence $E[\\varphi(Y) \\mid X] = \\Psi(X)$ a.s. (Existence of $\\Psi$ is guaranteed: $\\int_{\\mathsf{Y}}\\varphi f\\,d\\nu = 0$ whenever $\\int_{\\mathsf{Y}} f\\,d\\nu = 0$, and $\\int_{\\mathsf{Y}} f(x,\\cdot)\\,d\\nu < \\infty$ for $\\mu$-a.e. $x$; $\\Psi(X)$ is a.s. unique.)",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Sets up the right strategy: $\\Psi(X)$ is $X$-measurable (Doob–Dynkin) and it suffices to check $E[\\varphi(Y)\\eta(X)]=E[\\Psi(X)\\eta(X)]$ for all measurable $\\eta\\ge 0$",
+          "weight": 2
+        },
+        {
+          "label": "Uses the joint density $f$ and Fubini to write $E[\\varphi(Y)\\eta(X)]=\\int_{\\mathsf{X}}(\\int_{\\mathsf{Y}}\\varphi(y)f(x,y)\\nu(dy))\\eta(x)\\mu(dx)$, and identifies (via $\\varphi\\equiv 1$) the density of $X$ as $x\\mapsto\\int_{\\mathsf{Y}}f(x,y)\\nu(dy)$",
+          "weight": 2
+        },
+        {
+          "label": "Plugs the defining relation for $\\Psi$ to obtain $E[\\varphi(Y)\\eta(X)]=E[\\Psi(X)\\eta(X)]$ and concludes $E[\\varphi(Y)\\mid X]=\\Psi(X)$ a.s.",
+          "weight": 2
+        }
+      ]
+    },
+    "front": "Soient $(\\mathsf{X}, \\mathcal{A}, \\mu)$ et $(\\mathsf{Y}, \\mathcal{B}, \\nu)$ des espaces mesurés, et soit $(X, Y)$ une variable aléatoire à valeurs dans $(\\mathsf{X} \\times \\mathsf{Y})$ dont la loi a une densité $f$ par rapport à $\\lambda = \\mu \\otimes \\nu$ (donc $\\int_{\\mathsf{X} \\times \\mathsf{Y}} f \\, d\\lambda = 1$). Pour $\\varphi : \\mathsf{Y} \\to [0, \\infty]$ mesurable, calculer $E[\\varphi(Y) \\mid X]$. Montrer que $E[\\varphi(Y) \\mid X] = \\Psi(X)$ p.s., où $\\Psi$ vérifie\n$$\\Psi(x) \\cdot \\int_{\\mathsf{Y}} f(x,y)\\,\\nu(dy) = \\int_{\\mathsf{Y}} \\varphi(y) f(x,y)\\,\\nu(dy) \\quad \\text{pour $\\mu$-presque tout } x.$$",
+    "back": "Par le lemme de Doob–Dynkin, $\\Psi(X)$ est $X$-mesurable. Il suffit de montrer que $\\Psi(X)$ satisfait la propriété caractéristique (2.4) : pour toute fonction mesurable $\\eta : \\mathsf{X} \\to [0,\\infty]$, $E[\\varphi(Y)\\eta(X)] = E[\\Psi(X)\\eta(X)]$.\n\nComme $(X,Y)$ a une densité $f$ par rapport à $\\mu \\otimes \\nu$, par Fubini\n$$E[\\varphi(Y)\\eta(X)] = \\int_{\\mathsf{X}}\\int_{\\mathsf{Y}} \\varphi(y)\\eta(x) f(x,y)\\,\\nu(dy)\\,\\mu(dx) = \\int_{\\mathsf{X}} \\Big( \\int_{\\mathsf{Y}} \\varphi(y) f(x,y)\\,\\nu(dy) \\Big)\\eta(x)\\,\\mu(dx).$$\nEn prenant $\\varphi \\equiv 1$, on voit que $X$ a pour densité $x \\mapsto \\int_{\\mathsf{Y}} f(x,y)\\,\\nu(dy)$ par rapport à $\\mu$.\n\nEn utilisant la relation définissant $\\Psi$ et ce dernier fait,\n$$E[\\varphi(Y)\\eta(X)] = \\int_{\\mathsf{X}} \\Big( \\Psi(x) \\int_{\\mathsf{Y}} f(x,y)\\,\\nu(dy) \\Big)\\eta(x)\\,\\mu(dx) = \\int_{\\mathsf{X}} \\Psi(x)\\eta(x)\\Big(\\int_{\\mathsf{Y}} f(x,y)\\,\\nu(dy)\\Big)\\mu(dx) = E[\\Psi(X)\\eta(X)].$$\nDonc $E[\\varphi(Y) \\mid X] = \\Psi(X)$ p.s. (L'existence de $\\Psi$ est garantie : $\\int_{\\mathsf{Y}}\\varphi f\\,d\\nu = 0$ dès que $\\int_{\\mathsf{Y}} f\\,d\\nu = 0$, et $\\int_{\\mathsf{Y}} f(x,\\cdot)\\,d\\nu < \\infty$ pour $\\mu$-presque tout $x$ ; $\\Psi(X)$ est unique p.s.)",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Met en place la bonne stratégie : $\\Psi(X)$ est $X$-mesurable (Doob–Dynkin) et il suffit de vérifier $E[\\varphi(Y)\\eta(X)]=E[\\Psi(X)\\eta(X)]$ pour toute $\\eta\\ge 0$ mesurable",
+          "weight": 2
+        },
+        {
+          "label": "Utilise la densité jointe $f$ et Fubini pour écrire $E[\\varphi(Y)\\eta(X)]=\\int_{\\mathsf{X}}(\\int_{\\mathsf{Y}}\\varphi(y)f(x,y)\\nu(dy))\\eta(x)\\mu(dx)$, et identifie (via $\\varphi\\equiv 1$) la densité de $X$ comme $x\\mapsto\\int_{\\mathsf{Y}}f(x,y)\\nu(dy)$",
+          "weight": 2
+        },
+        {
+          "label": "Injecte la relation définissant $\\Psi$ pour obtenir $E[\\varphi(Y)\\eta(X)]=E[\\Psi(X)\\eta(X)]$ et conclut $E[\\varphi(Y)\\mid X]=\\Psi(X)$ p.s.",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch3-ex01",
+    "course": "Martingales",
+    "category": "Ch. 3",
+    "kind": "exercice",
+    "difficulty": 1,
+    "front_en": "Let $(X_n)_{n\\in\\mathbb{N}}$ be a stochastic process, and set $\\mathcal{F}_n = \\sigma(X_0,\\dots,X_n)$ for all $n\\in\\mathbb{N}$. Show that $(\\mathcal{F}_n)_{n\\in\\mathbb{N}}$ is a filtration, that $(X_n)_{n\\in\\mathbb{N}}$ is adapted to it, and explain why it is called the canonical filtration. (Example 3.1)",
+    "back_en": "For each $n$, $\\mathcal{F}_n = \\sigma(X_0,\\dots,X_n) \\subseteq \\sigma(X_0,\\dots,X_n,X_{n+1}) = \\mathcal{F}_{n+1}$, so $(\\mathcal{F}_n)_n$ is non-decreasing, hence a filtration. Since $X_n$ is $\\sigma(X_0,\\dots,X_n) = \\mathcal{F}_n$-measurable, the process is adapted to $(\\mathcal{F}_n)_n$. It is the canonical filtration associated with $(X_n)_n$: it is the smallest filtration for which $(X_n)_n$ is adapted, because any filtration $(\\mathcal{G}_n)_n$ making $(X_n)_n$ adapted must contain $\\sigma(X_0,\\dots,X_n) = \\mathcal{F}_n$ for each $n$.",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Non-decreasing property $\\mathcal{F}_n \\subseteq \\mathcal{F}_{n+1}$ (filtration)",
+          "weight": 2
+        },
+        {
+          "label": "Adaptedness: $X_n$ is $\\mathcal{F}_n$-measurable",
+          "weight": 2
+        },
+        {
+          "label": "Minimality: smallest filtration making $(X_n)$ adapted",
+          "weight": 2
+        }
+      ]
+    },
+    "front": "Soit $(X_n)_{n\\in\\mathbb{N}}$ un processus stochastique, et posons $\\mathcal{F}_n = \\sigma(X_0,\\dots,X_n)$ pour tout $n\\in\\mathbb{N}$. Montrer que $(\\mathcal{F}_n)_{n\\in\\mathbb{N}}$ est une filtration, que $(X_n)_{n\\in\\mathbb{N}}$ y est adapté, et expliquer pourquoi on l'appelle la filtration canonique. (Exemple 3.1)",
+    "back": "Pour chaque $n$, $\\mathcal{F}_n = \\sigma(X_0,\\dots,X_n) \\subseteq \\sigma(X_0,\\dots,X_n,X_{n+1}) = \\mathcal{F}_{n+1}$, donc $(\\mathcal{F}_n)_n$ est non décroissante, c'est donc une filtration. Comme $X_n$ est $\\sigma(X_0,\\dots,X_n) = \\mathcal{F}_n$-mesurable, le processus est adapté à $(\\mathcal{F}_n)_n$. C'est la filtration canonique associée à $(X_n)_n$ : c'est la plus petite filtration pour laquelle $(X_n)_n$ est adapté, car toute filtration $(\\mathcal{G}_n)_n$ rendant $(X_n)_n$ adapté doit contenir $\\sigma(X_0,\\dots,X_n) = \\mathcal{F}_n$ pour chaque $n$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Caractère non décroissant $\\mathcal{F}_n \\subseteq \\mathcal{F}_{n+1}$ (filtration)",
+          "weight": 2
+        },
+        {
+          "label": "Adaptation : $X_n$ est $\\mathcal{F}_n$-mesurable",
+          "weight": 2
+        },
+        {
+          "label": "Minimalité : plus petite filtration rendant $(X_n)$ adapté",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch3-ex02",
+    "course": "Martingales",
+    "category": "Ch. 3",
+    "kind": "exercice",
+    "difficulty": 2,
+    "front_en": "Random walk. Let $(X_n)_{n\\in\\mathbb{N}^*}$ be i.i.d. with $\\mathbb{E}[|X_1|] < \\infty$. Set $S_n = X_1 + \\dots + X_n$ and $\\mathcal{F}_n = \\sigma(X_1,\\dots,X_n)$. Compute $\\mathbb{E}[S_{n+1}\\mid\\mathcal{F}_n]$ and determine, according to the sign of $\\mathbb{E}[X_1]$, whether $(S_n)_n$ is a martingale, submartingale or supermartingale. (Example 3.2)",
+    "back_en": "$S_n$ is $\\mathcal{F}_n$-measurable (measurable function of $(X_1,\\dots,X_n)$) and integrable (sum of integrable r.v.). Since $S_n$ is $\\mathcal{F}_n$-measurable and $X_{n+1}$ is independent of $\\mathcal{F}_n$,\n$$\\mathbb{E}[S_{n+1}\\mid\\mathcal{F}_n] = \\mathbb{E}[S_n + X_{n+1}\\mid\\mathcal{F}_n] = S_n + \\mathbb{E}[X_{n+1}] = S_n + \\mathbb{E}[X_1]\\quad\\text{a.s.}$$\nHence:\n- if $\\mathbb{E}[X_1] = 0$, $(S_n)_n$ is a martingale;\n- if $\\mathbb{E}[X_1] \\le 0$, $(S_n)_n$ is a supermartingale;\n- if $\\mathbb{E}[X_1] \\ge 0$, $(S_n)_n$ is a submartingale (all w.r.t. $(\\mathcal{F}_n)_n$).",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Adaptedness and integrability of $S_n$",
+          "weight": 2
+        },
+        {
+          "label": "Computation $\\mathbb{E}[S_{n+1}\\mid\\mathcal{F}_n] = S_n + \\mathbb{E}[X_1]$ using independence",
+          "weight": 2
+        },
+        {
+          "label": "Correct classification by sign of $\\mathbb{E}[X_1]$",
+          "weight": 2
+        }
+      ]
+    },
+    "front": "Marche aléatoire. Soit $(X_n)_{n\\in\\mathbb{N}^*}$ i.i.d. avec $\\mathbb{E}[|X_1|] < \\infty$. Posons $S_n = X_1 + \\dots + X_n$ et $\\mathcal{F}_n = \\sigma(X_1,\\dots,X_n)$. Calculer $\\mathbb{E}[S_{n+1}\\mid\\mathcal{F}_n]$ et déterminer, selon le signe de $\\mathbb{E}[X_1]$, si $(S_n)_n$ est une martingale, sous-martingale ou surmartingale. (Exemple 3.2)",
+    "back": "$S_n$ est $\\mathcal{F}_n$-mesurable (fonction mesurable de $(X_1,\\dots,X_n)$) et intégrable (somme de v.a. intégrables). Comme $S_n$ est $\\mathcal{F}_n$-mesurable et $X_{n+1}$ indépendant de $\\mathcal{F}_n$,\n$$\\mathbb{E}[S_{n+1}\\mid\\mathcal{F}_n] = \\mathbb{E}[S_n + X_{n+1}\\mid\\mathcal{F}_n] = S_n + \\mathbb{E}[X_{n+1}] = S_n + \\mathbb{E}[X_1]\\quad\\text{p.s.}$$\nDonc :\n- si $\\mathbb{E}[X_1] = 0$, $(S_n)_n$ est une martingale ;\n- si $\\mathbb{E}[X_1] \\le 0$, $(S_n)_n$ est une surmartingale ;\n- si $\\mathbb{E}[X_1] \\ge 0$, $(S_n)_n$ est une sous-martingale (toutes par rapport à $(\\mathcal{F}_n)_n$).",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Adaptation et intégrabilité de $S_n$",
+          "weight": 2
+        },
+        {
+          "label": "Calcul $\\mathbb{E}[S_{n+1}\\mid\\mathcal{F}_n] = S_n + \\mathbb{E}[X_1]$ via l'indépendance",
+          "weight": 2
+        },
+        {
+          "label": "Classification correcte selon le signe de $\\mathbb{E}[X_1]$",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch3-ex03",
+    "course": "Martingales",
+    "category": "Ch. 3",
+    "kind": "exercice",
+    "difficulty": 3,
+    "front_en": "Product martingale. Let $(X_n)_{n\\in\\mathbb{N}^*}$ be independent r.v. with values in $(\\mathbb{R}_+^*, \\mathcal{B}(\\mathbb{R}_+^*))$ such that $\\mathbb{E}[X_n] < \\infty$ for all $n$. Show that $M_n = \\dfrac{\\prod_{i=1}^n X_i}{\\prod_{i=1}^n \\mathbb{E}[X_i]}$ is a martingale w.r.t. $\\mathcal{F}_n = \\sigma(X_1,\\dots,X_n)$. (Example 3.2)",
+    "back_en": "$M_n$ is $\\mathcal{F}_n$-measurable (measurable function of $(X_1,\\dots,X_n)$). Since the $M_n$ are non-negative we may check the martingale property before integrability. As $M_n$ is $\\mathcal{F}_n$-measurable and $X_{n+1}$ is independent of $\\mathcal{F}_n$,\n$$\\mathbb{E}[M_{n+1}\\mid\\mathcal{F}_n] = \\frac{\\mathbb{E}\\big[(\\prod_{i=1}^n X_i)\\cdot X_{n+1}\\mid\\mathcal{F}_n\\big]}{\\prod_{i=1}^{n+1}\\mathbb{E}[X_i]} = \\frac{(\\prod_{i=1}^n X_i)\\cdot \\mathbb{E}[X_{n+1}]}{\\prod_{i=1}^{n+1}\\mathbb{E}[X_i]} = \\frac{\\prod_{i=1}^n X_i}{\\prod_{i=1}^n \\mathbb{E}[X_i]} = M_n\\quad\\text{a.s.}$$\nThus $\\mathbb{E}[M_{n+1}] = \\mathbb{E}[M_n]$ for all $n$. Since $M_0 = 1$, it follows that $\\mathbb{E}[M_n] = 1 < \\infty$, so the $M_n$ are integrable, concluding the verification.",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "$\\mathcal{F}_n$-measurability of $M_n$",
+          "weight": 2
+        },
+        {
+          "label": "Martingale identity $\\mathbb{E}[M_{n+1}\\mid\\mathcal{F}_n] = M_n$ via independence",
+          "weight": 2
+        },
+        {
+          "label": "Integrability from $M_0 = 1$ and $\\mathbb{E}[M_n] = 1$",
+          "weight": 2
+        }
+      ]
+    },
+    "front": "Martingale produit. Soit $(X_n)_{n\\in\\mathbb{N}^*}$ des v.a. indépendantes à valeurs dans $(\\mathbb{R}_+^*, \\mathcal{B}(\\mathbb{R}_+^*))$ telles que $\\mathbb{E}[X_n] < \\infty$ pour tout $n$. Montrer que $M_n = \\dfrac{\\prod_{i=1}^n X_i}{\\prod_{i=1}^n \\mathbb{E}[X_i]}$ est une martingale par rapport à $\\mathcal{F}_n = \\sigma(X_1,\\dots,X_n)$. (Exemple 3.2)",
+    "back": "$M_n$ est $\\mathcal{F}_n$-mesurable (fonction mesurable de $(X_1,\\dots,X_n)$). Comme les $M_n$ sont positifs, on peut vérifier la propriété de martingale avant l'intégrabilité. Puisque $M_n$ est $\\mathcal{F}_n$-mesurable et $X_{n+1}$ indépendant de $\\mathcal{F}_n$,\n$$\\mathbb{E}[M_{n+1}\\mid\\mathcal{F}_n] = \\frac{\\mathbb{E}\\big[(\\prod_{i=1}^n X_i)\\cdot X_{n+1}\\mid\\mathcal{F}_n\\big]}{\\prod_{i=1}^{n+1}\\mathbb{E}[X_i]} = \\frac{(\\prod_{i=1}^n X_i)\\cdot \\mathbb{E}[X_{n+1}]}{\\prod_{i=1}^{n+1}\\mathbb{E}[X_i]} = \\frac{\\prod_{i=1}^n X_i}{\\prod_{i=1}^n \\mathbb{E}[X_i]} = M_n\\quad\\text{p.s.}$$\nAinsi $\\mathbb{E}[M_{n+1}] = \\mathbb{E}[M_n]$ pour tout $n$. Comme $M_0 = 1$, il en résulte que $\\mathbb{E}[M_n] = 1 < \\infty$, donc les $M_n$ sont intégrables, ce qui conclut la vérification.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "$\\mathcal{F}_n$-mesurabilité de $M_n$",
+          "weight": 2
+        },
+        {
+          "label": "Identité de martingale $\\mathbb{E}[M_{n+1}\\mid\\mathcal{F}_n] = M_n$ via l'indépendance",
+          "weight": 2
+        },
+        {
+          "label": "Intégrabilité à partir de $M_0 = 1$ et $\\mathbb{E}[M_n] = 1$",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch3-ex04",
+    "course": "Martingales",
+    "category": "Ch. 3",
+    "kind": "exercice",
+    "difficulty": 2,
+    "front_en": "Doob martingale. Let $X$ be an integrable random variable and $(\\mathcal{F}_n)_{n\\in\\mathbb{N}}$ a filtration. Show that the process $X_n = \\mathbb{E}[X\\mid\\mathcal{F}_n]$ is a martingale w.r.t. $(\\mathcal{F}_n)_n$. (Example 3.2)",
+    "back_en": "For each $n$, $X_n = \\mathbb{E}[X\\mid\\mathcal{F}_n]$ is $\\mathcal{F}_n$-measurable and integrable, as the conditional expectation given $\\mathcal{F}_n$ of an integrable r.v. By the tower property of conditional expectation (using $\\mathcal{F}_n \\subseteq \\mathcal{F}_{n+1}$),\n$$\\mathbb{E}[X_{n+1}\\mid\\mathcal{F}_n] = \\mathbb{E}\\big[\\mathbb{E}[X\\mid\\mathcal{F}_{n+1}]\\mid\\mathcal{F}_n\\big] = \\mathbb{E}[X\\mid\\mathcal{F}_n] = X_n\\quad\\text{a.s.}$$\nHence $(X_n)_n$ is a martingale.",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Adaptedness and integrability of $X_n = \\mathbb{E}[X\\mid\\mathcal{F}_n]$",
+          "weight": 2
+        },
+        {
+          "label": "Use of the tower property with $\\mathcal{F}_n \\subseteq \\mathcal{F}_{n+1}$",
+          "weight": 2
+        },
+        {
+          "label": "Conclusion $\\mathbb{E}[X_{n+1}\\mid\\mathcal{F}_n] = X_n$",
+          "weight": 2
+        }
+      ]
+    },
+    "front": "Martingale de Doob. Soit $X$ une variable aléatoire intégrable et $(\\mathcal{F}_n)_{n\\in\\mathbb{N}}$ une filtration. Montrer que le processus $X_n = \\mathbb{E}[X\\mid\\mathcal{F}_n]$ est une martingale par rapport à $(\\mathcal{F}_n)_n$. (Exemple 3.2)",
+    "back": "Pour chaque $n$, $X_n = \\mathbb{E}[X\\mid\\mathcal{F}_n]$ est $\\mathcal{F}_n$-mesurable et intégrable, en tant qu'espérance conditionnelle sachant $\\mathcal{F}_n$ d'une v.a. intégrable. Par la propriété de la tour de l'espérance conditionnelle (en utilisant $\\mathcal{F}_n \\subseteq \\mathcal{F}_{n+1}$),\n$$\\mathbb{E}[X_{n+1}\\mid\\mathcal{F}_n] = \\mathbb{E}\\big[\\mathbb{E}[X\\mid\\mathcal{F}_{n+1}]\\mid\\mathcal{F}_n\\big] = \\mathbb{E}[X\\mid\\mathcal{F}_n] = X_n\\quad\\text{p.s.}$$\nAinsi $(X_n)_n$ est une martingale.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Adaptation et intégrabilité de $X_n = \\mathbb{E}[X\\mid\\mathcal{F}_n]$",
+          "weight": 2
+        },
+        {
+          "label": "Usage de la propriété de la tour avec $\\mathcal{F}_n \\subseteq \\mathcal{F}_{n+1}$",
+          "weight": 2
+        },
+        {
+          "label": "Conclusion $\\mathbb{E}[X_{n+1}\\mid\\mathcal{F}_n] = X_n$",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch3-ex05",
+    "course": "Martingales",
+    "category": "Ch. 3",
+    "kind": "exercice",
+    "difficulty": 2,
+    "front_en": "Applications of the convex-function proposition (Prop. 3.1). (i) If $(X_n)_n$ is a martingale, show $(|X_n|)_n$ is a submartingale, and if moreover $\\mathbb{E}[X_n^2] < \\infty$ for all $n$, that $(X_n^2)_n$ is a submartingale. (ii) If $(X_n)_n$ is a submartingale, show $(X_n^+)_n$ is a submartingale. (Example 3.3)",
+    "back_en": "(i) The function $\\varphi(x) = |x|$ is convex, so by Proposition 3.1(i) applied to the martingale $(X_n)_n$ (with $\\mathbb{E}[|X_n|] < \\infty$), $(|X_n|)_n$ is a submartingale. The function $\\varphi(x) = x^2$ is convex; assuming $\\mathbb{E}[X_n^2] < \\infty$ for all $n$ (i.e. $\\mathbb{E}[|\\varphi(X_n)|] < \\infty$), Proposition 3.1(i) gives that $(X_n^2)_n$ is a submartingale.\n(ii) The function $\\varphi(x) = x^+ = \\max(x,0)$ is convex and non-decreasing. By Proposition 3.1(ii) applied to the submartingale $(X_n)_n$, the process $(X_n^+)_n$ is a submartingale.",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "$(|X_n|)_n$ submartingale via convexity of $|\\cdot|$ and Prop. 3.1(i)",
+          "weight": 2
+        },
+        {
+          "label": "$(X_n^2)_n$ submartingale via convexity of $x^2$ and integrability hypothesis",
+          "weight": 2
+        },
+        {
+          "label": "$(X_n^+)_n$ submartingale via convex non-decreasing $x^+$ and Prop. 3.1(ii)",
+          "weight": 2
+        }
+      ]
+    },
+    "front": "Applications de la proposition sur les fonctions convexes (Prop. 3.1). (i) Si $(X_n)_n$ est une martingale, montrer que $(|X_n|)_n$ est une sous-martingale, et si de plus $\\mathbb{E}[X_n^2] < \\infty$ pour tout $n$, que $(X_n^2)_n$ est une sous-martingale. (ii) Si $(X_n)_n$ est une sous-martingale, montrer que $(X_n^+)_n$ est une sous-martingale. (Exemple 3.3)",
+    "back": "(i) La fonction $\\varphi(x) = |x|$ est convexe, donc par la Proposition 3.1(i) appliquée à la martingale $(X_n)_n$ (avec $\\mathbb{E}[|X_n|] < \\infty$), $(|X_n|)_n$ est une sous-martingale. La fonction $\\varphi(x) = x^2$ est convexe ; en supposant $\\mathbb{E}[X_n^2] < \\infty$ pour tout $n$ (c.-à-d. $\\mathbb{E}[|\\varphi(X_n)|] < \\infty$), la Proposition 3.1(i) donne que $(X_n^2)_n$ est une sous-martingale.\n(ii) La fonction $\\varphi(x) = x^+ = \\max(x,0)$ est convexe et croissante. Par la Proposition 3.1(ii) appliquée à la sous-martingale $(X_n)_n$, le processus $(X_n^+)_n$ est une sous-martingale.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "$(|X_n|)_n$ sous-martingale via convexité de $|\\cdot|$ et Prop. 3.1(i)",
+          "weight": 2
+        },
+        {
+          "label": "$(X_n^2)_n$ sous-martingale via convexité de $x^2$ et hypothèse d'intégrabilité",
+          "weight": 2
+        },
+        {
+          "label": "$(X_n^+)_n$ sous-martingale via $x^+$ convexe croissante et Prop. 3.1(ii)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch3-ex06",
+    "course": "Martingales",
+    "category": "Ch. 3",
+    "kind": "exercice",
+    "difficulty": 3,
+    "front_en": "The original martingale (doubling strategy). Let $(X_n)_{n\\in\\mathbb{N}^*}$ be independent with $\\mathbb{P}(X_n = 1) = p \\in (0,1)$, $\\mathbb{P}(X_n = -1) = 1-p$, $S_n = X_1 + \\dots + X_n$, $\\mathcal{F}_n = \\sigma(X_1,\\dots,X_n)$. A gambler bets $1$ at step $1$ and doubles after each loss: $H_1 = 1$ and $H_n = 2H_{n-1}$ if $X_{n-1} = -1$, $H_n = 1$ if $X_{n-1} = 1$ (for $n \\ge 2$). Why is $\\tau = \\inf\\{n : (H\\cdot S)_n \\ge 1\\}$ finite a.s. even when $p < 1/2$, yet the strategy is not implementable and does not beat an unfavourable game? (Example 3.4)",
+    "back_en": "Each $H_n$ is $\\mathcal{F}_{n-1}$-measurable, bounded and non-negative, so $(H_n)_n$ is predictable. One checks $\\tau = \\inf\\{n : (H\\cdot S)_n \\ge 1\\} = \\inf\\{n\\in\\mathbb{N}^* : X_n = 1\\}$: as soon as the first win occurs, the doubled stake recovers all previous losses plus one coin, so $(H\\cdot S)_\\tau = 1$. Since $p > 0$, a win eventually occurs, hence $\\tau < \\infty$ a.s. even if $p < 1/2$. The strategy is not implementable because $H_n = 2^{n-1}$ for all $n < \\tau$ and $\\tau$ is unbounded: a gambler has finite capital and casinos cap bets. By Proposition 3.2, if $p \\le 1/2$ then $(S_n)_n$ is a supermartingale and, since $H_n \\ge 0$, $((H\\cdot S)_n)_n$ is also a supermartingale — so the doubling strategy does not turn an unfavourable game into a favourable one.",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "$(H_n)$ predictable, bounded, non-negative; $\\tau = \\inf\\{n : X_n = 1\\}$",
+          "weight": 2
+        },
+        {
+          "label": "$\\tau < \\infty$ a.s. for $p>0$ but $H_n = 2^{n-1}$ unbounded $\\Rightarrow$ not implementable",
+          "weight": 2
+        },
+        {
+          "label": "Prop. 3.2: supermartingale preserved, strategy doesn't beat unfavourable game",
+          "weight": 2
+        }
+      ]
+    },
+    "front": "La martingale d'origine (stratégie de doublement). Soit $(X_n)_{n\\in\\mathbb{N}^*}$ indépendantes avec $\\mathbb{P}(X_n = 1) = p \\in (0,1)$, $\\mathbb{P}(X_n = -1) = 1-p$, $S_n = X_1 + \\dots + X_n$, $\\mathcal{F}_n = \\sigma(X_1,\\dots,X_n)$. Un joueur mise $1$ à l'étape $1$ et double après chaque perte : $H_1 = 1$ et $H_n = 2H_{n-1}$ si $X_{n-1} = -1$, $H_n = 1$ si $X_{n-1} = 1$ (pour $n \\ge 2$). Pourquoi $\\tau = \\inf\\{n : (H\\cdot S)_n \\ge 1\\}$ est-il fini p.s. même si $p < 1/2$, alors que la stratégie est inapplicable et ne bat pas un jeu défavorable ? (Exemple 3.4)",
+    "back": "Chaque $H_n$ est $\\mathcal{F}_{n-1}$-mesurable, borné et positif, donc $(H_n)_n$ est prévisible. On vérifie $\\tau = \\inf\\{n : (H\\cdot S)_n \\ge 1\\} = \\inf\\{n\\in\\mathbb{N}^* : X_n = 1\\}$ : dès le premier gain, la mise doublée récupère toutes les pertes antérieures plus une pièce, donc $(H\\cdot S)_\\tau = 1$. Comme $p > 0$, un gain finit par survenir, donc $\\tau < \\infty$ p.s. même si $p < 1/2$. La stratégie est inapplicable car $H_n = 2^{n-1}$ pour tout $n < \\tau$ et $\\tau$ est non borné : un joueur a un capital fini et les casinos plafonnent les mises. Par la Proposition 3.2, si $p \\le 1/2$ alors $(S_n)_n$ est une surmartingale et, comme $H_n \\ge 0$, $((H\\cdot S)_n)_n$ est aussi une surmartingale — la stratégie de doublement ne transforme donc pas un jeu défavorable en jeu favorable.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "$(H_n)$ prévisible, borné, positif ; $\\tau = \\inf\\{n : X_n = 1\\}$",
+          "weight": 2
+        },
+        {
+          "label": "$\\tau < \\infty$ p.s. pour $p>0$ mais $H_n = 2^{n-1}$ non borné $\\Rightarrow$ inapplicable",
+          "weight": 2
+        },
+        {
+          "label": "Prop. 3.2 : surmartingale préservée, la stratégie ne bat pas le jeu défavorable",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch4-ex01",
+    "course": "Martingales",
+    "category": "Ch. 4",
+    "kind": "exercice",
+    "difficulty": 2,
+    "front_en": "Let $(X_n)_{n\\in\\mathbb{N}}$ be an adapted process and let $B\\in\\mathcal{B}(\\mathbb{R})$. Show that the first hitting time of $B$, $\\tau:=\\inf\\{n\\in\\mathbb{N}:X_n\\in B\\}$ (with $\\inf\\varnothing=\\infty$), is a stopping time. Then, fixing $n$, explain why the last hitting time before time $n$, $\\sigma=\\sup\\{k\\in[\\![0,n]\\!]:X_k\\in B\\}$ (with $\\sup\\varnothing=0$), is in general NOT a stopping time.",
+    "back_en": "First hitting time: for each $n\\in\\mathbb{N}$,\n$$(\\tau\\le n)=\\bigcup_{k=0}^{n}(X_k\\in B).$$\nSince $(X_n)$ is adapted, $(X_k\\in B)\\in\\mathcal{F}_k\\subseteq\\mathcal{F}_n$ for each $k\\le n$, so the union lies in $\\mathcal{F}_n$. Hence $(\\tau\\le n)\\in\\mathcal{F}_n$ and $\\tau$ is a stopping time.\n\nLast hitting time: for each $k\\in[\\![1,n]\\!]$,\n$$(\\sigma=k)=(X_k\\in B;\\,X_{k+1}\\notin B;\\dots;X_n\\notin B).$$\nThis event depends on the future values $X_{k+1},\\dots,X_n$, so it does not belong to $\\mathcal{F}_k$ in general. Therefore $\\sigma$ is not a stopping time.",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "First hitting time: writes $(\\tau\\le n)=\\bigcup_{k=0}^{n}(X_k\\in B)$ and uses adaptedness to get $\\in\\mathcal{F}_n$",
+          "weight": 2
+        },
+        {
+          "label": "Last hitting time: writes $(\\sigma=k)=(X_k\\in B;X_{k+1}\\notin B;\\dots;X_n\\notin B)$",
+          "weight": 2
+        },
+        {
+          "label": "Concludes $\\sigma$ depends on the future, so the event is not in $\\mathcal{F}_k$, hence $\\sigma$ is not a stopping time",
+          "weight": 2
+        }
+      ]
+    },
+    "front": "Soit $(X_n)_{n\\in\\mathbb{N}}$ un processus adapté et soit $B\\in\\mathcal{B}(\\mathbb{R})$. Montrer que le premier temps d'atteinte de $B$, $\\tau:=\\inf\\{n\\in\\mathbb{N}:X_n\\in B\\}$ (avec $\\inf\\varnothing=\\infty$), est un temps d'arrêt. Puis, en fixant $n$, expliquer pourquoi le dernier temps d'atteinte avant l'instant $n$, $\\sigma=\\sup\\{k\\in[\\![0,n]\\!]:X_k\\in B\\}$ (avec $\\sup\\varnothing=0$), n'est en général PAS un temps d'arrêt.",
+    "back": "Premier temps d'atteinte : pour chaque $n\\in\\mathbb{N}$,\n$$(\\tau\\le n)=\\bigcup_{k=0}^{n}(X_k\\in B).$$\nComme $(X_n)$ est adapté, $(X_k\\in B)\\in\\mathcal{F}_k\\subseteq\\mathcal{F}_n$ pour chaque $k\\le n$, donc l'union appartient à $\\mathcal{F}_n$. Ainsi $(\\tau\\le n)\\in\\mathcal{F}_n$ et $\\tau$ est un temps d'arrêt.\n\nDernier temps d'atteinte : pour chaque $k\\in[\\![1,n]\\!]$,\n$$(\\sigma=k)=(X_k\\in B;\\,X_{k+1}\\notin B;\\dots;X_n\\notin B).$$\nCet événement dépend des valeurs futures $X_{k+1},\\dots,X_n$, donc il n'appartient pas à $\\mathcal{F}_k$ en général. Par conséquent $\\sigma$ n'est pas un temps d'arrêt.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Premier temps d'atteinte : écrit $(\\tau\\le n)=\\bigcup_{k=0}^{n}(X_k\\in B)$ et utilise l'adaptation pour obtenir $\\in\\mathcal{F}_n$",
+          "weight": 2
+        },
+        {
+          "label": "Dernier temps d'atteinte : écrit $(\\sigma=k)=(X_k\\in B;X_{k+1}\\notin B;\\dots;X_n\\notin B)$",
+          "weight": 2
+        },
+        {
+          "label": "Conclut que $\\sigma$ dépend du futur, donc l'événement n'est pas dans $\\mathcal{F}_k$, d'où $\\sigma$ n'est pas un temps d'arrêt",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch4-ex02",
+    "course": "Martingales",
+    "category": "Ch. 4",
+    "kind": "exercice",
+    "difficulty": 3,
+    "front_en": "Gambler's ruin, symmetric case. Let $(X_n)_{n\\ge1}$ be i.i.d. with $P(X_n=1)=P(X_n=-1)=1/2$, set $S_n=X_1+\\dots+X_n$, $\\mathcal{F}_n=\\sigma(X_1,\\dots,X_n)$. Fix $a<b\\in\\mathbb{N}^*$ and let $\\tau=\\inf\\{n:S_n=b-a\\text{ or }S_n=-a\\}$ (which is finite a.s.). Compute the ruin probability $\\rho=P(S_\\tau=-a)$ and the expected duration $E[\\tau]$.",
+    "back_en": "$(S_n)$ is a martingale and $\\tau$ a stopping time, so by the optional stopping theorem $(S_{n\\wedge\\tau})$ is a martingale, giving $E[S_{n\\wedge\\tau}]=E[S_0]=0$. Since $\\tau<\\infty$ a.s., $S_{n\\wedge\\tau}\\to S_\\tau$ a.s., and $|S_{n\\wedge\\tau}|\\le(b-a)\\vee a$ is bounded, so by bounded convergence $E[S_\\tau]=0$:\n$$(b-a)(1-\\rho)+(-a)\\rho=0\\;\\Longrightarrow\\;\\rho=\\frac{b-a}{b}.$$\nFor $E[\\tau]$, use the martingale $M_n=S_n^2-n$. By optional stopping, $E[S_{n\\wedge\\tau}^2-(\\tau\\wedge n)]=E[M_0]=0$, i.e. $E[\\tau\\wedge n]=E[S_{\\tau\\wedge n}^2]$. Letting $n\\to\\infty$: monotone convergence gives $E[\\tau\\wedge n]\\to E[\\tau]$, bounded convergence gives $E[S_{\\tau\\wedge n}^2]\\to E[S_\\tau^2]$. Hence\n$$E[\\tau]=E[S_\\tau^2]=(b-a)^2(1-\\rho)+a^2\\rho=(b-a)^2\\tfrac{a}{b}+a^2\\tfrac{b-a}{b}=a(b-a).$$",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Applies optional stopping to the martingale $(S_n)$ and justifies $E[S_\\tau]=0$ via bounded convergence",
+          "weight": 2
+        },
+        {
+          "label": "Obtains $\\rho=\\frac{b-a}{b}$ from $(b-a)(1-\\rho)-a\\rho=0$",
+          "weight": 2
+        },
+        {
+          "label": "Uses $M_n=S_n^2-n$ to get $E[\\tau]=E[S_\\tau^2]=a(b-a)$",
+          "weight": 2
+        }
+      ]
+    },
+    "front": "Ruine du joueur, cas symétrique. Soit $(X_n)_{n\\ge1}$ i.i.d. avec $P(X_n=1)=P(X_n=-1)=1/2$, posons $S_n=X_1+\\dots+X_n$, $\\mathcal{F}_n=\\sigma(X_1,\\dots,X_n)$. Fixons $a<b\\in\\mathbb{N}^*$ et soit $\\tau=\\inf\\{n:S_n=b-a\\text{ ou }S_n=-a\\}$ (fini p.s.). Calculer la probabilité de ruine $\\rho=P(S_\\tau=-a)$ et la durée espérée $E[\\tau]$.",
+    "back": "$(S_n)$ est une martingale et $\\tau$ un temps d'arrêt, donc par le théorème d'arrêt $(S_{n\\wedge\\tau})$ est une martingale, d'où $E[S_{n\\wedge\\tau}]=E[S_0]=0$. Comme $\\tau<\\infty$ p.s., $S_{n\\wedge\\tau}\\to S_\\tau$ p.s., et $|S_{n\\wedge\\tau}|\\le(b-a)\\vee a$ est borné, donc par convergence dominée bornée $E[S_\\tau]=0$ :\n$$(b-a)(1-\\rho)+(-a)\\rho=0\\;\\Longrightarrow\\;\\rho=\\frac{b-a}{b}.$$\nPour $E[\\tau]$, on utilise la martingale $M_n=S_n^2-n$. Par le théorème d'arrêt, $E[S_{n\\wedge\\tau}^2-(\\tau\\wedge n)]=E[M_0]=0$, c.-à-d. $E[\\tau\\wedge n]=E[S_{\\tau\\wedge n}^2]$. En faisant $n\\to\\infty$ : convergence monotone donne $E[\\tau\\wedge n]\\to E[\\tau]$, convergence bornée donne $E[S_{\\tau\\wedge n}^2]\\to E[S_\\tau^2]$. D'où\n$$E[\\tau]=E[S_\\tau^2]=(b-a)^2(1-\\rho)+a^2\\rho=(b-a)^2\\tfrac{a}{b}+a^2\\tfrac{b-a}{b}=a(b-a).$$",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Applique le théorème d'arrêt à la martingale $(S_n)$ et justifie $E[S_\\tau]=0$ par convergence bornée",
+          "weight": 2
+        },
+        {
+          "label": "Obtient $\\rho=\\frac{b-a}{b}$ à partir de $(b-a)(1-\\rho)-a\\rho=0$",
+          "weight": 2
+        },
+        {
+          "label": "Utilise $M_n=S_n^2-n$ pour obtenir $E[\\tau]=E[S_\\tau^2]=a(b-a)$",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch4-ex03",
+    "course": "Martingales",
+    "category": "Ch. 4",
+    "kind": "exercice",
+    "difficulty": 3,
+    "front_en": "Gambler's ruin, biased case $p\\ne 1/2$. With $P(X_n=1)=p\\in\\,]0,1[$, $P(X_n=-1)=1-p$, $S_n=X_1+\\dots+X_n$, and $\\tau=\\inf\\{n:S_n=b-a\\text{ or }S_n=-a\\}$ ($a<b\\in\\mathbb{N}^*$, $\\tau<\\infty$ a.s.), find the ruin probability $\\rho=P(S_\\tau=-a)$ and $E[\\tau]$.",
+    "back_en": "Ruin probability via the exponential martingale. For $\\theta\\in\\mathbb{R}$, $N_n=\\exp(\\theta S_n-L(\\theta)n)$ is a martingale with $L(\\theta)=\\ln(e^{\\theta}p+e^{-\\theta}(1-p))$. Choosing $\\theta=\\ln\\frac{1-p}{p}\\ne0$ gives $L(\\theta)=0$, so $N_n=r^{S_n}$ is a martingale with $r=\\frac{1-p}{p}$. Optional stopping plus bounded convergence ($0\\le r^{S_{n\\wedge\\tau}}\\le r^{b-a}\\vee r^{-a}$) give $E[r^{S_\\tau}]=1$:\n$$r^{b-a}(1-\\rho)+r^{-a}\\rho=1\\;\\Longrightarrow\\;\\rho=\\frac{r^{b-a}-1}{r^{b-a}-r^{-a}}.$$\nExpected duration via $M_n=S_n-(2p-1)n$, a martingale. Optional stopping gives $E[S_{\\tau\\wedge n}]=(2p-1)E[\\tau\\wedge n]$. Letting $n\\to\\infty$ (monotone + bounded convergence):\n$$E[\\tau]=\\frac{E[S_\\tau]}{2p-1}=\\frac{(b-a)(1-\\rho)-a\\rho}{2p-1}=\\frac{(b-a)-b\\rho}{2p-1}.$$",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Builds the martingale $N_n=r^{S_n}$ with $r=\\frac{1-p}{p}$ from $L(\\theta)=0$, $\\theta=\\ln\\frac{1-p}{p}$",
+          "weight": 2
+        },
+        {
+          "label": "Optional stopping + bounded convergence give $r^{b-a}(1-\\rho)+r^{-a}\\rho=1$, hence $\\rho=\\frac{r^{b-a}-1}{r^{b-a}-r^{-a}}$",
+          "weight": 2
+        },
+        {
+          "label": "Uses $M_n=S_n-(2p-1)n$ to get $E[\\tau]=\\frac{E[S_\\tau]}{2p-1}=\\frac{(b-a)-b\\rho}{2p-1}$",
+          "weight": 2
+        }
+      ]
+    },
+    "front": "Ruine du joueur, cas biaisé $p\\ne 1/2$. Avec $P(X_n=1)=p\\in\\,]0,1[$, $P(X_n=-1)=1-p$, $S_n=X_1+\\dots+X_n$, et $\\tau=\\inf\\{n:S_n=b-a\\text{ ou }S_n=-a\\}$ ($a<b\\in\\mathbb{N}^*$, $\\tau<\\infty$ p.s.), trouver la probabilité de ruine $\\rho=P(S_\\tau=-a)$ et $E[\\tau]$.",
+    "back": "Probabilité de ruine via la martingale exponentielle. Pour $\\theta\\in\\mathbb{R}$, $N_n=\\exp(\\theta S_n-L(\\theta)n)$ est une martingale avec $L(\\theta)=\\ln(e^{\\theta}p+e^{-\\theta}(1-p))$. En choisissant $\\theta=\\ln\\frac{1-p}{p}\\ne0$ on a $L(\\theta)=0$, donc $N_n=r^{S_n}$ est une martingale avec $r=\\frac{1-p}{p}$. Le théorème d'arrêt et la convergence bornée ($0\\le r^{S_{n\\wedge\\tau}}\\le r^{b-a}\\vee r^{-a}$) donnent $E[r^{S_\\tau}]=1$ :\n$$r^{b-a}(1-\\rho)+r^{-a}\\rho=1\\;\\Longrightarrow\\;\\rho=\\frac{r^{b-a}-1}{r^{b-a}-r^{-a}}.$$\nDurée espérée via $M_n=S_n-(2p-1)n$, une martingale. Le théorème d'arrêt donne $E[S_{\\tau\\wedge n}]=(2p-1)E[\\tau\\wedge n]$. En faisant $n\\to\\infty$ (convergence monotone + bornée) :\n$$E[\\tau]=\\frac{E[S_\\tau]}{2p-1}=\\frac{(b-a)(1-\\rho)-a\\rho}{2p-1}=\\frac{(b-a)-b\\rho}{2p-1}.$$",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Construit la martingale $N_n=r^{S_n}$ avec $r=\\frac{1-p}{p}$ à partir de $L(\\theta)=0$, $\\theta=\\ln\\frac{1-p}{p}$",
+          "weight": 2
+        },
+        {
+          "label": "Théorème d'arrêt + convergence bornée donnent $r^{b-a}(1-\\rho)+r^{-a}\\rho=1$, d'où $\\rho=\\frac{r^{b-a}-1}{r^{b-a}-r^{-a}}$",
+          "weight": 2
+        },
+        {
+          "label": "Utilise $M_n=S_n-(2p-1)n$ pour obtenir $E[\\tau]=\\frac{E[S_\\tau]}{2p-1}=\\frac{(b-a)-b\\rho}{2p-1}$",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch4-ex04",
+    "course": "Martingales",
+    "category": "Ch. 4",
+    "kind": "exercice",
+    "difficulty": 2,
+    "front_en": "A cautionary counterexample. Let $(X_n)_{n\\ge1}$ be i.i.d. with $P(X_n=1)=P(X_n=-1)=1/2$, $S_n=X_1+\\dots+X_n$, and let $\\tau=\\inf\\{n:S_n=-1\\}$ (finite a.s.). The optional stopping theorem makes $(S_{n\\wedge\\tau})$ a martingale, so $E[S_{n\\wedge\\tau}]=0$. Yet $S_\\tau=-1$. What goes wrong if one concludes $E[S_\\tau]=\\lim_n E[S_{n\\wedge\\tau}]$, and what is the take-home message?",
+    "back_en": "Since $\\tau<\\infty$ a.s., $S_{n\\wedge\\tau}\\to S_\\tau=-1$ a.s. as $n\\to\\infty$. But for every $n$, $E[S_{n\\wedge\\tau}]=E[S_0]=0$, so\n$$E[S_{n\\wedge\\tau}]=0\\;\\not\\longrightarrow\\;-1=E[S_\\tau].$$\nThe a.s. convergence $S_{n\\wedge\\tau}\\to S_\\tau$ does NOT imply convergence of expectations here, because there is no domination/boundedness: $S_{n\\wedge\\tau}$ is not bounded uniformly in $n$ (the walk can go arbitrarily high before hitting $-1$), so neither bounded nor dominated convergence applies.\n\nTake-home message: after applying optional stopping to a martingale $(M_n)$ at a stopping time $\\tau$, to pass $E[M_{n\\wedge\\tau}]\\to E[M_\\tau]$ one needs (i) $\\tau<\\infty$ a.s. (so $M_\\tau$ makes sense) AND (ii) a domination/boundedness argument. Without (ii) the limit can fail.",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Notes $E[S_{n\\wedge\\tau}]=0$ for all $n$ but $S_\\tau=-1$, so $E[S_{n\\wedge\\tau}]\\not\\to E[S_\\tau]$",
+          "weight": 2
+        },
+        {
+          "label": "Identifies the failure: no domination/boundedness, $S_{n\\wedge\\tau}$ not uniformly bounded, so bounded/dominated convergence does not apply",
+          "weight": 2
+        },
+        {
+          "label": "States the take-home message: need $\\tau<\\infty$ a.s. AND a domination argument to pass to the limit",
+          "weight": 2
+        }
+      ]
+    },
+    "front": "Un contre-exemple instructif. Soit $(X_n)_{n\\ge1}$ i.i.d. avec $P(X_n=1)=P(X_n=-1)=1/2$, $S_n=X_1+\\dots+X_n$, et soit $\\tau=\\inf\\{n:S_n=-1\\}$ (fini p.s.). Le théorème d'arrêt rend $(S_{n\\wedge\\tau})$ une martingale, donc $E[S_{n\\wedge\\tau}]=0$. Pourtant $S_\\tau=-1$. Qu'est-ce qui cloche si l'on conclut $E[S_\\tau]=\\lim_n E[S_{n\\wedge\\tau}]$, et quelle est la leçon à retenir ?",
+    "back": "Comme $\\tau<\\infty$ p.s., $S_{n\\wedge\\tau}\\to S_\\tau=-1$ p.s. quand $n\\to\\infty$. Mais pour tout $n$, $E[S_{n\\wedge\\tau}]=E[S_0]=0$, donc\n$$E[S_{n\\wedge\\tau}]=0\\;\\not\\longrightarrow\\;-1=E[S_\\tau].$$\nLa convergence p.s. $S_{n\\wedge\\tau}\\to S_\\tau$ N'implique PAS ici la convergence des espérances, car il n'y a pas de domination/bornitude : $S_{n\\wedge\\tau}$ n'est pas borné uniformément en $n$ (la marche peut monter arbitrairement haut avant d'atteindre $-1$), donc ni la convergence bornée ni la convergence dominée ne s'appliquent.\n\nLeçon à retenir : après avoir appliqué le théorème d'arrêt à une martingale $(M_n)$ en un temps d'arrêt $\\tau$, pour passer $E[M_{n\\wedge\\tau}]\\to E[M_\\tau]$ il faut (i) $\\tau<\\infty$ p.s. (pour que $M_\\tau$ ait un sens) ET (ii) un argument de domination/bornitude. Sans (ii) la limite peut échouer.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Remarque que $E[S_{n\\wedge\\tau}]=0$ pour tout $n$ mais $S_\\tau=-1$, donc $E[S_{n\\wedge\\tau}]\\not\\to E[S_\\tau]$",
+          "weight": 2
+        },
+        {
+          "label": "Identifie la cause : pas de domination/bornitude, $S_{n\\wedge\\tau}$ non borné uniformément, donc convergence bornée/dominée inapplicable",
+          "weight": 2
+        },
+        {
+          "label": "Énonce la leçon : il faut $\\tau<\\infty$ p.s. ET un argument de domination pour passer à la limite",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch5-ex01",
+    "course": "Martingales",
+    "category": "Ch. 5",
+    "kind": "exercice",
+    "difficulty": 3,
+    "front_en": "(Bienaymé processes) Let $(Z_n)_{n\\in\\mathbb{N}}$ be a Bienaymé (Galton-Watson) process with offspring distribution $\\mu$, $\\mu(\\{1\\})<1$, $Z_0=1$, $Z_{n+1}=\\sum_{i=1}^{Z_n}\\xi^{n+1}_i$ with $(\\xi^n_i)$ i.i.d. $\\sim\\mu$. Assume $m:=\\sum_{k\\ge0}k\\,\\mu(\\{k\\})\\in\\,]0,\\infty[$, so that $W_n=Z_n/m^n$ is a martingale. Show that $W_n$ converges almost surely to some $W_\\infty\\ge0$, and discuss the behaviour of $Z_n$ according to whether $m<1$, $m=1$, $m>1$.",
+    "back_en": "Since $W_n\\ge0$, $\\mathbb{E}[|W_n|]=\\mathbb{E}[W_n]=\\mathbb{E}[W_0]=1$ (martingale), so $(W_n)$ is bounded in $L^1$. By the martingale a.s. convergence theorem (Thm 5.1), there is an integrable $\\mathcal{F}_\\infty$-measurable $W_\\infty$ with $W_n\\to W_\\infty$ a.s.; and $W_\\infty\\ge0$ a.s. since $W_n\\ge0$.\n\n• If $m<1$: $Z_n=W_n\\,m^n\\to W_\\infty\\cdot0=0$ a.s., so a.s. $Z_n=0$ for all large $n$ (extinction), whence $W_\\infty=0$ a.s.\n\n• If $m=1$: $Z_n=W_n\\to W_\\infty$ a.s.; again a.s. $Z_n=0$ for all large $n$, but this needs an extra argument (exercise sheet).\n\n• If $m>1$: on $(W_\\infty>0)$ one has $Z_n=W_n\\,m^n\\sim W_\\infty\\,m^n$ as $n\\to\\infty$ (geometric growth). It may still happen that $W_\\infty=0$ a.s.; one has $\\mathbb{P}(W_\\infty>0)>0$ provided moreover $\\sum_{k\\ge0}k^2\\mu(\\{k\\})<\\infty$.",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "$(W_n)$ bounded in $L^1$ via $\\mathbb{E}[W_n]=1$, hence a.s. convergence to $W_\\infty\\ge0$",
+          "weight": 2
+        },
+        {
+          "label": "Cases $m<1$ and $m=1$: $Z_n\\to0$, extinction a.s.",
+          "weight": 2
+        },
+        {
+          "label": "Case $m>1$: $Z_n\\sim W_\\infty m^n$ on $(W_\\infty>0)$; survival iff $\\sum k^2\\mu(\\{k\\})<\\infty$",
+          "weight": 2
+        }
+      ]
+    },
+    "front": "(Processus de Bienaymé) Soit $(Z_n)_{n\\in\\mathbb{N}}$ un processus de Bienaymé (Galton-Watson) de loi de reproduction $\\mu$, $\\mu(\\{1\\})<1$, $Z_0=1$, $Z_{n+1}=\\sum_{i=1}^{Z_n}\\xi^{n+1}_i$ avec $(\\xi^n_i)$ i.i.d. $\\sim\\mu$. On suppose $m:=\\sum_{k\\ge0}k\\,\\mu(\\{k\\})\\in\\,]0,\\infty[$, de sorte que $W_n=Z_n/m^n$ est une martingale. Montrer que $W_n$ converge presque sûrement vers un $W_\\infty\\ge0$, et discuter le comportement de $Z_n$ selon que $m<1$, $m=1$, $m>1$.",
+    "back": "Comme $W_n\\ge0$, on a $\\mathbb{E}[|W_n|]=\\mathbb{E}[W_n]=\\mathbb{E}[W_0]=1$ (martingale), donc $(W_n)$ est bornée dans $L^1$. Par le théorème de convergence presque sûre des martingales (Thm 5.1), il existe $W_\\infty$ intégrable et $\\mathcal{F}_\\infty$-mesurable avec $W_n\\to W_\\infty$ p.s.; et $W_\\infty\\ge0$ p.s. car $W_n\\ge0$.\n\n• Si $m<1$ : $Z_n=W_n\\,m^n\\to W_\\infty\\cdot0=0$ p.s., donc p.s. $Z_n=0$ pour tout $n$ assez grand (extinction), d'où $W_\\infty=0$ p.s.\n\n• Si $m=1$ : $Z_n=W_n\\to W_\\infty$ p.s.; à nouveau p.s. $Z_n=0$ pour tout $n$ assez grand, mais cela nécessite un argument supplémentaire (feuille d'exercices).\n\n• Si $m>1$ : sur $(W_\\infty>0)$ on a $Z_n=W_n\\,m^n\\sim W_\\infty\\,m^n$ quand $n\\to\\infty$ (croissance géométrique). Il se peut encore que $W_\\infty=0$ p.s.; on a $\\mathbb{P}(W_\\infty>0)>0$ pourvu de plus que $\\sum_{k\\ge0}k^2\\mu(\\{k\\})<\\infty$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "$(W_n)$ bornée dans $L^1$ via $\\mathbb{E}[W_n]=1$, d'où convergence p.s. vers $W_\\infty\\ge0$",
+          "weight": 2
+        },
+        {
+          "label": "Cas $m<1$ et $m=1$ : $Z_n\\to0$, extinction p.s.",
+          "weight": 2
+        },
+        {
+          "label": "Cas $m>1$ : $Z_n\\sim W_\\infty m^n$ sur $(W_\\infty>0)$; survie ssi $\\sum k^2\\mu(\\{k\\})<\\infty$",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch5-ex02",
+    "course": "Martingales",
+    "category": "Ch. 5",
+    "kind": "exercice",
+    "difficulty": 2,
+    "front_en": "(Pólya urns) Fix $a,b\\in\\mathbb{N}^*$. Start with $a$ red and $b$ blue balls; at each step draw a ball uniformly at random and replace it together with one extra ball of the same colour. Let $(R_n,B_n)$ be the counts, and $M_n=R_n/(R_n+B_n)$, which is a martingale w.r.t. $\\mathcal{F}_n=\\sigma(U_1,\\dots,U_n)$. Show that $M_n$ converges almost surely, and identify the law of the limit $M_\\infty$.",
+    "back_en": "Since $M_n\\in[0,1]$ for all $n$, $(M_n)$ is bounded in $L^1$. By the martingale a.s. convergence theorem (Thm 5.1) there is an integrable $\\mathcal{F}_\\infty$-measurable $M_\\infty$ with $M_n\\to M_\\infty$ almost surely; and $M_\\infty\\in[0,1]$ a.s. since each $M_n\\in[0,1]$.\n\nThe limit has the Beta$(a,b)$ distribution: for every Borel $\\varphi:[0,1]\\to\\mathbb{R}_+$,\n$$\\mathbb{E}[\\varphi(M_\\infty)]=\\frac{\\Gamma(a+b)}{\\Gamma(a)\\Gamma(b)}\\int_0^1\\varphi(x)\\,x^{a-1}(1-x)^{b-1}\\,dx.$$\n(Computation of the law on the exercise sheet.)",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "$M_n\\in[0,1]$ $\\Rightarrow$ bounded in $L^1$, so martingale a.s. convergence applies",
+          "weight": 2
+        },
+        {
+          "label": "Existence of $M_\\infty$ a.s. with $M_\\infty\\in[0,1]$",
+          "weight": 2
+        },
+        {
+          "label": "$M_\\infty\\sim$ Beta$(a,b)$ with the explicit density $\\propto x^{a-1}(1-x)^{b-1}$",
+          "weight": 2
+        }
+      ]
+    },
+    "front": "(Urnes de Pólya) Fixons $a,b\\in\\mathbb{N}^*$. On part de $a$ boules rouges et $b$ bleues; à chaque étape on tire une boule uniformément au hasard et on la remet avec une boule supplémentaire de la même couleur. Soit $(R_n,B_n)$ les effectifs et $M_n=R_n/(R_n+B_n)$, qui est une martingale par rapport à $\\mathcal{F}_n=\\sigma(U_1,\\dots,U_n)$. Montrer que $M_n$ converge presque sûrement, et identifier la loi de la limite $M_\\infty$.",
+    "back": "Comme $M_n\\in[0,1]$ pour tout $n$, $(M_n)$ est bornée dans $L^1$. Par le théorème de convergence presque sûre des martingales (Thm 5.1), il existe $M_\\infty$ intégrable et $\\mathcal{F}_\\infty$-mesurable avec $M_n\\to M_\\infty$ presque sûrement; et $M_\\infty\\in[0,1]$ p.s. car chaque $M_n\\in[0,1]$.\n\nLa limite suit la loi Beta$(a,b)$ : pour toute fonction borélienne $\\varphi:[0,1]\\to\\mathbb{R}_+$,\n$$\\mathbb{E}[\\varphi(M_\\infty)]=\\frac{\\Gamma(a+b)}{\\Gamma(a)\\Gamma(b)}\\int_0^1\\varphi(x)\\,x^{a-1}(1-x)^{b-1}\\,dx.$$\n(Calcul de la loi sur la feuille d'exercices.)",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "$M_n\\in[0,1]$ $\\Rightarrow$ bornée dans $L^1$, donc convergence p.s. des martingales s'applique",
+          "weight": 2
+        },
+        {
+          "label": "Existence de $M_\\infty$ p.s. avec $M_\\infty\\in[0,1]$",
+          "weight": 2
+        },
+        {
+          "label": "$M_\\infty\\sim$ Beta$(a,b)$ de densité explicite $\\propto x^{a-1}(1-x)^{b-1}$",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch5-ex03",
+    "course": "Martingales",
+    "category": "Ch. 5",
+    "kind": "exercice",
+    "difficulty": 2,
+    "front_en": "(Counterexample to $L^1$ convergence) Let $(X_n)_{n\\ge1}$ be i.i.d. with $\\mathbb{P}(X_n=1)=\\mathbb{P}(X_n=-1)=1/2$, $S_n=X_1+\\dots+X_n$, $\\mathcal{F}_n=\\sigma(X_1,\\dots,X_n)$, and let $\\tau=\\inf\\{n:S_n=-1\\}$. Show that the stopped martingale $(S_{n\\wedge\\tau})$ converges almost surely but NOT in $L^1$, yet is bounded in $L^1$. Conclude that the martingale $L^1$ convergence theorem fails for $p=1$.",
+    "back_en": "By optional stopping $(S_{n\\wedge\\tau})$ is a martingale, so $\\mathbb{E}[S_{n\\wedge\\tau}]=\\mathbb{E}[S_0]=0$ for all $n$. The simple random walk is recurrent so $\\tau<\\infty$ a.s., and $S_{n\\wedge\\tau}\\to S_\\tau=-1$ almost surely.\n\nNo $L^1$ convergence: $\\mathbb{E}[S_{n\\wedge\\tau}]=0\\not\\to-1=\\mathbb{E}[S_\\tau]$, so $S_{n\\wedge\\tau}\\not\\to S_\\tau$ in $L^1$ (if it did, expectations would converge).\n\nBounded in $L^1$: since $S_{n\\wedge\\tau}\\ge-1$, the variable $S_{n\\wedge\\tau}+1\\ge0$, so\n$$\\mathbb{E}[|S_{n\\wedge\\tau}|]\\le\\mathbb{E}[|S_{n\\wedge\\tau}+1|]+1=\\mathbb{E}[S_{n\\wedge\\tau}+1]+1=\\mathbb{E}[S_{0\\wedge\\tau}+1]+1=2.$$\n\nThus an $L^1$-bounded martingale converging a.s. need not converge in $L^1$: the martingale $L^p$ convergence theorem genuinely requires $p>1$.",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "A.s. convergence $S_{n\\wedge\\tau}\\to S_\\tau=-1$ (recurrence, $\\tau<\\infty$ a.s.)",
+          "weight": 2
+        },
+        {
+          "label": "No $L^1$ convergence: $\\mathbb{E}[S_{n\\wedge\\tau}]=0\\not\\to-1$",
+          "weight": 2
+        },
+        {
+          "label": "Bounded in $L^1$ via $S_{n\\wedge\\tau}\\ge-1$ giving $\\mathbb{E}[|S_{n\\wedge\\tau}|]\\le2$",
+          "weight": 2
+        }
+      ]
+    },
+    "front": "(Contre-exemple à la convergence $L^1$) Soit $(X_n)_{n\\ge1}$ i.i.d. avec $\\mathbb{P}(X_n=1)=\\mathbb{P}(X_n=-1)=1/2$, $S_n=X_1+\\dots+X_n$, $\\mathcal{F}_n=\\sigma(X_1,\\dots,X_n)$, et $\\tau=\\inf\\{n:S_n=-1\\}$. Montrer que la martingale arrêtée $(S_{n\\wedge\\tau})$ converge presque sûrement mais PAS dans $L^1$, tout en étant bornée dans $L^1$. En déduire que le théorème de convergence $L^1$ des martingales est faux pour $p=1$.",
+    "back": "Par arrêt optionnel $(S_{n\\wedge\\tau})$ est une martingale, donc $\\mathbb{E}[S_{n\\wedge\\tau}]=\\mathbb{E}[S_0]=0$ pour tout $n$. La marche aléatoire simple est récurrente donc $\\tau<\\infty$ p.s., et $S_{n\\wedge\\tau}\\to S_\\tau=-1$ presque sûrement.\n\nPas de convergence $L^1$ : $\\mathbb{E}[S_{n\\wedge\\tau}]=0\\not\\to-1=\\mathbb{E}[S_\\tau]$, donc $S_{n\\wedge\\tau}\\not\\to S_\\tau$ dans $L^1$ (sinon les espérances convergeraient).\n\nBornée dans $L^1$ : comme $S_{n\\wedge\\tau}\\ge-1$, la variable $S_{n\\wedge\\tau}+1\\ge0$, donc\n$$\\mathbb{E}[|S_{n\\wedge\\tau}|]\\le\\mathbb{E}[|S_{n\\wedge\\tau}+1|]+1=\\mathbb{E}[S_{n\\wedge\\tau}+1]+1=\\mathbb{E}[S_{0\\wedge\\tau}+1]+1=2.$$\n\nAinsi une martingale bornée dans $L^1$ qui converge p.s. ne converge pas forcément dans $L^1$ : le théorème de convergence $L^p$ des martingales requiert réellement $p>1$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Convergence p.s. $S_{n\\wedge\\tau}\\to S_\\tau=-1$ (récurrence, $\\tau<\\infty$ p.s.)",
+          "weight": 2
+        },
+        {
+          "label": "Pas de convergence $L^1$ : $\\mathbb{E}[S_{n\\wedge\\tau}]=0\\not\\to-1$",
+          "weight": 2
+        },
+        {
+          "label": "Bornée dans $L^1$ via $S_{n\\wedge\\tau}\\ge-1$ donnant $\\mathbb{E}[|S_{n\\wedge\\tau}|]\\le2$",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch5-ex04",
+    "course": "Martingales",
+    "category": "Ch. 5",
+    "kind": "exercice",
+    "difficulty": 3,
+    "front_en": "(Bienaymé process in $L^2$) With $(Z_n)$, $\\xi\\sim\\mu$, $m=\\sum_k k\\mu(\\{k\\})\\in\\,]0,\\infty[$ and the martingale $W_n=Z_n/m^n$, assume moreover $\\sum_k k^2\\mu(\\{k\\})<\\infty$. Compute $\\mathbb{E}[(W_{n+1}-W_n)^2]$ and show that if $m>1$ then $(W_n)$ is bounded in $L^2$. What can you deduce about $W_\\infty$ and about survival?",
+    "back_en": "Write $W_{n+1}-W_n=(Z_{n+1}-mZ_n)/m^{n+1}$. Conditioning on $\\mathcal{F}_n$ (with $Z_n$ $\\mathcal{F}_n$-measurable and $(\\xi^{n+1}_i)_i$ independent of $\\mathcal{F}_n$): since $\\mathbb{E}[\\xi^{n+1}_i-m]=0$ the cross terms vanish and\n$$\\mathbb{E}[(Z_{n+1}-mZ_n)^2\\mid\\mathcal{F}_n]=\\mathbb{V}(\\xi)\\cdot Z_n\\quad\\text{a.s.}$$\nUsing $\\mathbb{E}[Z_n]=m^n$,\n$$\\mathbb{E}[(W_{n+1}-W_n)^2]=\\frac{\\mathbb{E}[\\mathbb{V}(\\xi)Z_n]}{m^{2n+2}}=\\frac{\\mathbb{V}(\\xi)\\,m^n}{m^{2n+2}}=\\frac{\\mathbb{V}(\\xi)}{m^{n+2}}.$$\n\nIf $m>1$ this is summable: $\\sum_{n\\ge0}\\mathbb{E}[(W_{n+1}-W_n)^2]<\\infty$. Since also $\\mathbb{E}[W_0^2]=1<\\infty$, Proposition 5.2 gives that $(W_n)$ is bounded in $L^2$. By the martingale $L^2$ convergence theorem (Thm 5.3), $W_n\\to W_\\infty$ a.s. and in $L^2$, with $W_\\infty$ square-integrable.\n\nIn particular $\\mathbb{E}[W_\\infty]=\\lim_n\\mathbb{E}[W_n]=1$, so $W_\\infty$ is not a.s. $0$: $\\mathbb{P}(W_\\infty>0)>0$. On $(W_\\infty>0)$, $Z_n=W_n m^n\\sim W_\\infty m^n$ (survival with geometric growth).",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Conditional second moment $\\mathbb{E}[(Z_{n+1}-mZ_n)^2\\mid\\mathcal{F}_n]=\\mathbb{V}(\\xi)Z_n$ (vanishing cross terms)",
+          "weight": 2
+        },
+        {
+          "label": "$\\mathbb{E}[(W_{n+1}-W_n)^2]=\\mathbb{V}(\\xi)/m^{n+2}$, summable iff $m>1$; $L^2$-bounded via Prop. 5.2",
+          "weight": 2
+        },
+        {
+          "label": "$L^2$ convergence, $\\mathbb{E}[W_\\infty]=1$, hence $\\mathbb{P}(W_\\infty>0)>0$ (survival)",
+          "weight": 2
+        }
+      ]
+    },
+    "front": "(Processus de Bienaymé dans $L^2$) Avec $(Z_n)$, $\\xi\\sim\\mu$, $m=\\sum_k k\\mu(\\{k\\})\\in\\,]0,\\infty[$ et la martingale $W_n=Z_n/m^n$, on suppose de plus $\\sum_k k^2\\mu(\\{k\\})<\\infty$. Calculer $\\mathbb{E}[(W_{n+1}-W_n)^2]$ et montrer que si $m>1$ alors $(W_n)$ est bornée dans $L^2$. Qu'en déduit-on sur $W_\\infty$ et sur la survie ?",
+    "back": "Écrivons $W_{n+1}-W_n=(Z_{n+1}-mZ_n)/m^{n+1}$. En conditionnant par $\\mathcal{F}_n$ ($Z_n$ étant $\\mathcal{F}_n$-mesurable et $(\\xi^{n+1}_i)_i$ indépendant de $\\mathcal{F}_n$) : comme $\\mathbb{E}[\\xi^{n+1}_i-m]=0$ les termes croisés s'annulent et\n$$\\mathbb{E}[(Z_{n+1}-mZ_n)^2\\mid\\mathcal{F}_n]=\\mathbb{V}(\\xi)\\cdot Z_n\\quad\\text{p.s.}$$\nEn utilisant $\\mathbb{E}[Z_n]=m^n$,\n$$\\mathbb{E}[(W_{n+1}-W_n)^2]=\\frac{\\mathbb{E}[\\mathbb{V}(\\xi)Z_n]}{m^{2n+2}}=\\frac{\\mathbb{V}(\\xi)\\,m^n}{m^{2n+2}}=\\frac{\\mathbb{V}(\\xi)}{m^{n+2}}.$$\n\nSi $m>1$ c'est sommable : $\\sum_{n\\ge0}\\mathbb{E}[(W_{n+1}-W_n)^2]<\\infty$. Comme de plus $\\mathbb{E}[W_0^2]=1<\\infty$, la Proposition 5.2 donne que $(W_n)$ est bornée dans $L^2$. Par le théorème de convergence $L^2$ des martingales (Thm 5.3), $W_n\\to W_\\infty$ p.s. et dans $L^2$, avec $W_\\infty$ de carré intégrable.\n\nEn particulier $\\mathbb{E}[W_\\infty]=\\lim_n\\mathbb{E}[W_n]=1$, donc $W_\\infty$ n'est pas p.s. nulle : $\\mathbb{P}(W_\\infty>0)>0$. Sur $(W_\\infty>0)$, $Z_n=W_n m^n\\sim W_\\infty m^n$ (survie avec croissance géométrique).",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Moment d'ordre 2 conditionnel $\\mathbb{E}[(Z_{n+1}-mZ_n)^2\\mid\\mathcal{F}_n]=\\mathbb{V}(\\xi)Z_n$ (termes croisés nuls)",
+          "weight": 2
+        },
+        {
+          "label": "$\\mathbb{E}[(W_{n+1}-W_n)^2]=\\mathbb{V}(\\xi)/m^{n+2}$, sommable ssi $m>1$; bornée dans $L^2$ via Prop. 5.2",
+          "weight": 2
+        },
+        {
+          "label": "Convergence $L^2$, $\\mathbb{E}[W_\\infty]=1$, donc $\\mathbb{P}(W_\\infty>0)>0$ (survie)",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch5-ex05",
+    "course": "Martingales",
+    "category": "Ch. 5",
+    "kind": "exercice",
+    "difficulty": 2,
+    "front_en": "(Random series) Let $(X_n)_{n\\ge1}$ be independent with $\\mathbb{E}[X_n]=0$ for all $n$. Show that if $\\sum_{n\\ge1}\\mathbb{E}[X_n^2]<\\infty$, then the series $\\sum_{n\\ge1}X_n$ converges almost surely and in $L^2$.",
+    "back_en": "Set $S_n=X_1+\\dots+X_n$ and $\\mathcal{F}_n=\\sigma(X_1,\\dots,X_n)$. Since the $X_n$ are independent and centred, $(S_n)$ is a martingale w.r.t. $(\\mathcal{F}_n)$.\n\nBy Proposition 5.2 (second part), $(S_n)$ is bounded in $L^2$ iff $\\mathbb{E}[S_0^2]<\\infty$ and $\\sum_{n}\\mathbb{E}[(S_{n+1}-S_n)^2]<\\infty$. Here $S_0=0$ and $(S_{n+1}-S_n)^2=X_{n+1}^2$, so the condition is exactly $\\sum_{n\\ge1}\\mathbb{E}[X_n^2]<\\infty$, which holds. Hence $(S_n)$ is bounded in $L^2$.\n\nBy the martingale $L^2$ convergence theorem (Thm 5.3), there is a square-integrable $\\mathcal{F}_\\infty$-measurable $S_\\infty$ with $S_n\\to S_\\infty$ almost surely and in $L^2$, i.e. $\\sum_{n\\ge1}X_n$ converges a.s. and in $L^2$.\n\n(The $L^2$ convergence alone follows from $(S_n)$ being Cauchy in $L^2$; the martingale theorem is what additionally yields the almost sure convergence.)",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "$(S_n)$ is a martingale (independent, centred increments)",
+          "weight": 2
+        },
+        {
+          "label": "$L^2$-boundedness via Prop. 5.2: $\\sum\\mathbb{E}[(S_{n+1}-S_n)^2]=\\sum\\mathbb{E}[X_n^2]<\\infty$",
+          "weight": 2
+        },
+        {
+          "label": "Thm 5.3 gives a.s. and $L^2$ convergence of $\\sum X_n$",
+          "weight": 2
+        }
+      ]
+    },
+    "front": "(Séries aléatoires) Soit $(X_n)_{n\\ge1}$ indépendantes avec $\\mathbb{E}[X_n]=0$ pour tout $n$. Montrer que si $\\sum_{n\\ge1}\\mathbb{E}[X_n^2]<\\infty$, alors la série $\\sum_{n\\ge1}X_n$ converge presque sûrement et dans $L^2$.",
+    "back": "Posons $S_n=X_1+\\dots+X_n$ et $\\mathcal{F}_n=\\sigma(X_1,\\dots,X_n)$. Comme les $X_n$ sont indépendantes et centrées, $(S_n)$ est une martingale par rapport à $(\\mathcal{F}_n)$.\n\nPar la Proposition 5.2 (deuxième partie), $(S_n)$ est bornée dans $L^2$ ssi $\\mathbb{E}[S_0^2]<\\infty$ et $\\sum_{n}\\mathbb{E}[(S_{n+1}-S_n)^2]<\\infty$. Ici $S_0=0$ et $(S_{n+1}-S_n)^2=X_{n+1}^2$, donc la condition est exactement $\\sum_{n\\ge1}\\mathbb{E}[X_n^2]<\\infty$, qui est vérifiée. Donc $(S_n)$ est bornée dans $L^2$.\n\nPar le théorème de convergence $L^2$ des martingales (Thm 5.3), il existe $S_\\infty$ de carré intégrable et $\\mathcal{F}_\\infty$-mesurable avec $S_n\\to S_\\infty$ presque sûrement et dans $L^2$, c.-à-d. $\\sum_{n\\ge1}X_n$ converge p.s. et dans $L^2$.\n\n(La seule convergence $L^2$ découle de ce que $(S_n)$ est de Cauchy dans $L^2$; c'est le théorème des martingales qui fournit en plus la convergence presque sûre.)",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "$(S_n)$ est une martingale (accroissements indépendants centrés)",
+          "weight": 2
+        },
+        {
+          "label": "Bornée dans $L^2$ via Prop. 5.2 : $\\sum\\mathbb{E}[(S_{n+1}-S_n)^2]=\\sum\\mathbb{E}[X_n^2]<\\infty$",
+          "weight": 2
+        },
+        {
+          "label": "Thm 5.3 donne la convergence p.s. et $L^2$ de $\\sum X_n$",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch5-ex06",
+    "course": "Martingales",
+    "category": "Ch. 5",
+    "kind": "exercice",
+    "difficulty": 2,
+    "front_en": "(Sufficient conditions for uniform integrability) Give three standard sufficient conditions ensuring that a family $(X_i)_{i\\in I}$ is uniformly integrable, i.e. that $\\sup_{i\\in I}\\mathbb{E}[|X_i|\\,;\\,|X_i|\\ge x]\\to0$ as $x\\to\\infty$, and justify each.",
+    "back_en": "(1) A single integrable r.v. $X$ (hence any finite family of integrable r.v.) is UI: by dominated convergence, $\\mathbb{E}[|X|\\,;\\,|X|\\ge x]\\to0$ as $x\\to\\infty$.\n\n(2) Domination: if there is an integrable $Y\\ge0$ with $|X_i|\\le Y$ a.s. for all $i$, then $(X_i)$ is UI. Indeed $\\mathbb{E}[|X_i|\\,;\\,|X_i|\\ge x]\\le\\mathbb{E}[Y\\,;\\,Y\\ge x]$, so $\\sup_i\\mathbb{E}[|X_i|\\,;\\,|X_i|\\ge x]\\le\\mathbb{E}[Y\\,;\\,Y\\ge x]\\to0$.\n\n(3) $L^p$-boundedness for some $p>1$: if $\\sup_i\\mathbb{E}[|X_i|^p]<\\infty$, then $(X_i)$ is UI. From $x^{p-1}|X_i|\\mathbf{1}(|X_i|\\ge x)\\le|X_i|^p$ one gets, for $x>0$,\n$$\\mathbb{E}[|X_i|\\,;\\,|X_i|\\ge x]\\le\\frac{\\mathbb{E}[|X_i|^p]}{x^{p-1}},\\quad\\text{so}\\quad\\sup_i\\mathbb{E}[|X_i|\\,;\\,|X_i|\\ge x]\\le\\frac{\\sup_i\\mathbb{E}[|X_i|^p]}{x^{p-1}}\\to0.$$",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Single/finite family of integrable r.v. is UI (dominated convergence)",
+          "weight": 2
+        },
+        {
+          "label": "Domination by integrable $Y$: $\\mathbb{E}[|X_i|;|X_i|\\ge x]\\le\\mathbb{E}[Y;Y\\ge x]$",
+          "weight": 2
+        },
+        {
+          "label": "$L^p$-bounded ($p>1$): bound $\\mathbb{E}[|X_i|;|X_i|\\ge x]\\le\\mathbb{E}[|X_i|^p]/x^{p-1}$",
+          "weight": 2
+        }
+      ]
+    },
+    "front": "(Conditions suffisantes d'intégrabilité uniforme) Donner trois conditions suffisantes standard assurant qu'une famille $(X_i)_{i\\in I}$ est uniformément intégrable, c.-à-d. que $\\sup_{i\\in I}\\mathbb{E}[|X_i|\\,;\\,|X_i|\\ge x]\\to0$ quand $x\\to\\infty$, et justifier chacune.",
+    "back": "(1) Une seule v.a. intégrable $X$ (donc toute famille finie de v.a. intégrables) est UI : par convergence dominée, $\\mathbb{E}[|X|\\,;\\,|X|\\ge x]\\to0$ quand $x\\to\\infty$.\n\n(2) Domination : s'il existe $Y\\ge0$ intégrable avec $|X_i|\\le Y$ p.s. pour tout $i$, alors $(X_i)$ est UI. En effet $\\mathbb{E}[|X_i|\\,;\\,|X_i|\\ge x]\\le\\mathbb{E}[Y\\,;\\,Y\\ge x]$, donc $\\sup_i\\mathbb{E}[|X_i|\\,;\\,|X_i|\\ge x]\\le\\mathbb{E}[Y\\,;\\,Y\\ge x]\\to0$.\n\n(3) Bornitude $L^p$ pour un $p>1$ : si $\\sup_i\\mathbb{E}[|X_i|^p]<\\infty$, alors $(X_i)$ est UI. À partir de $x^{p-1}|X_i|\\mathbf{1}(|X_i|\\ge x)\\le|X_i|^p$ on obtient, pour $x>0$,\n$$\\mathbb{E}[|X_i|\\,;\\,|X_i|\\ge x]\\le\\frac{\\mathbb{E}[|X_i|^p]}{x^{p-1}},\\quad\\text{donc}\\quad\\sup_i\\mathbb{E}[|X_i|\\,;\\,|X_i|\\ge x]\\le\\frac{\\sup_i\\mathbb{E}[|X_i|^p]}{x^{p-1}}\\to0.$$",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Famille finie/unique de v.a. intégrables est UI (convergence dominée)",
+          "weight": 2
+        },
+        {
+          "label": "Domination par $Y$ intégrable : $\\mathbb{E}[|X_i|;|X_i|\\ge x]\\le\\mathbb{E}[Y;Y\\ge x]$",
+          "weight": 2
+        },
+        {
+          "label": "Bornée dans $L^p$ ($p>1$) : majoration $\\mathbb{E}[|X_i|;|X_i|\\ge x]\\le\\mathbb{E}[|X_i|^p]/x^{p-1}$",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch6-ex01",
+    "course": "Martingales",
+    "category": "Ch. 6",
+    "kind": "exercice",
+    "difficulty": 2,
+    "front": "Soit $\\mu = \\mathcal{N}(0, I_d)$ la loi gaussienne standard sur $\\mathbb{R}^d$, et soit $(S_n)_{n \\in \\mathbb{N}}$ la marche aléatoire dans $\\mathbb{R}^d$ de loi de pas $\\mu$, c'est-à-dire $S_n = X_1 + \\dots + X_n$ avec les $X_k$ i.i.d. de loi $\\mathcal{N}(0, I_d)$. Déterminer la loi de $S_n$ pour $n \\in \\mathbb{N}^*$. (On rappelle qu'un vecteur $X = (X^1, \\dots, X^d)$ a pour loi $\\mathcal{N}(0, \\sigma^2 I_d)$ si et seulement si ses coordonnées sont indépendantes de loi $\\mathcal{N}(0, \\sigma^2)$ sur $\\mathbb{R}$.)",
+    "back": "Chaque pas $X_k$ a pour loi $\\mathcal{N}(0, I_d)$, donc ses coordonnées $X_k^1, \\dots, X_k^d$ sont indépendantes de loi $\\mathcal{N}(0,1)$. La somme de $n$ variables gaussiennes indépendantes $\\mathcal{N}(0,1)$ est une gaussienne $\\mathcal{N}(0, n)$ (les moyennes et les variances s'additionnent). Donc, pour chaque coordonnée $i$, $S_n^i = X_1^i + \\dots + X_n^i \\sim \\mathcal{N}(0, n)$, et ces coordonnées restent indépendantes. Par le critère rappelé, on conclut\n$$ S_n \\sim \\mathcal{N}(0, n I_d) \\qquad \\text{pour tout } n \\in \\mathbb{N}^*. $$",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Identifie que les coordonnées des pas sont i.i.d. $\\mathcal{N}(0,1)$",
+          "weight": 2
+        },
+        {
+          "label": "Somme de gaussiennes indépendantes : $S_n^i \\sim \\mathcal{N}(0,n)$ (variances s'additionnent)",
+          "weight": 2
+        },
+        {
+          "label": "Conclut $S_n \\sim \\mathcal{N}(0, n I_d)$ par indépendance des coordonnées",
+          "weight": 2
+        }
+      ]
+    },
+    "front_en": "Let $\\mu = \\mathcal{N}(0, I_d)$ be the standard Gaussian distribution on $\\mathbb{R}^d$, and let $(S_n)_{n \\in \\mathbb{N}}$ be the random walk in $\\mathbb{R}^d$ with step distribution $\\mu$, i.e. $S_n = X_1 + \\dots + X_n$ with the $X_k$ i.i.d. of distribution $\\mathcal{N}(0, I_d)$. Determine the distribution of $S_n$ for $n \\in \\mathbb{N}^*$. (Recall that a vector $X = (X^1, \\dots, X^d)$ has distribution $\\mathcal{N}(0, \\sigma^2 I_d)$ if and only if its coordinates are independent with distribution $\\mathcal{N}(0, \\sigma^2)$ on $\\mathbb{R}$.)",
+    "back_en": "Each step $X_k$ has distribution $\\mathcal{N}(0, I_d)$, so its coordinates $X_k^1, \\dots, X_k^d$ are independent with distribution $\\mathcal{N}(0,1)$. The sum of $n$ independent $\\mathcal{N}(0,1)$ Gaussians is a Gaussian $\\mathcal{N}(0, n)$ (means and variances add). Hence, for each coordinate $i$, $S_n^i = X_1^i + \\dots + X_n^i \\sim \\mathcal{N}(0, n)$, and these coordinates remain independent. By the recalled criterion, we conclude\n$$ S_n \\sim \\mathcal{N}(0, n I_d) \\qquad \\text{for all } n \\in \\mathbb{N}^*. $$",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Identifies that the step coordinates are i.i.d. $\\mathcal{N}(0,1)$",
+          "weight": 2
+        },
+        {
+          "label": "Sum of independent Gaussians: $S_n^i \\sim \\mathcal{N}(0,n)$ (variances add)",
+          "weight": 2
+        },
+        {
+          "label": "Concludes $S_n \\sim \\mathcal{N}(0, n I_d)$ by independence of coordinates",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch6-ex02",
+    "course": "Martingales",
+    "category": "Ch. 6",
+    "kind": "exercice",
+    "difficulty": 3,
+    "front": "La Définition 6.2 déclare une marche aléatoire (à pas discret, supportée par $\\mathbb{Z}^d$) récurrente lorsque $P(\\exists n \\in \\mathbb{N}^* : S_n = 0) = 1$, et transiente sinon. Montrer, à l'aide de la marche gaussienne $(S_n)_{n \\in \\mathbb{N}}$ de loi de pas $\\mu = \\mathcal{N}(0, I_d)$, que ce critère n'est PAS la bonne notion de récurrence pour une marche générale dans $\\mathbb{R}^d$. En particulier, que vaut $P(\\exists n \\in \\mathbb{N}^* : S_n = 0)$, et quel comportement de récurrence observe-t-on néanmoins en dimensions $d \\in \\{1, 2\\}$ ?",
+    "back": "Pour la marche gaussienne, $S_n$ a une loi à densité (continue) sur $\\mathbb{R}^d$ : $S_n \\sim \\mathcal{N}(0, n I_d)$. L'événement $\\{S_n = 0\\}$ est de probabilité nulle pour chaque $n$, et donc\n$$ P(\\exists n \\in \\mathbb{N}^* : S_n = 0) = 0. $$\nAu sens littéral de la Définition 6.2, la marche serait donc « transiente » en toute dimension. Pourtant, le bon comportement de récurrence se mesure par les retours dans un voisinage de l'origine : pour tout $\\varepsilon \\in \\mathbb{R}_+^*$, on a en dimensions $d \\in \\{1, 2\\}$\n$$ P(|S_n| \\le \\varepsilon \\text{ pour une infinité de } n \\in \\mathbb{N}) = 1. $$\nLa marche revient donc une infinité de fois arbitrairement près de $0$ (récurrence), bien qu'elle n'atteigne jamais exactement $0$. Ceci montre que la définition « atteindre exactement $0$ » n'est adaptée qu'aux marches discrètes sur $\\mathbb{Z}^d$, et pas aux marches générales dans $\\mathbb{R}^d$.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "$S_n \\sim \\mathcal{N}(0, nI_d)$ a une densité, donc $P(S_n = 0) = 0$ pour chaque $n$",
+          "weight": 2
+        },
+        {
+          "label": "En déduit $P(\\exists n : S_n = 0) = 0$ (la marche n'atteint jamais exactement $0$)",
+          "weight": 2
+        },
+        {
+          "label": "La bonne récurrence : $P(|S_n| \\le \\varepsilon \\text{ i.o.}) = 1$ en $d \\in \\{1,2\\}$, d'où l'inadéquation de la Déf. 6.2",
+          "weight": 2
+        }
+      ]
+    },
+    "front_en": "Definition 6.2 calls a random walk (with discrete step distribution supported on $\\mathbb{Z}^d$) recurrent when $P(\\exists n \\in \\mathbb{N}^* : S_n = 0) = 1$, and transient otherwise. Using the Gaussian random walk $(S_n)_{n \\in \\mathbb{N}}$ with step distribution $\\mu = \\mathcal{N}(0, I_d)$, show that this criterion is NOT the right notion of recurrence for a general walk in $\\mathbb{R}^d$. In particular, what is $P(\\exists n \\in \\mathbb{N}^* : S_n = 0)$, and what recurrence behaviour does one nonetheless observe in dimensions $d \\in \\{1, 2\\}$?",
+    "back_en": "For the Gaussian walk, $S_n$ has a (continuous) density on $\\mathbb{R}^d$: $S_n \\sim \\mathcal{N}(0, n I_d)$. The event $\\{S_n = 0\\}$ has probability zero for each $n$, and therefore\n$$ P(\\exists n \\in \\mathbb{N}^* : S_n = 0) = 0. $$\nIn the literal sense of Definition 6.2, the walk would thus be \"transient\" in every dimension. Yet the correct recurrence behaviour is measured by returns to a neighbourhood of the origin: for every $\\varepsilon \\in \\mathbb{R}_+^*$, in dimensions $d \\in \\{1, 2\\}$ we have\n$$ P(|S_n| \\le \\varepsilon \\text{ for infinitely many } n \\in \\mathbb{N}) = 1. $$\nThus the walk returns infinitely often arbitrarily close to $0$ (recurrence), even though it never hits exactly $0$. This shows that the \"hit exactly $0$\" definition is suited only to discrete walks on $\\mathbb{Z}^d$, not to general walks in $\\mathbb{R}^d$.",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "$S_n \\sim \\mathcal{N}(0, nI_d)$ has a density, so $P(S_n = 0) = 0$ for each $n$",
+          "weight": 2
+        },
+        {
+          "label": "Deduces $P(\\exists n : S_n = 0) = 0$ (the walk never hits exactly $0$)",
+          "weight": 2
+        },
+        {
+          "label": "Correct recurrence: $P(|S_n| \\le \\varepsilon \\text{ i.o.}) = 1$ for $d \\in \\{1,2\\}$, hence inadequacy of Def. 6.2",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch7-ex01",
+    "course": "Martingales",
+    "category": "Ch. 7",
+    "kind": "exercice",
+    "difficulty": 2,
+    "front": "Soit $(W_t)_{t\\in D}$ un processus tel que pour tout $n\\in\\mathbb N$ les variables $\\big(W_{(k+1)2^{-n}}-W_{k2^{-n}}\\big)_{k\\in[\\![0,2^n-1]\\!]}$ sont indépendantes de loi $N(0,2^{-n})$. Pour $s<t\\in D$, déterminer la loi de $W_t-W_s$, en déduire l'\\og ordre de grandeur\\fg{} de $|W_t-W_s|$, et énoncer le résultat de comparaison correspondant avec l'exposant $\\beta=1/2$.",
+    "back": "Pour $s<t\\in D$, l'incrément a pour loi $W_t-W_s\\sim N(0,t-s)$. Donc en loi $|W_t-W_s|=\\sqrt{t-s}\\,\\cdot|X|$, où $X$ est une gaussienne standard ; intuitivement $|W_t-W_s|$ est \\og d'ordre $|t-s|^{1/2}$\\fg{}. La Proposition 7.5 affirme que pour tout $\\beta\\in\\,]0,1/2[$, $|W_t-W_s|$ est au plus d'ordre $|t-s|^\\beta$, simultanément pour tous $s<t\\in D$ ($\\sup_{s\\neq t}\\frac{|W_t-W_s|}{|t-s|^\\beta}<\\infty$ p.s.). En revanche, à l'exposant critique $1/2$ on a $\\sup_{s\\neq t\\in D}\\frac{|W_t-W_s|}{|t-s|^{1/2}}=\\infty$ presque sûrement : le mouvement brownien n'est pas $\\tfrac12$-höldérien.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Loi $N(0,t-s)$ et égalité en loi $|W_t-W_s|=\\sqrt{t-s}\\,|X|$, ordre $|t-s|^{1/2}$",
+          "weight": 2
+        },
+        {
+          "label": "Énoncé : pour $\\beta\\in]0,1/2[$, $\\sup\\frac{|W_t-W_s|}{|t-s|^\\beta}<\\infty$ p.s.",
+          "weight": 2
+        },
+        {
+          "label": "Cas critique $\\beta=1/2$ : le sup vaut $\\infty$ p.s.",
+          "weight": 2
+        }
+      ]
+    },
+    "front_en": "Let $(W_t)_{t\\in D}$ be a process such that for all $n\\in\\mathbb N$ the random variables $\\big(W_{(k+1)2^{-n}}-W_{k2^{-n}}\\big)_{k\\in[\\![0,2^n-1]\\!]}$ are independent with distribution $N(0,2^{-n})$. For $s<t\\in D$, find the distribution of $W_t-W_s$, deduce the \"order of magnitude\" of $|W_t-W_s|$, and state the corresponding comparison result at the exponent $\\beta=1/2$.",
+    "back_en": "For $s<t\\in D$, the increment has distribution $W_t-W_s\\sim N(0,t-s)$. Hence, in distribution, $|W_t-W_s|=\\sqrt{t-s}\\,\\cdot|X|$, where $X$ is a standard Gaussian; intuitively $|W_t-W_s|$ is \"of order $|t-s|^{1/2}$\". Proposition 7.5 states that for every $\\beta\\in\\,]0,1/2[$, $|W_t-W_s|$ is at most of order $|t-s|^\\beta$, simultaneously for all $s<t\\in D$ ($\\sup_{s\\neq t}\\frac{|W_t-W_s|}{|t-s|^\\beta}<\\infty$ a.s.). In contrast, at the critical exponent $1/2$ one has $\\sup_{s\\neq t\\in D}\\frac{|W_t-W_s|}{|t-s|^{1/2}}=\\infty$ almost surely: Brownian motion is not $\\tfrac12$-Hölder.",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Distribution $N(0,t-s)$ and equality in law $|W_t-W_s|=\\sqrt{t-s}\\,|X|$, order $|t-s|^{1/2}$",
+          "weight": 2
+        },
+        {
+          "label": "Statement: for $\\beta\\in]0,1/2[$, $\\sup\\frac{|W_t-W_s|}{|t-s|^\\beta}<\\infty$ a.s.",
+          "weight": 2
+        },
+        {
+          "label": "Critical case $\\beta=1/2$: the sup equals $\\infty$ a.s.",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch8-ex01",
+    "course": "Martingales",
+    "category": "Ch. 8",
+    "kind": "exercice",
+    "difficulty": 3,
+    "front_en": "Let $B=(B_t)_{t\\in\\mathbb{R}_+}$ be a Brownian motion in $\\mathbb{R}^d$ with $\\mathcal{F}_t=\\sigma(B_s; s\\in[0,t])$. Fix $D\\in\\mathcal{B}(\\mathbb{R}^d)$ and let $\\tau=\\inf\\{t\\in\\mathbb{R}_+: B_t\\in D\\}$ be the first hitting time of $D$ (convention $\\inf\\varnothing=\\infty$). Show that if $D$ is closed, then $\\tau$ is a stopping time with respect to $(\\mathcal{F}_t)_{t\\in\\mathbb{R}_+}$. Why does the naive argument fail for a general Borel set $D$?",
+    "back_en": "For a general Borel $D$ the naive identity $(\\tau\\le t)=\\big(\\exists s\\in[0,t]:B_s\\in D\\big)=\\bigcup_{s\\in[0,t]}(B_s\\in D)$ is problematic: the second equality always holds but is an uncountable union, so it need not lie in $\\mathcal{F}_t$, and the first equality can even fail. Now assume $D$ is closed. First, $(\\tau\\le t)=\\big(\\exists s\\in[0,t]:B_s\\in D\\big)$: if such $s$ exists then $\\tau\\le s\\le t$; conversely if $\\tau\\le t$, then since $s\\mapsto B_s$ is continuous and $D$ is closed, the set $\\{s:B_s\\in D\\}$ is closed, so $B_\\tau\\in D$, giving an $s=\\tau\\in[0,t]$ with $B_s\\in D$. Since $D$ is closed, $\\exists s\\in[0,t]:B_s\\in D$ is equivalent to $\\inf_{s\\in[0,t]}d(B_s,D)=0$. Finally, continuity of $s\\mapsto B_s$ makes $s\\mapsto d(B_s,D)$ continuous, so the infimum over $[0,t]$ equals the infimum over rationals: $(\\tau\\le t)=\\big(\\inf_{s\\in[0,t]\\cap\\mathbb{Q}}d(B_s,D)=0\\big)\\in\\mathcal{F}_t$. Hence $\\tau$ is a stopping time.",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Explains why the naive uncountable-union argument fails for a general Borel $D$ (not in $\\mathcal{F}_t$).",
+          "weight": 2
+        },
+        {
+          "label": "Proves $(\\tau\\le t)=(\\exists s\\in[0,t]:B_s\\in D)$ using closedness of $D$ and continuity (so $B_\\tau\\in D$).",
+          "weight": 2
+        },
+        {
+          "label": "Rewrites as $\\inf_{s\\in[0,t]\\cap\\mathbb{Q}}d(B_s,D)=0$ via continuity of $s\\mapsto d(B_s,D)$ and concludes $(\\tau\\le t)\\in\\mathcal{F}_t$.",
+          "weight": 2
+        }
+      ]
+    },
+    "front": "Soit $B=(B_t)_{t\\in\\mathbb{R}_+}$ un mouvement brownien dans $\\mathbb{R}^d$ avec $\\mathcal{F}_t=\\sigma(B_s; s\\in[0,t])$. Fixons $D\\in\\mathcal{B}(\\mathbb{R}^d)$ et posons $\\tau=\\inf\\{t\\in\\mathbb{R}_+: B_t\\in D\\}$ le premier temps d'atteinte de $D$ (convention $\\inf\\varnothing=\\infty$). Montrer que si $D$ est fermé, alors $\\tau$ est un temps d'arrêt pour $(\\mathcal{F}_t)_{t\\in\\mathbb{R}_+}$. Pourquoi l'argument naïf échoue-t-il pour un borélien $D$ quelconque ?",
+    "back": "Pour un borélien $D$ quelconque, l'identité naïve $(\\tau\\le t)=\\big(\\exists s\\in[0,t]:B_s\\in D\\big)=\\bigcup_{s\\in[0,t]}(B_s\\in D)$ pose problème : la seconde égalité est toujours vraie mais c'est une union non dénombrable, donc l'événement n'appartient pas nécessairement à $\\mathcal{F}_t$, et la première égalité peut même être fausse. Supposons maintenant $D$ fermé. D'abord, $(\\tau\\le t)=\\big(\\exists s\\in[0,t]:B_s\\in D\\big)$ : si un tel $s$ existe alors $\\tau\\le s\\le t$ ; réciproquement si $\\tau\\le t$, alors comme $s\\mapsto B_s$ est continue et $D$ fermé, l'ensemble $\\{s:B_s\\in D\\}$ est fermé, donc $B_\\tau\\in D$, ce qui fournit un $s=\\tau\\in[0,t]$ avec $B_s\\in D$. Comme $D$ est fermé, $\\exists s\\in[0,t]:B_s\\in D$ équivaut à $\\inf_{s\\in[0,t]}d(B_s,D)=0$. Enfin, la continuité de $s\\mapsto B_s$ rend $s\\mapsto d(B_s,D)$ continue, donc l'infimum sur $[0,t]$ égale l'infimum sur les rationnels : $(\\tau\\le t)=\\big(\\inf_{s\\in[0,t]\\cap\\mathbb{Q}}d(B_s,D)=0\\big)\\in\\mathcal{F}_t$. Ainsi $\\tau$ est un temps d'arrêt.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Explique pourquoi l'argument naïf par union non dénombrable échoue pour un borélien $D$ quelconque (pas dans $\\mathcal{F}_t$).",
+          "weight": 2
+        },
+        {
+          "label": "Démontre $(\\tau\\le t)=(\\exists s\\in[0,t]:B_s\\in D)$ en utilisant la fermeture de $D$ et la continuité (donc $B_\\tau\\in D$).",
+          "weight": 2
+        },
+        {
+          "label": "Réécrit comme $\\inf_{s\\in[0,t]\\cap\\mathbb{Q}}d(B_s,D)=0$ via la continuité de $s\\mapsto d(B_s,D)$ et conclut $(\\tau\\le t)\\in\\mathcal{F}_t$.",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch9-ex01",
+    "course": "Martingales",
+    "category": "Ch. 9",
+    "kind": "exercice",
+    "difficulty": 1,
+    "front_en": "Let $(B_t)_{t\\in\\mathbb{R}_+}$ be a Brownian motion in $\\mathbb{R}$ and $\\mathcal{F}_t=\\sigma(B_s;\\,s\\in[0,t])$. Show that $(B_t)_{t\\in\\mathbb{R}_+}$ is a martingale with respect to $(\\mathcal{F}_t)_{t\\in\\mathbb{R}_+}$, i.e. that for all $s\\le t$ one has $\\mathbb{E}[B_t\\mid\\mathcal{F}_s]=B_s$ almost surely.",
+    "back_en": "For each $t\\in\\mathbb{R}_+$, the variable $B_t$ is $\\mathcal{F}_t$-measurable and integrable (since $B_t\\sim\\mathcal{N}(0,t)$). Fix $s\\le t$. Write $B_t=B_s+(B_t-B_s)$. Here $B_s$ is $\\mathcal{F}_s$-measurable, and by the simple Markov property the increment $B_t-B_s$ is independent of $\\mathcal{F}_s$ and centred ($\\mathbb{E}[B_t-B_s]=0$). Hence, almost surely,\n$$\\mathbb{E}[B_t\\mid\\mathcal{F}_s]=\\mathbb{E}[B_s+(B_t-B_s)\\mid\\mathcal{F}_s]=B_s+\\mathbb{E}[B_t-B_s]=B_s+0=B_s.$$\nTherefore $(B_t)_{t\\in\\mathbb{R}_+}$ is a martingale, exactly as in the discrete-time case.",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Adaptedness and integrability of $B_t$ stated",
+          "weight": 2
+        },
+        {
+          "label": "Decomposition $B_t=B_s+(B_t-B_s)$ with $B_t-B_s\\perp\\mathcal{F}_s$ centred (Markov property)",
+          "weight": 2
+        },
+        {
+          "label": "Conclusion $\\mathbb{E}[B_t\\mid\\mathcal{F}_s]=B_s$",
+          "weight": 2
+        }
+      ]
+    },
+    "front": "Soit $(B_t)_{t\\in\\mathbb{R}_+}$ un mouvement brownien dans $\\mathbb{R}$ et $\\mathcal{F}_t=\\sigma(B_s;\\,s\\in[0,t])$. Montrer que $(B_t)_{t\\in\\mathbb{R}_+}$ est une martingale par rapport à $(\\mathcal{F}_t)_{t\\in\\mathbb{R}_+}$, c'est-à-dire que pour tous $s\\le t$ on a $\\mathbb{E}[B_t\\mid\\mathcal{F}_s]=B_s$ presque sûrement.",
+    "back": "Pour chaque $t\\in\\mathbb{R}_+$, la variable $B_t$ est $\\mathcal{F}_t$-mesurable et intégrable (car $B_t\\sim\\mathcal{N}(0,t)$). Fixons $s\\le t$. Écrivons $B_t=B_s+(B_t-B_s)$. Ici $B_s$ est $\\mathcal{F}_s$-mesurable, et par la propriété de Markov simple l'accroissement $B_t-B_s$ est indépendant de $\\mathcal{F}_s$ et centré ($\\mathbb{E}[B_t-B_s]=0$). Donc, presque sûrement,\n$$\\mathbb{E}[B_t\\mid\\mathcal{F}_s]=\\mathbb{E}[B_s+(B_t-B_s)\\mid\\mathcal{F}_s]=B_s+\\mathbb{E}[B_t-B_s]=B_s+0=B_s.$$\nAinsi $(B_t)_{t\\in\\mathbb{R}_+}$ est une martingale, exactement comme dans le cas en temps discret.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Adaptation et intégrabilité de $B_t$ énoncées",
+          "weight": 2
+        },
+        {
+          "label": "Décomposition $B_t=B_s+(B_t-B_s)$ avec $B_t-B_s\\perp\\mathcal{F}_s$ centré (propriété de Markov)",
+          "weight": 2
+        },
+        {
+          "label": "Conclusion $\\mathbb{E}[B_t\\mid\\mathcal{F}_s]=B_s$",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch9-ex02",
+    "course": "Martingales",
+    "category": "Ch. 9",
+    "kind": "exercice",
+    "difficulty": 2,
+    "front_en": "Let $(B_t)_{t\\in\\mathbb{R}_+}$ be a standard Brownian motion in $\\mathbb{R}$ with filtration $(\\mathcal{F}_t)$. Show that the process $\\bigl(B_t^2-t\\bigr)_{t\\in\\mathbb{R}_+}$ is a martingale with respect to $(\\mathcal{F}_t)$ (Example 9.1, first item).",
+    "back_en": "The process is adapted and integrable since $\\mathbb{E}[B_t^2]=t<\\infty$. Fix $s\\le t$ and write $B_t=B_s+(B_t-B_s)$, so\n$$B_t^2=B_s^2+2B_s(B_t-B_s)+(B_t-B_s)^2.$$\nTaking conditional expectation given $\\mathcal{F}_s$: $B_s$ is $\\mathcal{F}_s$-measurable, while $B_t-B_s$ is independent of $\\mathcal{F}_s$, centred, with $\\mathbb{E}[(B_t-B_s)^2]=t-s$. Hence almost surely\n$$\\mathbb{E}[B_t^2\\mid\\mathcal{F}_s]=B_s^2+2B_s\\,\\mathbb{E}[B_t-B_s]+\\mathbb{E}[(B_t-B_s)^2]=B_s^2+0+(t-s).$$\nSubtracting $t$ gives $\\mathbb{E}[B_t^2-t\\mid\\mathcal{F}_s]=B_s^2-s$, so $(B_t^2-t)_t$ is a martingale, as in the discrete-time case.",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Integrability/adaptedness and expansion of $B_t^2$ via $B_t=B_s+(B_t-B_s)$",
+          "weight": 2
+        },
+        {
+          "label": "Independence/centring of the increment and $\\mathbb{E}[(B_t-B_s)^2]=t-s$",
+          "weight": 2
+        },
+        {
+          "label": "Conclusion $\\mathbb{E}[B_t^2-t\\mid\\mathcal{F}_s]=B_s^2-s$",
+          "weight": 2
+        }
+      ]
+    },
+    "front": "Soit $(B_t)_{t\\in\\mathbb{R}_+}$ un mouvement brownien standard dans $\\mathbb{R}$ de filtration $(\\mathcal{F}_t)$. Montrer que le processus $\\bigl(B_t^2-t\\bigr)_{t\\in\\mathbb{R}_+}$ est une martingale par rapport à $(\\mathcal{F}_t)$ (Exemple 9.1, premier point).",
+    "back": "Le processus est adapté et intégrable car $\\mathbb{E}[B_t^2]=t<\\infty$. Fixons $s\\le t$ et écrivons $B_t=B_s+(B_t-B_s)$, d'où\n$$B_t^2=B_s^2+2B_s(B_t-B_s)+(B_t-B_s)^2.$$\nEn prenant l'espérance conditionnelle sachant $\\mathcal{F}_s$ : $B_s$ est $\\mathcal{F}_s$-mesurable, tandis que $B_t-B_s$ est indépendant de $\\mathcal{F}_s$, centré, avec $\\mathbb{E}[(B_t-B_s)^2]=t-s$. Donc presque sûrement\n$$\\mathbb{E}[B_t^2\\mid\\mathcal{F}_s]=B_s^2+2B_s\\,\\mathbb{E}[B_t-B_s]+\\mathbb{E}[(B_t-B_s)^2]=B_s^2+0+(t-s).$$\nEn retranchant $t$ on obtient $\\mathbb{E}[B_t^2-t\\mid\\mathcal{F}_s]=B_s^2-s$, donc $(B_t^2-t)_t$ est une martingale, comme dans le cas en temps discret.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Intégrabilité/adaptation et développement de $B_t^2$ via $B_t=B_s+(B_t-B_s)$",
+          "weight": 2
+        },
+        {
+          "label": "Indépendance/centrage de l'accroissement et $\\mathbb{E}[(B_t-B_s)^2]=t-s$",
+          "weight": 2
+        },
+        {
+          "label": "Conclusion $\\mathbb{E}[B_t^2-t\\mid\\mathcal{F}_s]=B_s^2-s$",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch9-ex03",
+    "course": "Martingales",
+    "category": "Ch. 9",
+    "kind": "exercice",
+    "difficulty": 2,
+    "front_en": "Let $(B_t)_{t\\in\\mathbb{R}_+}$ be a standard Brownian motion with filtration $(\\mathcal{F}_t)$, and fix $\\lambda\\in\\mathbb{R}$. Show that the exponential process $\\Bigl(\\exp\\bigl(\\lambda B_t-\\tfrac{\\lambda^2 t}{2}\\bigr)\\Bigr)_{t\\in\\mathbb{R}_+}$ is a martingale with respect to $(\\mathcal{F}_t)$ (Example 9.1, second item).",
+    "back_en": "Set $M_t=\\exp(\\lambda B_t-\\tfrac{\\lambda^2 t}{2})$. The process is adapted, and integrable since $\\mathbb{E}[e^{\\lambda B_t}]=e^{\\lambda^2 t/2}<\\infty$ (the moment generating function of $\\mathcal{N}(0,t)$), so $\\mathbb{E}[M_t]=1$. Fix $s\\le t$ and use $B_t=B_s+(B_t-B_s)$:\n$$\\mathbb{E}[M_t\\mid\\mathcal{F}_s]=e^{-\\lambda^2 t/2}\\,\\mathbb{E}\\bigl[e^{\\lambda B_s}e^{\\lambda(B_t-B_s)}\\mid\\mathcal{F}_s\\bigr]=e^{-\\lambda^2 t/2}\\,e^{\\lambda B_s}\\,\\mathbb{E}\\bigl[e^{\\lambda(B_t-B_s)}\\bigr],$$\nsince $e^{\\lambda B_s}$ is $\\mathcal{F}_s$-measurable and the increment $B_t-B_s\\sim\\mathcal{N}(0,t-s)$ is independent of $\\mathcal{F}_s$. As $\\mathbb{E}[e^{\\lambda(B_t-B_s)}]=e^{\\lambda^2(t-s)/2}$, we get\n$$\\mathbb{E}[M_t\\mid\\mathcal{F}_s]=e^{-\\lambda^2 t/2}\\,e^{\\lambda B_s}\\,e^{\\lambda^2(t-s)/2}=e^{\\lambda B_s-\\lambda^2 s/2}=M_s.$$\nHence $(M_t)_t$ is a martingale.",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Integrability via $\\mathbb{E}[e^{\\lambda B_t}]=e^{\\lambda^2 t/2}$ and factorization using $B_t=B_s+(B_t-B_s)$",
+          "weight": 2
+        },
+        {
+          "label": "Independence of the increment and $\\mathbb{E}[e^{\\lambda(B_t-B_s)}]=e^{\\lambda^2(t-s)/2}$",
+          "weight": 2
+        },
+        {
+          "label": "Conclusion $\\mathbb{E}[M_t\\mid\\mathcal{F}_s]=M_s$",
+          "weight": 2
+        }
+      ]
+    },
+    "front": "Soit $(B_t)_{t\\in\\mathbb{R}_+}$ un mouvement brownien standard de filtration $(\\mathcal{F}_t)$, et fixons $\\lambda\\in\\mathbb{R}$. Montrer que le processus exponentiel $\\Bigl(\\exp\\bigl(\\lambda B_t-\\tfrac{\\lambda^2 t}{2}\\bigr)\\Bigr)_{t\\in\\mathbb{R}_+}$ est une martingale par rapport à $(\\mathcal{F}_t)$ (Exemple 9.1, second point).",
+    "back": "Posons $M_t=\\exp(\\lambda B_t-\\tfrac{\\lambda^2 t}{2})$. Le processus est adapté, et intégrable car $\\mathbb{E}[e^{\\lambda B_t}]=e^{\\lambda^2 t/2}<\\infty$ (fonction génératrice des moments de $\\mathcal{N}(0,t)$), donc $\\mathbb{E}[M_t]=1$. Fixons $s\\le t$ et utilisons $B_t=B_s+(B_t-B_s)$ :\n$$\\mathbb{E}[M_t\\mid\\mathcal{F}_s]=e^{-\\lambda^2 t/2}\\,\\mathbb{E}\\bigl[e^{\\lambda B_s}e^{\\lambda(B_t-B_s)}\\mid\\mathcal{F}_s\\bigr]=e^{-\\lambda^2 t/2}\\,e^{\\lambda B_s}\\,\\mathbb{E}\\bigl[e^{\\lambda(B_t-B_s)}\\bigr],$$\ncar $e^{\\lambda B_s}$ est $\\mathcal{F}_s$-mesurable et l'accroissement $B_t-B_s\\sim\\mathcal{N}(0,t-s)$ est indépendant de $\\mathcal{F}_s$. Comme $\\mathbb{E}[e^{\\lambda(B_t-B_s)}]=e^{\\lambda^2(t-s)/2}$, on obtient\n$$\\mathbb{E}[M_t\\mid\\mathcal{F}_s]=e^{-\\lambda^2 t/2}\\,e^{\\lambda B_s}\\,e^{\\lambda^2(t-s)/2}=e^{\\lambda B_s-\\lambda^2 s/2}=M_s.$$\nDonc $(M_t)_t$ est une martingale.",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Intégrabilité via $\\mathbb{E}[e^{\\lambda B_t}]=e^{\\lambda^2 t/2}$ et factorisation par $B_t=B_s+(B_t-B_s)$",
+          "weight": 2
+        },
+        {
+          "label": "Indépendance de l'accroissement et $\\mathbb{E}[e^{\\lambda(B_t-B_s)}]=e^{\\lambda^2(t-s)/2}$",
+          "weight": 2
+        },
+        {
+          "label": "Conclusion $\\mathbb{E}[M_t\\mid\\mathcal{F}_s]=M_s$",
+          "weight": 2
+        }
+      ]
+    }
+  },
+  {
+    "id": "m330-ch9-ex04",
+    "course": "Martingales",
+    "category": "Ch. 9",
+    "kind": "exercice",
+    "difficulty": 3,
+    "front_en": "Let $(B_t)_{t\\in\\mathbb{R}_+}$ be a standard Brownian motion, fix $a,b>0$, and let $\\tau=\\inf\\{t\\in\\mathbb{R}_+:B_t\\notin\\,]-a,b[\\,\\}$ be the first exit time of $]-a,b[$. Granting that $\\tau<\\infty$ almost surely and that $\\mathbb{E}[B_\\tau\\,;\\,\\tau<\\infty]=\\mathbb{E}[B_0]=0$, compute the exit probabilities $\\mathbb{P}(B_\\tau=b)$ and $\\mathbb{P}(B_\\tau=-a)$.",
+    "back_en": "Almost surely, on $(\\tau<\\infty)$ the path exits through one of the two endpoints, so $B_\\tau\\in\\{-a,b\\}$. Since $\\tau<\\infty$ a.s., the two events $\\{B_\\tau=b\\}$ and $\\{B_\\tau=-a\\}$ partition $\\Omega$ up to a null set, giving\n$$\\mathbb{P}(B_\\tau=b)+\\mathbb{P}(B_\\tau=-a)=1.$$\nThe optional-stopping identity $\\mathbb{E}[B_\\tau]=0$ reads\n$$b\\,\\mathbb{P}(B_\\tau=b)+(-a)\\,\\mathbb{P}(B_\\tau=-a)=0.$$\nSolving this $2\\times 2$ linear system: from the first equation $\\mathbb{P}(B_\\tau=-a)=1-\\mathbb{P}(B_\\tau=b)$; substituting, $b\\,\\mathbb{P}(B_\\tau=b)-a\\bigl(1-\\mathbb{P}(B_\\tau=b)\\bigr)=0$, i.e. $(a+b)\\mathbb{P}(B_\\tau=b)=a$. Hence\n$$\\mathbb{P}(B_\\tau=b)=\\frac{a}{a+b},\\qquad \\mathbb{P}(B_\\tau=-a)=\\frac{b}{a+b}.$$\n(The farther boundary is reached with smaller probability, reflecting the continuous-time gambler's-ruin formula.)",
+    "bareme_en": {
+      "total": 6,
+      "points": [
+        {
+          "label": "On $\\{\\tau<\\infty\\}$, $B_\\tau\\in\\{-a,b\\}$ and the two events partition: probabilities sum to $1$",
+          "weight": 2
+        },
+        {
+          "label": "Use $\\mathbb{E}[B_\\tau]=0$ to write $b\\,\\mathbb{P}(B_\\tau=b)-a\\,\\mathbb{P}(B_\\tau=-a)=0$",
+          "weight": 2
+        },
+        {
+          "label": "Solve the system: $\\mathbb{P}(B_\\tau=b)=\\tfrac{a}{a+b},\\ \\mathbb{P}(B_\\tau=-a)=\\tfrac{b}{a+b}$",
+          "weight": 2
+        }
+      ]
+    },
+    "front": "Soit $(B_t)_{t\\in\\mathbb{R}_+}$ un mouvement brownien standard, fixons $a,b>0$, et soit $\\tau=\\inf\\{t\\in\\mathbb{R}_+:B_t\\notin\\,]-a,b[\\,\\}$ le premier temps de sortie de $]-a,b[$. En admettant que $\\tau<\\infty$ presque sûrement et que $\\mathbb{E}[B_\\tau\\,;\\,\\tau<\\infty]=\\mathbb{E}[B_0]=0$, calculer les probabilités de sortie $\\mathbb{P}(B_\\tau=b)$ et $\\mathbb{P}(B_\\tau=-a)$.",
+    "back": "Presque sûrement, sur $(\\tau<\\infty)$ la trajectoire sort par l'une des deux extrémités, donc $B_\\tau\\in\\{-a,b\\}$. Comme $\\tau<\\infty$ p.s., les deux événements $\\{B_\\tau=b\\}$ et $\\{B_\\tau=-a\\}$ partitionnent $\\Omega$ à un ensemble négligeable près, d'où\n$$\\mathbb{P}(B_\\tau=b)+\\mathbb{P}(B_\\tau=-a)=1.$$\nL'identité d'arrêt optionnel $\\mathbb{E}[B_\\tau]=0$ s'écrit\n$$b\\,\\mathbb{P}(B_\\tau=b)+(-a)\\,\\mathbb{P}(B_\\tau=-a)=0.$$\nRésolution du système linéaire $2\\times 2$ : de la première équation $\\mathbb{P}(B_\\tau=-a)=1-\\mathbb{P}(B_\\tau=b)$ ; en substituant, $b\\,\\mathbb{P}(B_\\tau=b)-a\\bigl(1-\\mathbb{P}(B_\\tau=b)\\bigr)=0$, soit $(a+b)\\mathbb{P}(B_\\tau=b)=a$. D'où\n$$\\mathbb{P}(B_\\tau=b)=\\frac{a}{a+b},\\qquad \\mathbb{P}(B_\\tau=-a)=\\frac{b}{a+b}.$$\n(La frontière la plus éloignée est atteinte avec une probabilité plus faible, reflétant la formule de ruine du joueur en temps continu.)",
+    "bareme": {
+      "total": 6,
+      "points": [
+        {
+          "label": "Sur $\\{\\tau<\\infty\\}$, $B_\\tau\\in\\{-a,b\\}$ et les deux événements partitionnent : somme des probabilités $=1$",
+          "weight": 2
+        },
+        {
+          "label": "Utiliser $\\mathbb{E}[B_\\tau]=0$ pour écrire $b\\,\\mathbb{P}(B_\\tau=b)-a\\,\\mathbb{P}(B_\\tau=-a)=0$",
+          "weight": 2
+        },
+        {
+          "label": "Résoudre le système : $\\mathbb{P}(B_\\tau=b)=\\tfrac{a}{a+b},\\ \\mathbb{P}(B_\\tau=-a)=\\tfrac{b}{a+b}$",
+          "weight": 2
+        }
+      ]
+    }
   }
 ]
