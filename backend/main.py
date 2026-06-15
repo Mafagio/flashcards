@@ -346,10 +346,10 @@ def _form_audit_batch(db, uid: int, course: str) -> int:
             continue
         seen.add(cid)
         c = db.execute("SELECT difficulty FROM cards WHERE id=?", (cid,)).fetchone()
-        never = db.execute("SELECT 1 FROM audits WHERE user_id=? AND card_id=? LIMIT 1",
-                           (uid, cid)).fetchone() is None
+        n_aud = db.execute("SELECT COUNT(*) n FROM audits WHERE user_id=? AND card_id=? "
+                           "AND status IN ('passed','failed')", (uid, cid)).fetchone()["n"]
         items.append(rv)
-        weights.append(S.audit_weight(c["difficulty"], never, cid in opp_failed))
+        weights.append(S.audit_weight(c["difficulty"], n_aud, cid in opp_failed))
 
     chosen = weighted_sample(items, weights, S.AUDIT_SAMPLE)
     chosen_ids = {rv["id"] for rv in chosen}

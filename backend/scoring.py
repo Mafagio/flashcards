@@ -60,9 +60,11 @@ DUEL_WIN: float = 10.0
 DUEL_PARTICIPATE: float = 2.0
 DUEL_N: int = 6              # nb de cartes par duel
 
-# Pondération du tirage d'audit (audit plus probable si jamais audité / dur /
+# Pondération du tirage d'audit (audit plus probable si peu audité / dur /
 # raté récemment par l'adversaire) -> l'audit devient informatif, pas du bruit.
-W_NEVER_AUDITED = 1.6
+# DÉCROISSANCE : chaque audit DÉJÀ passé sur la carte multiplie sa proba de retomber
+# par W_AUDIT_DECAY -> "pas mal moins" à chaque fois (0:1 · 1:½ · 2:¼ · 3:⅛ · 4:1/16).
+W_AUDIT_DECAY = 0.5
 W_DIFFICULTY = {1: 0.8, 2: 1.0, 3: 1.4}
 W_OPP_FAILED = 1.5
 
@@ -179,12 +181,12 @@ def tokens_for_xp(old_milestone: float, new_xp: float) -> tuple[int, float]:
     return max(0, granted), new_xp
 
 
-def audit_weight(difficulty: int, never_audited: bool, opp_failed: bool) -> float:
-    """Poids d'une carte dans le tirage au sort des audits (>0)."""
-    w = 1.0
-    if never_audited:
-        w *= W_NEVER_AUDITED
-    w *= W_DIFFICULTY.get(difficulty, 1.0)
+def audit_weight(difficulty: int, n_audits: int, opp_failed: bool) -> float:
+    """Poids d'une carte dans le tirage au sort des audits (>0).
+    n_audits = nb de fois où CET utilisateur a déjà été audité (corrigé) sur cette carte :
+    plus il est grand, moins la carte risque de retomber (décroissance géométrique 0.5^n)."""
+    w = W_DIFFICULTY.get(difficulty, 1.0)
+    w *= W_AUDIT_DECAY ** max(0, n_audits)
     if opp_failed:
         w *= W_OPP_FAILED
     return w
