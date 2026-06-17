@@ -236,8 +236,12 @@ def progress(u=Depends(current_user)):
         q = r["q"] if r["q"] is not None else 0.6   # repli prudent (ne surevalue pas une confiance inconnue)
         return 3 if q >= 0.95 else (2 if q >= 0.8 else 1)
 
+    def _snip(s):
+        s = (s or "").strip().replace("\n", " ")
+        return s[:160] + ("…" if len(s) > 160 else "")
+
     out = {}
-    for c in db.execute("SELECT id, course, category, kind, front FROM cards "
+    for c in db.execute("SELECT id, course, category, kind, front, front_en FROM cards "
                         "WHERE kind != 'exam' ORDER BY course, category, id"):
         lv = level(c["id"])
         cat = out.setdefault(c["course"], {}).setdefault(
@@ -247,9 +251,9 @@ def progress(u=Depends(current_user)):
         if lv >= 1:
             cat["known"] += 1
         cat["levels"][str(lv)] += 1
-        front = (c["front"] or "").strip().replace("\n", " ")
         cat["cards"].append({"id": c["id"], "kind": c["kind"], "level": lv,
-                             "front": front[:160] + ("…" if len(front) > 160 else "")})
+                             "front": _snip(c["front"]),
+                             "front_en": _snip(c["front_en"]) if c["front_en"] else None})
     return {course: list(cats.values()) for course, cats in out.items()}
 
 

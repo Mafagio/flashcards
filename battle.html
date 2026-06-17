@@ -344,9 +344,17 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
 .prog-bar>i{display:block;height:100%}
 .prog-count{margin-left:auto;font-size:13px;font-variant-numeric:tabular-nums;color:var(--muted);white-space:nowrap}
 .prog-count b{color:var(--ink)}
-.prog-grid{display:none;grid-template-columns:repeat(auto-fill,minmax(24px,1fr));gap:5px;padding:4px 14px 14px}
-.prog-cat.open .prog-grid{display:grid}
-.prog-cell{aspect-ratio:1;border-radius:5px;border:1px solid rgba(128,128,144,.30)}
+/* liste détaillée : un titre de carte par ligne, coloré par niveau, cliquable -> réviser cette carte */
+.prog-cardlist{display:none;flex-direction:column;gap:1px;padding:2px 8px 12px}
+.prog-cat.open .prog-cardlist{display:flex}
+.prog-card-row{display:flex;align-items:center;gap:11px;padding:8px 10px;border-radius:9px;cursor:pointer}
+.prog-card-row:hover{background:var(--accent-soft)}
+.prog-dot{width:12px;height:12px;border-radius:3px;flex-shrink:0;border:1px solid rgba(128,128,144,.30)}
+.prog-card-title{font-size:14px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.prog-card-kind{font-size:10.5px;color:var(--muted);flex-shrink:0;text-transform:uppercase;letter-spacing:.04em}
+.prog-card-row:hover .prog-card-kind::after{content:" ▸ réviser"}
+#update-banner{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--accent);color:#fff;
+  text-align:center;padding:11px;font-weight:700;cursor:pointer;font-size:14px;box-shadow:0 2px 10px rgba(0,0,0,.25)}
 /* échelle rouge -> vert (niveaux), gris = jamais vue */
 .lv--1{background:var(--track2)}
 .lv0{background:#e5484d}
@@ -659,6 +667,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
    ================================================================= */
 // Defaut = backend Railway (URL publique, sans token) -> le site publie marche sans reglage,
 // pour toi ET ton pote. Le champ "URL de l'API" reste prioritaire (dev local : http://localhost:8000).
+const APP_VERSION = 1;   // bumpé à chaque déploiement frontend (doit = version.json) -> bandeau de MAJ
 const DEFAULT_API = "https://battle-production-640a.up.railway.app";
 let API_BASE = (localStorage.getItem("battle_api_url") || "").trim().replace(/\/+$/, "") || DEFAULT_API;
 function setApiBase(v){
@@ -795,6 +804,9 @@ async function auth(path){
 
 $("#logout").onclick = ()=>{
   localStorage.removeItem("battle_creds"); creds=null;
+  // purge des caches propres à l'utilisateur (sinon fuite d'un joueur à l'autre sur le même appareil)
+  state.me=null; state.opponents=null; state.opponent=null; state.cards=null;
+  state.deck=null; state.session=null; PROG_CACHE=null; PROG_OPEN.clear();
   $("#app").classList.add("hidden"); $("#login").classList.remove("hidden");
 };
 
@@ -981,6 +993,40 @@ const PROG_LEVELS=[
   {cls:"lv4", label:"audit validé"}
 ];
 function lvClass(l){ l = (l==null ? -1 : l); return l<0 ? "lv--1" : "lv"+l; }
+// titre court d'une carte (pour la liste de progression) : le **gras** initial, sinon 1re phrase.
+function cardTitle(front){
+  front=(front||"").trim();
+  let title;
+  const m=front.match(/^\*\*(.+?)\*\*/);
+  if(m) title=m[1].replace(/\.\s*$/,"").trim();
+  else { const first=front.split(/[.\n]/)[0]||front; title=(first.length>70?first.slice(0,70)+"…":first).trim(); }
+  // si la troncature a laissé un $ non apparié, on coupe avant -> pas de KaTeX cassé
+  if(((title.match(/\$/g)||[]).length)%2) title=title.slice(0, title.lastIndexOf("$")).trim();
+  return title || "(carte)";
+}
+// réviser UNE carte précise (depuis la liste de progression) -> bascule sur l'écran de carte.
+async function startSingleCardReview(course, cardId){
+  let card;
+  try{ const all=await api(`/cards?course=${encodeURIComponent(course)}`); card=all.find(c=>c.id===cardId); }
+  catch(e){ toast(e.message,"alert"); return; }
+  if(!card){ toast("Carte introuvable.","alert"); return; }
+  // aligner la compétition courante sur le cours de la carte -> XP/rang/toast corrects (le backend
+  // crédite déjà la compétition de la carte ; sans ça l'UI afficherait « +0 XP »).
+  if(course !== state.course){
+    state.course=course; try{ localStorage.setItem("battle_course", course); }catch(e){}
+    if($("#rv-course")) $("#rv-course").value=course;
+    if($("#dl-course")) $("#dl-course").value=course;
+    renderCourseSwitch(); updateExamTabVisibility();
+    await refreshHeader();   // state.me reflète désormais l'XP du bon cours
+  }
+  $$("#tabs button").forEach(b=>b.classList.toggle("active", b.dataset.tab==="review"));
+  $$("#app section[data-panel]").forEach(s=>s.classList.toggle("hidden", s.dataset.panel!=="review"));
+  state.deck=[card]; state.idx=0;
+  state.session={seen:0, xp0:state.me.xp, shuffled:false, filter:null, loop:false,
+                 course, cats:[card.category], single:true, sig:null};
+  show("#review-card"); renderFlash();
+}
+const PROG_OPEN=new Set();   // catégories dépliées (clé course+catégorie) -> conservées au re-render
 async function renderProgress(){
   await refreshHeader();
   const data = await api("/progress");
@@ -1012,6 +1058,7 @@ async function renderProgress(){
       +`<div class="prog-summary-sub"><b>${known}</b>/${total} cartes connues · <b>${mastered}</b> maîtrisées (≥ « Très sûr ») = <b>${pctMast}%</b></div>`;
     body.appendChild(sum);
     cats.forEach(cat=>{
+      const key=course+"::"+cat.category;
       const wrap=document.createElement("div"); wrap.className="prog-cat";
       const head=document.createElement("div"); head.className="prog-cat-head";
       let bar='<div class="prog-bar">';
@@ -1020,14 +1067,28 @@ async function renderProgress(){
       bar+='</div>';
       head.innerHTML=`<span class="prog-caret">▶</span><span class="prog-cat-name">${escapeHtml(cat.category)}</span>${bar}`
         +`<span class="prog-count"><b>${cat.known}</b>/${cat.total} connues</span>`;
-      const grid=document.createElement("div"); grid.className="prog-grid";
-      cat.cards.forEach(c=>{
-        const cell=document.createElement("div"); cell.className="prog-cell "+lvClass(c.level);
-        cell.title=(c.kind?"["+c.kind+"] ":"")+(c.front||"");
-        grid.appendChild(cell);
-      });
-      head.onclick=()=> wrap.classList.toggle("open");
-      wrap.append(head, grid); body.appendChild(wrap);
+      const list=document.createElement("div"); list.className="prog-cardlist";
+      let built=false;
+      function buildList(){                 // LAZY : ne construit (et n'appelle KaTeX) que si déplié
+        if(built) return; built=true;
+        const en = (typeof cardLang==="function" && cardLang()==="en");
+        cat.cards.forEach(c=>{
+          const front = (en && c.front_en) ? c.front_en : c.front;
+          const row=document.createElement("div"); row.className="prog-card-row"; row.title=front||"";
+          const dot=document.createElement("span"); dot.className="prog-dot "+lvClass(c.level);
+          const t=document.createElement("span"); t.className="prog-card-title"; tex(t, cardTitle(front));
+          const k=document.createElement("span"); k.className="prog-card-kind"; k.textContent=c.kind||"";
+          row.append(dot, t, k);
+          row.onclick=()=> startSingleCardReview(course, c.id);
+          list.appendChild(row);
+        });
+      }
+      head.onclick=()=>{
+        const open=wrap.classList.toggle("open");
+        if(open){ buildList(); PROG_OPEN.add(key); } else PROG_OPEN.delete(key);
+      };
+      wrap.append(head, list); body.appendChild(wrap);
+      if(PROG_OPEN.has(key)){ wrap.classList.add("open"); buildList(); }   // restaure l'état déplié au re-render
     });
   });
 }
@@ -1135,7 +1196,10 @@ function renderCats(){
 $("#rv-start").onclick = ()=>startReview();
 $("#rv-again").onclick = ()=>{ show("#review-setup"); reviewSetupRefresh(); };
 $("#rv-flip").onclick  = flipCard;
-$("#rv-exit").onclick  = ()=>{ persistSession(); show("#review-setup"); reviewSetupRefresh(); };  // quitter en cours -> proposé en "Reprendre"
+$("#rv-exit").onclick  = ()=>{
+  if(state.session && state.session.single){ show("#review-setup"); switchTab("progress"); return; }
+  persistSession(); show("#review-setup"); reviewSetupRefresh();   // quitter en cours -> proposé en "Reprendre"
+};
 $("#rv-cats").addEventListener("change", ()=>updateBanners());
 
 /* Ordre des cartes (mélangé = +25% XP) — sélection + persistance */
@@ -1391,6 +1455,14 @@ async function declare(btn){
   }
 }
 function finishReview(){
+  // révision d'une seule carte (depuis la Progression) -> retour direct à la progression (couleur mise à jour).
+  if(state.session && state.session.single){
+    const g=Math.round((state.me.xp - state.session.xp0)*10)/10;
+    show("#review-setup");
+    switchTab("progress");
+    toast(`Carte mise à jour (${g>=0?"+":""}${g} XP) ✓`, "good");
+    return;
+  }
   const wasLoop = !!(state.session && state.session.loop);
   if(state.session && state.session.sig) clearSession(state.session.sig);   // session terminée
   const gained = Math.round((state.me.xp - state.session.xp0)*10)/10;
@@ -1697,7 +1769,28 @@ function fmtTime(s){
 }
 
 /* ---------- boot ---------- */
+// Mise à jour : si une version plus récente est publiée, proposer de recharger (évite que les
+// amis restent bloqués sur un vieux battle.html mis en cache). Pas de reload auto -> pas de boucle.
+async function checkVersion(){
+  try{
+    const r = await fetch("version.json?t="+Date.now(), {cache:"no-store"});
+    if(!r.ok) return;
+    const d = await r.json();
+    const tried = new URLSearchParams(location.search).get("v");   // version déjà tentée via ?v=
+    // garde anti-boucle : si on a déjà rechargé pour cette version mais que le HTML reste ancien
+    // (désync APP_VERSION/version.json ou CDN), on n'affiche PAS le bandeau -> pas de cycle.
+    if(d && typeof d.v === "number" && d.v > APP_VERSION && String(d.v) !== tried
+       && !document.getElementById("update-banner")){
+      const b=document.createElement("div"); b.id="update-banner";
+      b.textContent="🔄 Nouvelle version disponible — clique pour recharger";
+      b.onclick=()=> location.replace(location.pathname + "?v=" + d.v);   // ?v= casse le cache navigateur
+      document.body.appendChild(b);
+      document.body.style.paddingTop="44px";   // évite que le bandeau masque le header
+    }
+  }catch(e){}
+}
 window.addEventListener("DOMContentLoaded", async()=>{
+  checkVersion();
   if(creds){
     try{ await enterApp(); }
     catch(e){ localStorage.removeItem("battle_creds"); creds=null; $("#login").classList.remove("hidden"); }
