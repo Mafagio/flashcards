@@ -353,6 +353,14 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
 .prog-card-title{font-size:14px;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .prog-card-kind{font-size:10.5px;color:var(--muted);flex-shrink:0;text-transform:uppercase;letter-spacing:.04em}
 .prog-card-row:hover .prog-card-kind::after{content:" ▸ réviser"}
+/* VUE D'ENSEMBLE : tout visible, chapitre par chapitre (sans repli) */
+.prog-viewseg{display:inline-flex;margin:0 0 16px;width:auto}
+.prog-ov-cat{margin:0 0 18px}
+.prog-ov-head{display:flex;align-items:center;gap:12px;padding:10px 12px;font-weight:700;font-size:15px;
+  background:var(--accent-soft);border-radius:10px;margin-bottom:3px}
+.prog-cardlist.static{display:flex}
+.prog-card-row.just-reviewed{animation:flashrow 1.6s ease}
+@keyframes flashrow{0%,30%{background:var(--accent-soft)}100%{background:transparent}}
 #update-banner{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--accent);color:#fff;
   text-align:center;padding:11px;font-weight:700;cursor:pointer;font-size:14px;box-shadow:0 2px 10px rgba(0,0,0,.25)}
 /* échelle rouge -> vert (niveaux), gris = jamais vue */
@@ -667,7 +675,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
    ================================================================= */
 // Defaut = backend Railway (URL publique, sans token) -> le site publie marche sans reglage,
 // pour toi ET ton pote. Le champ "URL de l'API" reste prioritaire (dev local : http://localhost:8000).
-const APP_VERSION = 1;   // bumpé à chaque déploiement frontend (doit = version.json) -> bandeau de MAJ
+const APP_VERSION = 2;   // bumpé à chaque déploiement frontend (doit = version.json) -> bandeau de MAJ
 const DEFAULT_API = "https://battle-production-640a.up.railway.app";
 let API_BASE = (localStorage.getItem("battle_api_url") || "").trim().replace(/\/+$/, "") || DEFAULT_API;
 function setApiBase(v){
@@ -1010,6 +1018,7 @@ async function startSingleCardReview(course, cardId){
   try{ const all=await api(`/cards?course=${encodeURIComponent(course)}`); card=all.find(c=>c.id===cardId); }
   catch(e){ toast(e.message,"alert"); return; }
   if(!card){ toast("Carte introuvable.","alert"); return; }
+  PROG_FOCUS_CARD=cardId;   // au retour en Progression, on recentrera sur cette carte
   // aligner la compétition courante sur le cours de la carte -> XP/rang/toast corrects (le backend
   // crédite déjà la compétition de la carte ; sans ça l'UI afficherait « +0 XP »).
   if(course !== state.course){
@@ -1026,71 +1035,100 @@ async function startSingleCardReview(course, cardId){
                  course, cats:[card.category], single:true, sig:null};
   show("#review-card"); renderFlash();
 }
-const PROG_OPEN=new Set();   // catégories dépliées (clé course+catégorie) -> conservées au re-render
+let PROG_VIEW=(function(){ try{ return localStorage.getItem("battle_progview")||"all"; }catch(e){ return "all"; } })();
+const PROG_OPEN=new Set();      // catégories dépliées (mode Chapitres) -> conservées au re-render
+let PROG_FOCUS_CARD=null;       // carte à recentrer après une révision unique (mode Vue d'ensemble)
+let TITLE_OBSERVER=null;        // rend le KaTeX d'un titre seulement quand il devient visible (fluide sur ~270 cartes)
+function observeTitle(el, title){
+  el.textContent=title;                 // fallback texte immédiat
+  if(!title.includes("$")) return;      // pas de maths -> rien à rendre
+  if(!TITLE_OBSERVER){
+    TITLE_OBSERVER=new IntersectionObserver(ents=>{
+      ents.forEach(e=>{ if(e.isIntersecting){ const t=e.target; tex(t, t.dataset.tex||""); TITLE_OBSERVER.unobserve(t); } });
+    }, {rootMargin:"300px"});
+  }
+  el.dataset.tex=title; TITLE_OBSERVER.observe(el);
+}
+function progCatBar(cat){
+  let bar='<div class="prog-bar">'; const lvl=cat.levels||{}, tot=cat.total||1;
+  [0,1,2,3,4].forEach(lv=>{ const n=lvl[String(lv)]||0; if(n) bar+=`<i class="lv${lv}" style="width:${(100*n/tot).toFixed(2)}%"></i>`; });
+  return bar+'</div>';
+}
+function progCardRow(course, c, en){
+  const front=(en && c.front_en) ? c.front_en : c.front;
+  const row=document.createElement("div"); row.className="prog-card-row"; row.title=front||""; row.dataset.id=c.id;
+  const dot=document.createElement("span"); dot.className="prog-dot "+lvClass(c.level);
+  const t=document.createElement("span"); t.className="prog-card-title"; observeTitle(t, cardTitle(front));
+  const k=document.createElement("span"); k.className="prog-card-kind"; k.textContent=c.kind||"";
+  row.append(dot, t, k);
+  row.onclick=()=> startSingleCardReview(course, c.id);
+  return row;
+}
 async function renderProgress(){
   await refreshHeader();
   const data = await api("/progress");
   const leg=$("#prog-legend"); leg.innerHTML="";
   PROG_LEVELS.forEach(p=>{ const s=document.createElement("span"); s.innerHTML=`<i class="${p.cls}"></i>${p.label}`; leg.appendChild(s); });
   const body=$("#prog-body"); body.innerHTML="";
+  if(TITLE_OBSERVER){ TITLE_OBSERVER.disconnect(); TITLE_OBSERVER=null; }
   const courses=Object.keys(data||{});
   if(!courses.length){ body.innerHTML='<p class="empty">Aucune carte pour l\'instant.</p>'; return; }
+  // bascule : Vue d'ensemble (tout visible, chapitre par chapitre) vs Chapitres (compact, repliable)
+  const seg=document.createElement("div"); seg.className="seg prog-viewseg";
+  seg.innerHTML=`<button data-v="all" class="${PROG_VIEW==='all'?'sel':''}">🗂️ Vue d'ensemble</button>`
+              +`<button data-v="cats" class="${PROG_VIEW==='cats'?'sel':''}">Chapitres (compact)</button>`;
+  seg.querySelectorAll("button").forEach(b=> b.onclick=()=>{ if(PROG_VIEW===b.dataset.v) return;
+    PROG_VIEW=b.dataset.v; try{localStorage.setItem("battle_progview",PROG_VIEW);}catch(e){} renderProgress(); });
+  body.appendChild(seg);
+  const en=(typeof cardLang==="function" && cardLang()==="en");
   courses.forEach(course=>{
     const cats=data[course];
-    // récap global du cours : % de la matière connue (niveau >= 1) et maîtrisée (>= Très sûr)
     const agg={"-1":0,"0":0,"1":0,"2":0,"3":0,"4":0};
     let total=0, known=0, mastered=0;
-    cats.forEach(cat=>{
-      total += cat.total||0; known += cat.known||0;
-      const L=cat.levels||{};
-      ["-1","0","1","2","3","4"].forEach(k=>agg[k]+=(+L[k]||0));
-      mastered += (+L["3"]||0)+(+L["4"]||0);
-    });
-    const pctKnown = total ? Math.round(100*known/total) : 0;
-    const pctMast  = total ? Math.round(100*mastered/total) : 0;
+    cats.forEach(cat=>{ total+=cat.total||0; known+=cat.known||0; const L=cat.levels||{};
+      ["-1","0","1","2","3","4"].forEach(k=>agg[k]+=(+L[k]||0)); mastered+=(+L["3"]||0)+(+L["4"]||0); });
+    const pctKnown=total?Math.round(100*known/total):0, pctMast=total?Math.round(100*mastered/total):0;
     let sbar='<div class="prog-bar big">';
     [0,1,2,3,4].forEach(lv=>{ const n=agg[String(lv)]; if(n) sbar+=`<i class="lv${lv}" style="width:${(100*n/(total||1)).toFixed(2)}%"></i>`; });
     sbar+='</div>';
     const sum=document.createElement("div"); sum.className="prog-summary";
     sum.innerHTML=`<div class="prog-summary-top"><span class="prog-summary-name">${escapeHtml(course)}</span>`
-      +`<span class="prog-summary-pct"><b>${pctKnown}%</b> de la matière connue</span></div>`
-      +sbar
+      +`<span class="prog-summary-pct"><b>${pctKnown}%</b> de la matière connue</span></div>`+sbar
       +`<div class="prog-summary-sub"><b>${known}</b>/${total} cartes connues · <b>${mastered}</b> maîtrisées (≥ « Très sûr ») = <b>${pctMast}%</b></div>`;
     body.appendChild(sum);
     cats.forEach(cat=>{
-      const key=course+"::"+cat.category;
-      const wrap=document.createElement("div"); wrap.className="prog-cat";
-      const head=document.createElement("div"); head.className="prog-cat-head";
-      let bar='<div class="prog-bar">';
-      const lvl=cat.levels||{}, tot=cat.total||1;
-      [0,1,2,3,4].forEach(lv=>{ const n=lvl[String(lv)]||0; if(n) bar+=`<i class="lv${lv}" style="width:${(100*n/tot).toFixed(2)}%"></i>`; });
-      bar+='</div>';
-      head.innerHTML=`<span class="prog-caret">▶</span><span class="prog-cat-name">${escapeHtml(cat.category)}</span>${bar}`
-        +`<span class="prog-count"><b>${cat.known}</b>/${cat.total} connues</span>`;
-      const list=document.createElement("div"); list.className="prog-cardlist";
-      let built=false;
-      function buildList(){                 // LAZY : ne construit (et n'appelle KaTeX) que si déplié
-        if(built) return; built=true;
-        const en = (typeof cardLang==="function" && cardLang()==="en");
-        cat.cards.forEach(c=>{
-          const front = (en && c.front_en) ? c.front_en : c.front;
-          const row=document.createElement("div"); row.className="prog-card-row"; row.title=front||"";
-          const dot=document.createElement("span"); dot.className="prog-dot "+lvClass(c.level);
-          const t=document.createElement("span"); t.className="prog-card-title"; tex(t, cardTitle(front));
-          const k=document.createElement("span"); k.className="prog-card-kind"; k.textContent=c.kind||"";
-          row.append(dot, t, k);
-          row.onclick=()=> startSingleCardReview(course, c.id);
-          list.appendChild(row);
-        });
+      if(PROG_VIEW==='all'){
+        // VUE D'ENSEMBLE : chapitre toujours ouvert, toutes les cartes visibles d'un coup
+        const sec=document.createElement("div"); sec.className="prog-ov-cat";
+        const head=document.createElement("div"); head.className="prog-ov-head";
+        head.innerHTML=`<span class="prog-cat-name">${escapeHtml(cat.category)}</span>${progCatBar(cat)}`
+          +`<span class="prog-count"><b>${cat.known}</b>/${cat.total} connues</span>`;
+        const list=document.createElement("div"); list.className="prog-cardlist static";
+        cat.cards.forEach(c=> list.appendChild(progCardRow(course, c, en)));
+        sec.append(head, list); body.appendChild(sec);
+      } else {
+        // CHAPITRES (compact) : accordéon repliable, liste construite à la demande
+        const key=course+"::"+cat.category;
+        const wrap=document.createElement("div"); wrap.className="prog-cat";
+        const head=document.createElement("div"); head.className="prog-cat-head";
+        head.innerHTML=`<span class="prog-caret">▶</span><span class="prog-cat-name">${escapeHtml(cat.category)}</span>${progCatBar(cat)}`
+          +`<span class="prog-count"><b>${cat.known}</b>/${cat.total} connues</span>`;
+        const list=document.createElement("div"); list.className="prog-cardlist";
+        let built=false;
+        function buildList(){ if(built) return; built=true; cat.cards.forEach(c=> list.appendChild(progCardRow(course, c, en))); }
+        head.onclick=()=>{ const open=wrap.classList.toggle("open"); if(open){ buildList(); PROG_OPEN.add(key);} else PROG_OPEN.delete(key); };
+        wrap.append(head, list); body.appendChild(wrap);
+        if(PROG_OPEN.has(key)){ wrap.classList.add("open"); buildList(); }
       }
-      head.onclick=()=>{
-        const open=wrap.classList.toggle("open");
-        if(open){ buildList(); PROG_OPEN.add(key); } else PROG_OPEN.delete(key);
-      };
-      wrap.append(head, list); body.appendChild(wrap);
-      if(PROG_OPEN.has(key)){ wrap.classList.add("open"); buildList(); }   // restaure l'état déplié au re-render
     });
   });
+  // recentrer sur la carte qu'on vient de réviser (retour depuis une révision unique)
+  if(PROG_FOCUS_CARD){
+    const sel = (window.CSS && CSS.escape) ? CSS.escape(PROG_FOCUS_CARD) : PROG_FOCUS_CARD;
+    const row=body.querySelector(`.prog-card-row[data-id="${sel}"]`);
+    if(row){ row.scrollIntoView({block:"center"}); row.classList.add("just-reviewed"); setTimeout(()=>row.classList.remove("just-reviewed"),1600); }
+    PROG_FOCUS_CARD=null;
+  }
 }
 
 /* =================================================================
