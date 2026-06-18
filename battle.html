@@ -493,12 +493,6 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
       <div id="rv-unsure-banner" class="rv-resume hidden"></div>
       <div id="rv-seen-banner" class="rv-resume hidden"></div>
       <div id="rv-loop-banner" class="rv-resume hidden"></div>
-      <div class="row">
-        <div class="grow">
-          <label class="fld">Cours</label>
-          <select id="rv-course"></select>
-        </div>
-      </div>
       <div style="margin-top:14px">
         <label class="fld">Chapitres / séries</label>
         <div class="cat-legend">
@@ -596,10 +590,6 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
         (+10 XP, +2 pour l'autre).</p>
       <div class="row">
         <div class="grow">
-          <label class="fld">Cours</label>
-          <select id="dl-course"></select>
-        </div>
-        <div class="grow">
           <label class="fld">Adversaire</label>
           <select id="dl-opp-select"></select>
         </div>
@@ -675,7 +665,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
    ================================================================= */
 // Defaut = backend Railway (URL publique, sans token) -> le site publie marche sans reglage,
 // pour toi ET ton pote. Le champ "URL de l'API" reste prioritaire (dev local : http://localhost:8000).
-const APP_VERSION = 3;   // bumpé à chaque déploiement frontend (doit = version.json) -> bandeau de MAJ
+const APP_VERSION = 4;   // bumpé à chaque déploiement frontend (doit = version.json) -> bandeau de MAJ
 const DEFAULT_API = "https://battle-production-640a.up.railway.app";
 let API_BASE = (localStorage.getItem("battle_api_url") || "").trim().replace(/\/+$/, "") || DEFAULT_API;
 function setApiBase(v){
@@ -1023,8 +1013,6 @@ async function startSingleCardReview(course, cardId){
   // crédite déjà la compétition de la carte ; sans ça l'UI afficherait « +0 XP »).
   if(course !== state.course){
     state.course=course; try{ localStorage.setItem("battle_course", course); }catch(e){}
-    if($("#rv-course")) $("#rv-course").value=course;
-    if($("#dl-course")) $("#dl-course").value=course;
     renderCourseSwitch(); updateExamTabVisibility();
     await refreshHeader();   // state.me reflète désormais l'XP du bon cours
   }
@@ -1142,11 +1130,7 @@ async function loadCourses(){
   COURSES = await api("/courses");
   const names=Object.keys(COURSES);
   if(!names.includes(state.course)) state.course = names[0] || "Martingales";
-  fillSelect($("#rv-course"), names);
-  fillSelect($("#dl-course"), names);
-  $("#rv-course").value = state.course;   // par défaut : le cours de la compétition courante
-  $("#dl-course").value = state.course;
-  $("#rv-course").onchange = renderCats;
+  // le cours = la compétition courante (sélecteur du haut) -> plus de menu "Cours" redondant.
   renderCats();
   renderCourseSwitch();
   updateExamTabVisibility();
@@ -1177,8 +1161,7 @@ async function setCourse(c){
   if(c===state.course || !COURSES[c]) return;
   state.course=c; try{ localStorage.setItem("battle_course", c); }catch(e){}
   state.opponent=null;
-  if($("#rv-course")){ $("#rv-course").value=c; renderCats(); }
-  if($("#dl-course")) $("#dl-course").value=c;
+  renderCats();
   renderCourseSwitch();
   updateExamTabVisibility();
   await refreshHeader();
@@ -1202,7 +1185,7 @@ function catKey(s){            // tri : par famille puis par numéro
   return [CAT_ORDER.indexOf(catGroup(t)), m?parseInt(m[1],10):0];
 }
 function renderCats(){
-  const course=$("#rv-course").value;
+  const course=state.course;
   const cats=(COURSES[course]||[]).slice().sort((a,b)=>{
     const ka=catKey(a.category), kb=catKey(b.category);
     return ka[0]-kb[0] || ka[1]-kb[1] || a.category.localeCompare(b.category);
@@ -1315,7 +1298,6 @@ async function resumeSession(sig){
   const filter=s.filter || (s.unsure ? "unsure" : null);   // rétrocompat
   state.session={seen:s.seen||0, xp0:state.me.xp, shuffled:!!s.shuffled, filter, loop:!!s.loop, course:s.course, cats:s.cats, sig};
   if(s.loop){ state.session.toMaster=new Set(s.toMaster||[]); state.session.totalMaster=s.totalMaster||(s.toMaster||[]).length; }
-  if($("#rv-course")) $("#rv-course").value=s.course;
   if(state.session.loop ? (state.session.toMaster.size===0) : (state.idx>=deck.length)){ finishReview(); return; }
   show("#review-card"); renderFlash();
 }
@@ -1342,7 +1324,7 @@ function catProgClass(course, category){
   return null;                                     // pas commencé -> gris (défaut)
 }
 function colorizeCats(){
-  const course=$("#rv-course") ? $("#rv-course").value : null; if(!course) return;
+  const course=state.course; if(!course) return;
   $$("#rv-cats .checks label").forEach(l=>{
     const inp=l.querySelector("input"); if(!inp) return;
     l.classList.remove("pg-started","pg-progress","pg-done");
@@ -1361,7 +1343,7 @@ function levelCounts(course, cats){           // total par niveau sur les catég
   return acc;
 }
 function updateBanners(){
-  const course=$("#rv-course") ? $("#rv-course").value : null;
+  const course=state.course;
   const cats=$$("#rv-cats input:checked").map(i=>i.value);
   const acc=(course && cats.length) ? levelCounts(course,cats) : null;
   const nTotal = acc ? acc["-1"]+acc["0"]+acc["1"]+acc["2"]+acc["3"]+acc["4"] : null;
@@ -1408,7 +1390,7 @@ function renderFilterBanner(box, cls, n, txt, onClick){
 
 async function startReview(opts){
   opts = opts || {};
-  const course=$("#rv-course").value;
+  const course=state.course;
   const cats=$$("#rv-cats input:checked").map(i=>i.value);
   if(!cats.length){ toast("Choisis au moins un chapitre.","alert"); return; }
   const shuffled = ($("#rv-order-seg button.sel")||{}).dataset?.shuffle === "1";
@@ -1722,10 +1704,10 @@ function examCard(e){
 $("#dl-start").onclick = async()=>{
   const opp = $("#dl-opp-select").value;
   if(!opp){ toast("Choisis un adversaire (personne d'autre n'a encore de compte).","alert"); return; }
-  const course=$("#dl-course").value;
+  const course=state.course;
   try{
     await api("/duels", {method:"POST", body:{opponent:opp, course}});
-    toast(`🤺 Duel lancé contre ${opp} ! Réponds dans l'onglet Audits.`,"good");
+    toast(`🤺 Duel lancé contre ${opp} ! Vos cartes sont dans l'onglet Duels.`,"good");
     renderDuels();
   }catch(err){ toast(err.message,"alert"); }
 };
