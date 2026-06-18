@@ -665,7 +665,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
    ================================================================= */
 // Defaut = backend Railway (URL publique, sans token) -> le site publie marche sans reglage,
 // pour toi ET ton pote. Le champ "URL de l'API" reste prioritaire (dev local : http://localhost:8000).
-const APP_VERSION = 4;   // bumpé à chaque déploiement frontend (doit = version.json) -> bandeau de MAJ
+const APP_VERSION = 5;   // bumpé à chaque déploiement frontend (doit = version.json) -> bandeau de MAJ
 const DEFAULT_API = "https://battle-production-640a.up.railway.app";
 let API_BASE = (localStorage.getItem("battle_api_url") || "").trim().replace(/\/+$/, "") || DEFAULT_API;
 function setApiBase(v){
@@ -1260,6 +1260,7 @@ function renderResume(){
   const box=$("#rv-resume"); if(!box) return;
   const m=loadSessions();
   const list=Object.keys(m).map(k=>({sig:k,...m[k]}))
+    .filter(s=> s.course===state.course)                                              // uniquement la compétition courante
     .filter(s=> s.loop ? ((s.toMaster||[]).length>0) : ((s.idx||0) < (s.total||0)))   // non terminées
     .sort((a,b)=>(b.ts||0)-(a.ts||0));
   if(!list.length){ box.classList.add("hidden"); box.innerHTML=""; return; }
