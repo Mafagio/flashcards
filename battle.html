@@ -665,7 +665,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
    ================================================================= */
 // Defaut = backend Railway (URL publique, sans token) -> le site publie marche sans reglage,
 // pour toi ET ton pote. Le champ "URL de l'API" reste prioritaire (dev local : http://localhost:8000).
-const APP_VERSION = 5;   // bumpé à chaque déploiement frontend (doit = version.json) -> bandeau de MAJ
+const APP_VERSION = 6;   // bumpé à chaque déploiement frontend (doit = version.json) -> bandeau de MAJ
 const DEFAULT_API = "https://battle-production-640a.up.railway.app";
 let API_BASE = (localStorage.getItem("battle_api_url") || "").trim().replace(/\/+$/, "") || DEFAULT_API;
 function setApiBase(v){
@@ -1073,7 +1073,11 @@ async function renderProgress(){
   body.appendChild(seg);
   const en=(typeof cardLang==="function" && cardLang()==="en");
   courses.forEach(course=>{
-    const cats=data[course];
+    // tri numérique (Chapitres puis Séries puis ... , chacun par numéro) au lieu de l'ordre alphabétique
+    const cats=(data[course]||[]).slice().sort((a,b)=>{
+      const ka=catKey(a.category), kb=catKey(b.category);
+      return ka[0]-kb[0] || ka[1]-kb[1] || a.category.localeCompare(b.category,undefined,{numeric:true});
+    });
     const agg={"-1":0,"0":0,"1":0,"2":0,"3":0,"4":0};
     let total=0, known=0, mastered=0;
     cats.forEach(cat=>{ total+=cat.total||0; known+=cat.known||0; const L=cat.levels||{};
