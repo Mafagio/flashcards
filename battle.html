@@ -675,7 +675,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
    ================================================================= */
 // Defaut = backend Railway (URL publique, sans token) -> le site publie marche sans reglage,
 // pour toi ET ton pote. Le champ "URL de l'API" reste prioritaire (dev local : http://localhost:8000).
-const APP_VERSION = 2;   // bumpé à chaque déploiement frontend (doit = version.json) -> bandeau de MAJ
+const APP_VERSION = 3;   // bumpé à chaque déploiement frontend (doit = version.json) -> bandeau de MAJ
 const DEFAULT_API = "https://battle-production-640a.up.railway.app";
 let API_BASE = (localStorage.getItem("battle_api_url") || "").trim().replace(/\/+$/, "") || DEFAULT_API;
 function setApiBase(v){
@@ -1039,9 +1039,10 @@ let PROG_VIEW=(function(){ try{ return localStorage.getItem("battle_progview")||
 const PROG_OPEN=new Set();      // catégories dépliées (mode Chapitres) -> conservées au re-render
 let PROG_FOCUS_CARD=null;       // carte à recentrer après une révision unique (mode Vue d'ensemble)
 let TITLE_OBSERVER=null;        // rend le KaTeX d'un titre seulement quand il devient visible (fluide sur ~270 cartes)
+function mdBold(s){ return escapeHtml(s).replace(/\*\*([^*]+)\*\*/g,"<strong>$1</strong>"); }
 function observeTitle(el, title){
-  el.textContent=title;                 // fallback texte immédiat
-  if(!title.includes("$")) return;      // pas de maths -> rien à rendre
+  if(!title.includes("$")){ el.innerHTML=mdBold(title); return; }   // pas de maths : juste le **gras** (sans KaTeX)
+  el.textContent=title;                 // fallback texte immédiat ; le KaTeX arrive quand le titre devient visible
   if(!TITLE_OBSERVER){
     TITLE_OBSERVER=new IntersectionObserver(ents=>{
       ents.forEach(e=>{ if(e.isIntersecting){ const t=e.target; tex(t, t.dataset.tex||""); TITLE_OBSERVER.unobserve(t); } });
@@ -1071,7 +1072,9 @@ async function renderProgress(){
   PROG_LEVELS.forEach(p=>{ const s=document.createElement("span"); s.innerHTML=`<i class="${p.cls}"></i>${p.label}`; leg.appendChild(s); });
   const body=$("#prog-body"); body.innerHTML="";
   if(TITLE_OBSERVER){ TITLE_OBSERVER.disconnect(); TITLE_OBSERVER=null; }
-  const courses=Object.keys(data||{});
+  // une compétition = un cours : la Progression ne montre QUE le cours courant (pas les autres).
+  let courses=Object.keys(data||{}).filter(c=>c===state.course);
+  if(!courses.length) courses=Object.keys(data||{}).slice(0,1);   // repli si le cours courant n'a pas de cartes
   if(!courses.length){ body.innerHTML='<p class="empty">Aucune carte pour l\'instant.</p>'; return; }
   // bascule : Vue d'ensemble (tout visible, chapitre par chapitre) vs Chapitres (compact, repliable)
   const seg=document.createElement("div"); seg.className="seg prog-viewseg";
