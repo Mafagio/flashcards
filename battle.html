@@ -363,6 +363,11 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
 @keyframes flashrow{0%,30%{background:var(--accent-soft)}100%{background:transparent}}
 #update-banner{position:fixed;top:0;left:0;right:0;z-index:200;background:var(--accent);color:#fff;
   text-align:center;padding:11px;font-weight:700;cursor:pointer;font-size:14px;box-shadow:0 2px 10px rgba(0,0,0,.25)}
+.annales-list{display:flex;flex-direction:column;gap:10px;margin-top:8px}
+.annale-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  border:1px solid var(--line);border-radius:11px;padding:12px 14px;background:var(--chip-bg)}
+.annale-name{font-weight:600;font-size:14.5px}
+.annale-links{display:flex;gap:8px;flex-shrink:0}
 /* échelle rouge -> vert (niveaux), gris = jamais vue */
 .lv--1{background:var(--track2)}
 .lv0{background:#e5484d}
@@ -450,6 +455,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
     <button data-tab="progress">Progression</button>
     <button data-tab="audits">Audits <span class="badge hidden" id="tab-aud-badge">0</span></button>
     <button data-tab="examens">Examens TS</button>
+    <button data-tab="annales" class="hidden">Examens</button>
     <button data-tab="challenge">Challenge</button>
     <button data-tab="duels">Duels</button>
     <button data-tab="calib">Calibration</button>
@@ -561,6 +567,16 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
     </div>
   </section>
 
+  <!-- EXAMENS (sujets d'entraînement PDF) -->
+  <section data-panel="annales" class="hidden">
+    <div class="card">
+      <h2>Examens d'entraînement <span class="kindtag" id="annales-course"></span></h2>
+      <p class="sub">Sujets originaux (énoncé avec espace pour répondre + corrigé séparé).
+        Conseil : fais l'énoncé en 3 h, corrigé fermé, puis corrige-toi.</p>
+      <div id="annales-body" class="annales-list"></div>
+    </div>
+  </section>
+
   <!-- EXAMENS TS -->
   <section data-panel="examens" class="hidden">
     <div class="card">
@@ -665,7 +681,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
    ================================================================= */
 // Defaut = backend Railway (URL publique, sans token) -> le site publie marche sans reglage,
 // pour toi ET ton pote. Le champ "URL de l'API" reste prioritaire (dev local : http://localhost:8000).
-const APP_VERSION = 6;   // bumpé à chaque déploiement frontend (doit = version.json) -> bandeau de MAJ
+const APP_VERSION = 7;   // bumpé à chaque déploiement frontend (doit = version.json) -> bandeau de MAJ
 const DEFAULT_API = "https://battle-production-640a.up.railway.app";
 let API_BASE = (localStorage.getItem("battle_api_url") || "").trim().replace(/\/+$/, "") || DEFAULT_API;
 function setApiBase(v){
@@ -907,6 +923,7 @@ function switchTab(tab){
   if(tab==="review")    reviewSetupRefresh();
   if(tab==="audits")    renderAudits();
   if(tab==="examens")   renderExamens();
+  if(tab==="annales")   renderAnnales();
   if(tab==="challenge") renderChallenge();
   if(tab==="duels")     renderDuels();
   if(tab==="calib")     renderCalib();
@@ -1156,10 +1173,15 @@ function renderCourseSwitch(){
   });
 }
 function updateExamTabVisibility(){
-  const t=$('#tabs button[data-tab="examens"]'); if(!t) return;
-  const show = state.course==="Time Series";        // les examens n'existent que pour Time Series
-  t.classList.toggle("hidden", !show);
-  if(!show && t.classList.contains("active")) switchTab("dash");
+  // Examens TS (note déclarée) : seulement pour Time Series.
+  const t=$('#tabs button[data-tab="examens"]');
+  if(t){ const show=state.course==="Time Series"; t.classList.toggle("hidden",!show);
+    if(!show && t.classList.contains("active")) switchTab("dash"); }
+  // Examens (sujets PDF) : seulement pour les cours qui en ont (EXAM_PDFS).
+  const a=$('#tabs button[data-tab="annales"]');
+  if(a){ const show=!!(EXAM_PDFS[state.course]&&EXAM_PDFS[state.course].length);
+    a.classList.toggle("hidden",!show);
+    if(!show && a.classList.contains("active")) switchTab("dash"); }
 }
 async function setCourse(c){
   if(c===state.course || !COURSES[c]) return;
@@ -1626,8 +1648,30 @@ async function renderChallenge(){
 }
 
 /* =================================================================
-   EXAMENS TS (note déclarée + vérification)
+   EXAMENS (sujets d'entraînement PDF, par cours)
    ================================================================= */
+const EXAM_PDFS = {
+  "Martingales": [
+    { n:"Sujet 1 — complet (≈ 3 h · 5 problèmes)",        e:"exams/Sujet-1-enonce.pdf", c:"exams/Sujet-1-corrige.pdf" },
+    { n:"Sujet 2 — court (≈ 2 h · 4 problèmes)",          e:"exams/Sujet-2-enonce.pdf", c:"exams/Sujet-2-corrige.pdf" },
+    { n:"Sujet 3 — intermédiaire (≈ 2 h 25 · 5 problèmes)", e:"exams/Sujet-3-enonce.pdf", c:"exams/Sujet-3-corrige.pdf" },
+  ],
+};
+function renderAnnales(){
+  const cc=$("#annales-course"); if(cc) cc.textContent=state.course;
+  const box=$("#annales-body"); if(!box) return;
+  const list=EXAM_PDFS[state.course]||[];
+  box.innerHTML="";
+  if(!list.length){ box.innerHTML='<p class="empty">Aucun sujet pour ce cours pour l\'instant.</p>'; return; }
+  list.forEach(x=>{
+    const row=document.createElement("div"); row.className="annale-row";
+    const name=document.createElement("span"); name.className="annale-name"; name.textContent=x.n;
+    const links=document.createElement("span"); links.className="annale-links";
+    links.innerHTML=`<a class="btn primary sm" href="${x.e}" target="_blank" rel="noopener">📄 Énoncé</a>`
+                  +`<a class="btn sm" href="${x.c}" target="_blank" rel="noopener">✅ Corrigé</a>`;
+    row.append(name, links); box.appendChild(row);
+  });
+}
 async function renderExamens(){
   await refreshHeader();
   const box=$("#ex-list");
