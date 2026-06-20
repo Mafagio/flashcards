@@ -368,6 +368,9 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
   border:1px solid var(--line);border-radius:11px;padding:12px 14px;background:var(--chip-bg)}
 .annale-name{font-weight:600;font-size:14.5px}
 .annale-links{display:flex;gap:8px;flex-shrink:0}
+.exam-statement{margin-top:10px;border-top:1px solid var(--line);padding-top:12px;display:flex;flex-direction:column;gap:16px}
+.exam-exo-lbl{font-weight:700;font-size:13px;color:var(--accent);margin-bottom:5px}
+.exam-exo .tex{font-size:14.5px;line-height:1.5}
 /* échelle rouge -> vert (niveaux), gris = jamais vue */
 .lv--1{background:var(--track2)}
 .lv0{background:#e5484d}
@@ -681,7 +684,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
    ================================================================= */
 // Defaut = backend Railway (URL publique, sans token) -> le site publie marche sans reglage,
 // pour toi ET ton pote. Le champ "URL de l'API" reste prioritaire (dev local : http://localhost:8000).
-const APP_VERSION = 7;   // bumpé à chaque déploiement frontend (doit = version.json) -> bandeau de MAJ
+const APP_VERSION = 8;   // bumpé à chaque déploiement frontend (doit = version.json) -> bandeau de MAJ
 const DEFAULT_API = "https://battle-production-640a.up.railway.app";
 let API_BASE = (localStorage.getItem("battle_api_url") || "").trim().replace(/\/+$/, "") || DEFAULT_API;
 function setApiBase(v){
@@ -1696,6 +1699,31 @@ function examCard(e){
   else { st.textContent="pas encore déclarée"; }
   head.appendChild(st);
   d.appendChild(head);
+
+  // Voir l'énoncé (pour composer l'examen) — corrigé jamais servi
+  const seeBtn=document.createElement("button"); seeBtn.className="btn ghost sm"; seeBtn.style.marginTop="10px";
+  seeBtn.textContent="📄 Voir l'énoncé";
+  const stmt=document.createElement("div"); stmt.className="exam-statement hidden";
+  seeBtn.onclick=async()=>{
+    if(!stmt.classList.contains("hidden")){ stmt.classList.add("hidden"); seeBtn.textContent="📄 Voir l'énoncé"; return; }
+    if(!stmt.dataset.loaded){
+      seeBtn.disabled=true; seeBtn.textContent="Chargement…";
+      try{
+        const s=await api(`/ts/exams/${encodeURIComponent(e.id)}`);
+        stmt.innerHTML="";
+        (s.exercises||[]).forEach((x,i)=>{
+          const ex=document.createElement("div"); ex.className="exam-exo";
+          const lbl=document.createElement("div"); lbl.className="exam-exo-lbl"; lbl.textContent=`Exercice ${i+1}`;
+          const body=document.createElement("div"); body.className="tex"; tex(body, x.front);
+          ex.append(lbl, body); stmt.appendChild(ex);
+        });
+        stmt.dataset.loaded="1";
+      }catch(err){ toast(err.message,"alert"); seeBtn.disabled=false; seeBtn.textContent="📄 Voir l'énoncé"; return; }
+      seeBtn.disabled=false;
+    }
+    stmt.classList.remove("hidden"); seeBtn.textContent="Masquer l'énoncé";
+  };
+  d.appendChild(seeBtn); d.appendChild(stmt);
 
   if(!e.status){
     const row=document.createElement("div");
