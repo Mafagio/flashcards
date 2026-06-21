@@ -133,8 +133,13 @@ def login(c: Creds):
     return {"ok": True, "name": row["name"], "xp": row["xp"], "tokens": row["tokens"]}
 
 
-def pending_count(db, uid):
+def pending_count(db, uid, course=None):
     # Les cartes d'un DUEL se répondent dans l'onglet Duels (pas dans Audits) -> exclues du compteur.
+    # Si course est fourni, on ne compte que les audits de CETTE compétition (audits séparés par matière).
+    if course:
+        return db.execute("SELECT COUNT(*) c FROM audits a JOIN cards ca ON ca.id=a.card_id "
+                          "WHERE a.user_id=? AND a.status='pending' AND a.source!='duel' AND ca.course=?",
+                          (uid, course)).fetchone()["c"]
     return db.execute("SELECT COUNT(*) c FROM audits WHERE user_id=? AND status='pending' "
                       "AND source!='duel'", (uid,)).fetchone()["c"]
 
@@ -146,7 +151,7 @@ def me(course: Optional[str] = None, u=Depends(current_user)):
     s = read_score(db, u["id"], course)
     return {
         "name": u["name"], "course": course, "xp": s["xp"], "tokens": s["tokens"],
-        "pending_audits": pending_count(db, u["id"]),
+        "pending_audits": pending_count(db, u["id"], course),
         "next_token_in": round(S.TOKEN_EVERY - (s["xp_milestone"] % S.TOKEN_EVERY), 1),
     }
 
@@ -317,7 +322,7 @@ def review(r: ReviewIn, u=Depends(current_user)):
         s = read_score(db, u["id"], course)
         return {"xp": s["xp"], "tokens": s["tokens"], "course": course,
                 "batched": batched, "new_audits": new_audits,
-                "pending_audits": pending_count(db, u["id"])}
+                "pending_audits": pending_count(db, u["id"], course)}
 
 
 def _form_audit_batch(db, uid: int, course: str) -> int:
@@ -378,14 +383,19 @@ def _form_audit_batch(db, uid: int, course: str) -> int:
 # ---------------------------------------------------------------------------
 
 @app.get("/audits/pending")
-def audits_pending(u=Depends(current_user)):
+def audits_pending(course: Optional[str] = None, u=Depends(current_user)):
     db = DB.get_db()
-    rows = db.execute("""
+    # audits séparés par matière : si course est fourni, on ne renvoie que ses audits.
+    q = """
         SELECT a.id, a.source, a.q, a.challenger_id, a.duel_id,
                c.front, c.front_en, c.category, c.course, c.kind
         FROM audits a JOIN cards c ON c.id=a.card_id
-        WHERE a.user_id=? AND a.status='pending' AND a.source!='duel'
-        ORDER BY a.id""", (u["id"],)).fetchall()
+        WHERE a.user_id=? AND a.status='pending' AND a.source!='duel'"""
+    args = [u["id"]]
+    if course:
+        q += " AND c.course=?"; args.append(course)
+    q += " ORDER BY a.id"
+    rows = db.execute(q, args).fetchall()
     out = []
     for r in rows:
         d = dict(r)
@@ -482,7 +492,7 @@ def answer_audit(audit_id: int, a: AnswerIn, u=Depends(current_user)):
             "justification": res["justification"], "hits": res.get("hits", []),
             "back": back, "bareme": bareme,
             "xp": s["xp"], "tokens": s["tokens"],
-            "pending_audits": pending_count(db, u["id"]),
+            "pending_audits": pending_count(db, u["id"], course),
         }
 
 
@@ -821,7 +831,7 @@ def ts_declare(exam_id: str, d: DeclareIn, u=Depends(current_user)):
                      f'(+{upfront} XP, {n_checks} vérif. en attente).')
         db.commit()
     return {"ok": True, "upfront_xp": upfront, "checks": n_checks,
-            "pending_audits": pending_count(db, u["id"])}
+            "pending_audits": pending_count(db, u["id"], "Time Series")}
 
 
 class TsChallengeIn(BaseModel):

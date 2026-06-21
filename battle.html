@@ -684,7 +684,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
    ================================================================= */
 // Defaut = backend Railway (URL publique, sans token) -> le site publie marche sans reglage,
 // pour toi ET ton pote. Le champ "URL de l'API" reste prioritaire (dev local : http://localhost:8000).
-const APP_VERSION = 9;   // bumpé à chaque déploiement frontend (doit = version.json) -> bandeau de MAJ
+const APP_VERSION = 10;   // bumpé à chaque déploiement frontend (doit = version.json) -> bandeau de MAJ
 const DEFAULT_API = "https://battle-production-640a.up.railway.app";
 let API_BASE = (localStorage.getItem("battle_api_url") || "").trim().replace(/\/+$/, "") || DEFAULT_API;
 function setApiBase(v){
@@ -1541,9 +1541,9 @@ document.addEventListener("keydown", e=>{
    ================================================================= */
 async function renderAudits(){
   await refreshHeader();
-  const list = await api("/audits/pending");
+  const list = await api("/audits/pending"+cq());   // audits de la compétition courante seulement
   const box=$("#aud-list"); box.innerHTML="";
-  if(!list.length){ box.innerHTML='<p class="empty">Aucun audit en attente. 👌</p>'; return; }
+  if(!list.length){ box.innerHTML='<p class="empty">Aucun audit en attente pour ce cours. 👌</p>'; return; }
   list.forEach(a=>box.appendChild(auditCard(a)));
 }
 function auditCard(a, onAnswered){
