@@ -126,6 +126,32 @@ CREATE TABLE IF NOT EXISTS scores (
     PRIMARY KEY (user_id, course)
 );
 
+-- QCM (questions à choix multiple, jouées une à la fois ; score +/- XP, puis solution).
+-- Contenu importé depuis qcm.<cours>.json (comme les cartes). Indépendant des cartes.
+CREATE TABLE IF NOT EXISTS qcm (
+    id            TEXT PRIMARY KEY,             -- ex "bqcm-s2-07"
+    course        TEXT NOT NULL,                -- compétition (ex "Bayesian Statistics")
+    set_no        INTEGER NOT NULL,             -- série d'origine (1,2,3…)
+    area          TEXT NOT NULL,                -- thème (ex "Foundations")
+    stem          TEXT NOT NULL,                -- énoncé (LaTeX/markdown)
+    options_json  TEXT NOT NULL,                -- JSON: liste des options
+    correct_index INTEGER NOT NULL,             -- index 0-based de la bonne réponse
+    solution      TEXT NOT NULL,                -- corrigé concis (révélé après réponse)
+    difficulty    INTEGER NOT NULL DEFAULT 2
+);
+
+-- Réponse d'un joueur à un QCM (1 par (user, qcm) : noté une seule fois).
+CREATE TABLE IF NOT EXISTS qcm_answers (
+    id           INTEGER PRIMARY KEY AUTOINCREMENT,
+    user_id      INTEGER NOT NULL REFERENCES users(id),
+    qcm_id       TEXT NOT NULL REFERENCES qcm(id),
+    chosen_index INTEGER NOT NULL,
+    correct      INTEGER NOT NULL,              -- 1 juste, 0 faux
+    xp_delta     REAL NOT NULL DEFAULT 0,
+    created_at   TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE(user_id, qcm_id)
+);
+
 CREATE TABLE IF NOT EXISTS duels (
     id            INTEGER PRIMARY KEY AUTOINCREMENT,
     challenger_id INTEGER NOT NULL REFERENCES users(id),

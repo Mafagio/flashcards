@@ -1,0 +1,765 @@
+[
+  {
+    "id": "bqcm-s1-01",
+    "course": "Bayesian Statistics",
+    "set_no": 1,
+    "area": "Foundations",
+    "stem": "A disease has prevalence $\\pi(D)=0.01$. A test has $P(+\\mid D)=0.99$ and $P(+\\mid D^c)=0.05$. A randomly chosen individual tests positive; what is the posterior probability $\\Pi(D\\mid +)$?",
+    "options": [
+      "$\\dfrac{1}{6}\\approx 0.167$",
+      "$0.99$",
+      "$\\dfrac{99}{599}\\approx 0.165$",
+      "$\\dfrac{5}{6}\\approx 0.833$",
+      "$0.0099$"
+    ],
+    "correct_index": 0,
+    "solution": "By Bayes' rule, $\\Pi(D\\mid +)=\\frac{0.99\\cdot 0.01}{0.99\\cdot 0.01+0.05\\cdot 0.99}=\\frac{0.0099}{0.0594}=\\frac{1}{6}\\approx 0.167$. The trap is base-rate neglect: the low prevalence keeps the posterior small despite the high sensitivity.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s1-02",
+    "course": "Bayesian Statistics",
+    "set_no": 1,
+    "area": "Foundations",
+    "stem": "A coin is drawn from a box with $\\Pi(\\theta=\\tfrac14)=\\tfrac12$, $\\Pi(\\theta=\\tfrac12)=\\tfrac14$, $\\Pi(\\theta=\\tfrac34)=\\tfrac14$, then tossed; conditional on $\\theta$ the tosses are i.i.d. $\\mathrm{Bernoulli}(\\theta)$. The first two tosses are both heads. What is the posterior predictive probability that the next toss of the same coin is heads?",
+    "options": [
+      "$\\dfrac{7}{16}$",
+      "$\\dfrac{37}{60}$",
+      "$\\dfrac{9}{14}$",
+      "$\\dfrac{3}{4}$",
+      "$\\dfrac{1}{2}$"
+    ],
+    "correct_index": 1,
+    "solution": "Posterior weights $\\propto\\theta^2\\Pi(\\theta)$ are $(\\tfrac{2}{15},\\tfrac{4}{15},\\tfrac{9}{15})$, and the single-draw predictive is the posterior mean $\\sum_\\theta\\theta\\,\\Pi(\\theta\\mid\\text{data})=\\tfrac{37}{60}$. Trap: use the posterior, not the prior weights ($\\tfrac{7}{16}$) nor the MAP coin alone ($\\tfrac34$).",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s1-03",
+    "course": "Bayesian Statistics",
+    "set_no": 1,
+    "area": "Foundations",
+    "stem": "With prior $\\theta \\sim \\mathrm{Beta}(2,3)$, we observe $X = 7$ successes in $n = 10$ trials with $X \\mid \\theta \\sim \\mathrm{Bin}(10,\\theta)$. Give the posterior distribution of $\\theta$ and its posterior mean.",
+    "options": [
+      "Posterior $\\mathrm{Beta}(9,13)$, posterior mean $\\tfrac{9}{22} \\approx 0.409$",
+      "Posterior $\\mathrm{Beta}(7,3)$, posterior mean $\\tfrac{7}{10} = 0.7$",
+      "Posterior $\\mathrm{Beta}(8,7)$, posterior mean $\\tfrac{8}{15} \\approx 0.533$",
+      "Posterior $\\mathrm{Beta}(9,6)$, posterior mean $\\tfrac{9}{15} = 0.6$",
+      "Posterior $\\mathrm{Beta}(9,6)$, posterior mean $\\tfrac{7}{10} = 0.7$"
+    ],
+    "correct_index": 3,
+    "solution": "By Beta-Binomial conjugacy the posterior is $\\mathrm{Beta}(2+7,\\,3+10-7)=\\mathrm{Beta}(9,6)$, with posterior mean $9/(9+6)=0.6$. The trap is reporting the MLE $7/10=0.7$ instead of the posterior mean.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s1-04",
+    "course": "Bayesian Statistics",
+    "set_no": 1,
+    "area": "Foundations",
+    "stem": "Let $C_\\alpha(X)$ be a $(1-\\alpha)$-credible set for $\\theta$, i.e. $\\Pi(C_\\alpha\\mid X)\\ge 1-\\alpha$ under the posterior from a prior $\\pi$. Which statement holds for a general model and prior?",
+    "options": [
+      "Averaging the frequentist coverage over the prior gives $\\int P_\\theta(\\theta \\in C_\\alpha(X))\\, \\pi(\\theta)\\, d\\theta \\ge 1-\\alpha$; i.e. $C_\\alpha$ has prior-average coverage at least $1-\\alpha$.",
+      "A credible set and a confidence set are the same concept, since both are derived from the likelihood, so any $(1-\\alpha)$-credible set is exactly a $(1-\\alpha)$-confidence set.",
+      "Every $(1-\\alpha)$-confidence set is automatically a $(1-\\alpha)$-credible set for any prior, because frequentist coverage is stronger than posterior probability.",
+      "The set $C_\\alpha$ automatically satisfies $P_\\theta(\\theta \\in C_\\alpha(X)) \\ge 1-\\alpha$ for every fixed $\\theta$, so it is a $(1-\\alpha)$-confidence set.",
+      "The credible set $C_\\alpha$ has exact frequentist coverage $1-\\alpha$ for every fixed $\\theta$ whenever the prior $\\pi$ has full support."
+    ],
+    "correct_index": 0,
+    "solution": "Integrating the credible-coverage statement against the joint law $p_\\theta(x)\\pi(\\theta)$ gives $\\int P_\\theta(\\theta\\in C_\\alpha(X))\\,\\pi(\\theta)\\,d\\theta\\ge 1-\\alpha$, so a credible set has prior-average frequentist coverage $\\ge 1-\\alpha$. Pointwise coverage $P_\\theta(\\theta\\in C_\\alpha)\\ge 1-\\alpha$ for every fixed $\\theta$ is the trap: it fails in general and holds only asymptotically under Bernstein--von Mises (Def. 2.2).",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s1-05",
+    "course": "Bayesian Statistics",
+    "set_no": 1,
+    "area": "Decision theory",
+    "stem": "A parameter $\\theta$ has posterior $\\Pi(\\cdot\\mid X)$, and $\\delta(X)$ is a point estimator. For the squared-error loss $L_1(\\hat\\theta,\\theta)=\\|\\hat\\theta-\\theta\\|^2$, the absolute-error loss $L_2(\\hat\\theta,\\theta)=|\\hat\\theta-\\theta|$ (with $\\theta\\in\\mathbb{R}$), and the $0$--$1$ loss $L_3(a,\\theta)=\\mathbf{1}\\{a\\neq\\theta\\}$, which option correctly pairs each loss with the posterior functional giving its Bayes estimator?",
+    "options": [
+      "$L_1\\to$ MLE; $\\;L_2\\to$ posterior mean; $\\;L_3\\to$ posterior median.",
+      "$L_1\\to$ posterior mode; $\\;L_2\\to$ posterior median; $\\;L_3\\to$ posterior mean.",
+      "$L_1\\to$ posterior mean; $\\;L_2\\to$ posterior mode; $\\;L_3\\to$ posterior median.",
+      "$L_1\\to$ posterior mean; $\\;L_2\\to$ posterior median; $\\;L_3\\to$ posterior mode.",
+      "$L_1\\to$ posterior median; $\\;L_2\\to$ posterior mean; $\\;L_3\\to$ posterior mode."
+    ],
+    "correct_index": 3,
+    "solution": "Minimizing posterior risk yields the posterior mean for squared error, the posterior median for absolute error, and the posterior mode for $0$--$1$ loss (Ex. 3.7--3.9). The trap is swapping mean and median, or reading the squared-loss rule as the MLE.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s1-06",
+    "course": "Bayesian Statistics",
+    "set_no": 1,
+    "area": "Decision theory",
+    "stem": "Estimators are evaluated under squared-error risk $R(\\delta,\\theta)=\\mathbb{E}_\\theta\\,\\|\\delta(X)-\\theta\\|^2$, and \"Bayes\" means Bayes for some prior. Which statement is TRUE in general?",
+    "options": [
+      "Every Bayes estimator is minimax.",
+      "If $\\delta_\\pi$ is the \\emph{unique} $\\pi$-Bayes rule for a prior $\\Pi$, then $\\delta_\\pi$ is admissible.",
+      "If an estimator is unbiased, then it is inadmissible.",
+      "Every minimax estimator is admissible.",
+      "If a Bayes estimator is unbiased, then it is minimax."
+    ],
+    "correct_index": 1,
+    "solution": "A unique $\\pi$-Bayes rule is admissible (Prop. 3.19(i)): any dominating rule would also be $\\pi$-Bayes, so uniqueness forces equality, contradicting strict domination. The others fail: the Gaussian MLE is minimax yet inadmissible for $p\\ge3$ (James-Stein), Bayes need not be minimax without a least-favourable prior, and the dim-1 Gaussian MLE is unbiased but admissible.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s1-07",
+    "course": "Bayesian Statistics",
+    "set_no": 1,
+    "area": "Decision theory",
+    "stem": "Let $(P_\\theta:\\theta\\in\\Theta)$ be a model with loss $L$ and prior $\\pi$. Which condition is sufficient for $\\delta_\\pi$ to be the unique minimax rule with $\\pi$ least favourable?",
+    "options": [
+      "$\\delta_\\pi$ is unbiased and has constant risk, since unbiasedness together with constant risk characterises minimax rules.",
+      "$\\delta_\\pi$ is a $\\pi$-Bayes rule for some prior $\\pi$, since every Bayes rule is minimax.",
+      "$\\delta_\\pi$ is the unique $\\pi$-Bayes rule and its Bayes risk equals its worst-case risk $\\sup_{\\theta}R(\\delta_\\pi,\\theta)$ (in particular, this holds if $\\delta_\\pi$ has constant risk in $\\theta$).",
+      "$\\delta_\\pi$ has constant risk $R(\\delta_\\pi,\\theta)$ in $\\theta$; constant risk alone is enough to force minimaxity.",
+      "$\\pi$ is the uniform prior on $\\Theta$, since the least favourable prior is always the flat / maximally non-informative one."
+    ],
+    "correct_index": 2,
+    "solution": "By Thm 3.15, the chain $\\sup_\\theta R(\\delta,\\theta)\\ge R_\\pi(\\delta)\\ge R_\\pi(\\delta_\\pi)=\\sup_\\theta R(\\delta_\\pi,\\theta)$ holds when $\\delta_\\pi$ is the unique $\\pi$-Bayes rule and its Bayes risk equals its worst-case risk (e.g. constant risk), forcing minimaxity and $\\pi$ least favourable. Trap: constant risk or being Bayes alone is insufficient -- both halves are required.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s1-08",
+    "course": "Bayesian Statistics",
+    "set_no": 1,
+    "area": "Decision theory",
+    "stem": "Let $X\\mid\\theta\\sim N(\\theta,I_p)$ on $\\mathbb{R}^p$ under loss $L(\\hat\\theta,\\theta)=\\|\\hat\\theta-\\theta\\|^2$, with MLE $\\hat\\theta_{\\mathrm{MLE}}=X$ and James-Stein estimator $\\hat\\theta_{\\mathrm{JS}}=\\bigl(1-\\tfrac{p-2}{\\|X\\|^2}\\bigr)X$ of risk $p-(p-2)^2\\,E_\\theta[\\|X\\|^{-2}]$. Which statement is correct?",
+    "options": [
+      "Since $\\hat\\theta_{\\mathrm{JS}}$ dominates the MLE, it is an unbiased estimator of $\\theta$ with $E_\\theta[\\hat\\theta_{\\mathrm{JS}}]=\\theta$.",
+      "$\\hat\\theta_{\\mathrm{MLE}}=X$ is inadmissible under quadratic loss for every dimension $p\\ge 1$.",
+      "For $p\\ge 3$, $\\hat\\theta_{\\mathrm{JS}}$ dominates $\\hat\\theta_{\\mathrm{MLE}}$ and therefore has strictly smaller worst-case risk, $\\sup_\\theta E_\\theta[\\|\\hat\\theta_{\\mathrm{JS}}-\\theta\\|^2]<p$.",
+      "Because $\\hat\\theta_{\\mathrm{MLE}}=X$ is inadmissible for $p\\ge 3$, it cannot be minimax for $\\theta$.",
+      "For $p\\ge 3$, $\\hat\\theta_{\\mathrm{MLE}}$ is inadmissible and $\\hat\\theta_{\\mathrm{JS}}$ dominates it, yet both estimators have the same worst-case risk $\\sup_{\\theta\\in\\mathbb{R}^p} E_\\theta[\\|\\hat\\theta-\\theta\\|^2]=p$."
+    ],
+    "correct_index": 4,
+    "solution": "For $p\\ge3$ the Stein correction is positive, so $\\hat\\theta_{\\mathrm{JS}}$ strictly dominates the MLE at every $\\theta$, making $X$ inadmissible. But as $\\|\\theta\\|\\to\\infty$ we have $E_\\theta[\\|X\\|^{-2}]\\to0$, so the JS sup-risk rises to $p$, equal to the MLE's constant risk $p$: hence both share the same worst-case risk $p$ and pointwise domination does not lower the minimax risk.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s1-09",
+    "course": "Bayesian Statistics",
+    "set_no": 1,
+    "area": "Frequentist guarantees",
+    "stem": "Let $X_1,\\dots,X_n$ be i.i.d. from a density $p_0\\in\\mathcal{P}$ with prior $\\Pi$ and metric $d$. Which pair of conditions is assumed in the simpler version of Schwartz's theorem to guarantee strong posterior consistency at $p_0$?",
+    "options": [
+      "(i) the prior density is continuous and strictly positive in a neighborhood of $p_0$; and (ii) the Fisher information $i(p_0)$ is finite and nonsingular at $p_0$.",
+      "(i) the prior assigns mass $1$ to a neighborhood of $p_0$, i.e. $\\Pi\\big(\\{p:\\mathrm{KL}(p_0,p)<\\varepsilon\\}\\big)=1$ for some $\\varepsilon>0$; and (ii) there exist tests $\\phi_n$ separating $p_0$ from $B_\\varepsilon(p_0)^c$ with both error probabilities tending to $0$.",
+      "(i) $p_0$ lies in the KL-support of $\\Pi$; and (ii) the prior $\\Pi$ is conjugate to the model, so that the posterior is available in closed form.",
+      "(i) $p_0$ lies in the KL-support of $\\Pi$, i.e. $\\Pi\\big(\\{p:\\mathrm{KL}(p_0,p)<\\varepsilon\\}\\big)>0$ for all $\\varepsilon>0$; and (ii) for every $\\varepsilon$-ball $B_\\varepsilon(p_0)$ there exist tests $\\phi_n$ with type-I error $P_0^n\\phi_n\\le e^{-Cn}$ and type-II error $\\sup_{p\\in B_\\varepsilon(p_0)^c}P^n(1-\\phi_n)\\le e^{-Cn}$ for some $C>0$.",
+      "Condition (i) that $p_0$ lies in the KL-support of $\\Pi$ alone is sufficient; no testing condition is required."
+    ],
+    "correct_index": 3,
+    "solution": "Schwartz's theorem requires $p_0$ in the KL-support of $\\Pi$ ($\\Pi(\\{p:\\mathrm{KL}(p_0,p)<\\varepsilon\\})>0$ for all $\\varepsilon>0$), lower-bounding the evidence, together with exponentially consistent tests of $p_0$ against $d$-balls' complements (type-I and type-II errors $\\le e^{-Cn}$), controlling the numerator over far sets. KL-support alone is insufficient; the testing condition is essential.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s1-10",
+    "course": "Bayesian Statistics",
+    "set_no": 1,
+    "area": "Frequentist guarantees",
+    "stem": "Let $X_1,\\dots,X_n$ be i.i.d. from $p_{\\theta_0}$ in a regular parametric model on $\\Theta=\\mathbb{R}^p$, with MLE $\\hat\\theta_n$, non-singular Fisher information $i(\\theta_0)$, and a prior with continuous positive density near $\\theta_0$. State the conclusion of the Bernstein--von Mises theorem.",
+    "options": [
+      "$\\left\\| \\Pi(\\cdot\\mid X_1,\\dots,X_n) - N\\!\\left(\\theta_{\\pi},\\tfrac{1}{n}\\,i(\\theta_0)^{-1}\\right) \\right\\|_{TV} \\to 0$, where $\\theta_{\\pi}$ is the prior mean, so credible sets centred at the prior mean are asymptotically valid.",
+      "$\\left\\| \\Pi(\\cdot\\mid X_1,\\dots,X_n) - N\\!\\left(\\hat\\theta_n,\\tfrac{1}{n}\\,i(\\theta_0)^{-1}\\right) \\right\\|_{TV} \\to 0$ in $P_{\\theta_0}$-probability; consequently $1-\\alpha$ posterior credible sets are asymptotically valid frequentist confidence sets and the posterior contracts at rate $1/\\sqrt{n}$.",
+      "$\\left\\| \\Pi(\\cdot\\mid X_1,\\dots,X_n) - N\\!\\left(\\hat\\theta_n,\\,i(\\theta_0)^{-1}\\right) \\right\\|_{TV} \\to 0$ in $P_{\\theta_0}$-probability, so the posterior contracts at rate $1/n$.",
+      "$\\mathrm{KL}\\!\\left(\\Pi(\\cdot\\mid X_1,\\dots,X_n),\\,N\\!\\left(\\hat\\theta_n,\\tfrac{1}{n}\\,i(\\theta_0)^{-1}\\right)\\right) \\to 0$ in $P_{\\theta_0}$-probability; convergence holds in KL divergence rather than in total variation.",
+      "$\\left\\| \\Pi(\\cdot\\mid X_1,\\dots,X_n) - N\\!\\left(\\hat\\theta_n,\\tfrac{1}{n}\\,i(\\theta_0)\\right) \\right\\|_{TV} \\to 0$ in $P_{\\theta_0}$-probability; the posterior covariance equals $\\tfrac{1}{n}\\,i(\\theta_0)$."
+    ],
+    "correct_index": 1,
+    "solution": "Bernstein--von Mises gives $\\|\\Pi(\\cdot\\mid X_{1:n})-N(\\hat\\theta_n,\\tfrac1n i(\\theta_0)^{-1})\\|_{TV}\\to 0$ in $P_{\\theta_0}$-probability: the limit is centred at the MLE, has covariance $\\tfrac1n i(\\theta_0)^{-1}$ (hence $1/\\sqrt n$ contraction), and convergence is in total variation, so credible sets are asymptotically valid confidence sets. Traps: dropping the $1/n$ scaling, not inverting $i(\\theta_0)$, centring at the prior mean, or stating KL instead of TV.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s1-11",
+    "course": "Bayesian Statistics",
+    "set_no": 1,
+    "area": "Frequentist guarantees",
+    "stem": "Let $X_1,\\dots,X_n\\mid\\theta\\overset{iid}{\\sim}P_\\theta$ with true value $\\theta_0$, metric $d$ on $\\Theta$, and posterior $\\Pi_n(\\cdot\\mid X^{(n)})$. Which of the following are correct?\n\n(I) The posterior is weakly consistent at $\\theta_0$ if $\\Pi_n(\\{d(\\theta,\\theta_0)>\\varepsilon\\}\\mid X^{(n)})\\to 0$ in $P_{\\theta_0}^{(n)}$-probability for every $\\varepsilon>0$.\n\n(II) $\\mathrm{KL}(p_0,p)=\\int p_0\\log(p_0/p)\\,d\\mu$ is symmetric and defines a metric on densities.\n\n(III) Posterior consistency at $\\theta_0$ means, by definition, that every $(1-\\alpha)$ credible set has frequentist coverage $\\ge 1-\\alpha$ for all $\\theta$.",
+    "options": [
+      "(II) only",
+      "(I) and (II)",
+      "(III) only",
+      "(I) and (III)",
+      "(I) only"
+    ],
+    "correct_index": 4,
+    "solution": "Only (I) holds: it is the definition of weak posterior consistency, i.e. the posterior contracting to a Dirac mass at $\\theta_0$. (II) fails since $\\mathrm{KL}$ is asymmetric, a divergence and not a metric; (III) confuses consistency with credible-set coverage, which arises only asymptotically via Bernstein--von Mises and is not the definition.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s1-12",
+    "course": "Bayesian Statistics",
+    "set_no": 1,
+    "area": "Bayesian computation",
+    "stem": "You run Metropolis-Hastings to sample from a posterior $\\mu(\\theta)=\\pi(\\theta\\mid X)=p_\\theta(X)\\pi(\\theta)/m(X)$, using a possibly non-symmetric proposal $q(y,z)$ for the move $y\\to z$. Which statement about the acceptance probability $\\alpha(y,z)$ is correct?",
+    "options": [
+      "The acceptance probability is $\\alpha(y,z) = \\min\\left\\{1,\\ \\dfrac{\\mu(y)\\,q(y,z)}{\\mu(z)\\,q(z,y)}\\right\\}$, the reciprocal of the standard ratio, which still leaves $\\mu$ stationary.",
+      "The acceptance probability is $\\alpha(y,z) = \\min\\left\\{1,\\ \\dfrac{\\mu(z)\\,q(y,z)}{\\mu(y)\\,q(z,y)}\\right\\}$, using the forward proposal $q(y,z)$ in the numerator and the reverse proposal $q(z,y)$ in the denominator.",
+      "The acceptance probability is $\\alpha(y,z) = \\min\\left\\{1,\\ \\dfrac{\\mu(z)\\,q(z,y)}{\\mu(y)\\,q(y,z)}\\right\\}$, and it can be evaluated without knowing the normalizing constant $m(X)$, since $\\mu$ enters only through the ratio $\\mu(z)/\\mu(y)$.",
+      "Because $\\mu(z) = p_z(X)\\pi(z)/m(X)$, computing $\\alpha(y,z)$ requires evaluating the marginal likelihood (normalizing constant) $m(X)$ at least once.",
+      "The acceptance probability is $\\alpha(y,z) = \\min\\left\\{1,\\ \\dfrac{\\mu(z)}{\\mu(y)}\\right\\}$ for every proposal $q$, so the proposal density never appears in the acceptance step."
+    ],
+    "correct_index": 2,
+    "solution": "Detailed balance gives the Hastings ratio $\\alpha(y,z)=\\min\\{1,\\,\\mu(z)q(z,y)/(\\mu(y)q(y,z))\\}$, with the reverse proposal $q(z,y)$ in the numerator. Since $\\mu$ enters only through $\\mu(z)/\\mu(y)$, the intractable $m(X)$ cancels, so $\\alpha$ is computable without it. The traps: dropping the proposal correction (valid only for symmetric $q$) or claiming $m(X)$ must be evaluated.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s1-13",
+    "course": "Bayesian Statistics",
+    "set_no": 1,
+    "area": "Bayesian computation",
+    "stem": "Among the exact (non-MCMC) sampling methods seen in the course, which one of the following statements is correct?",
+    "options": [
+      "The Box-Muller algorithm requires two independent standard normal inputs to produce two independent uniform $\\mathrm{Unif}(0,1)$ outputs.",
+      "Accept-reject sampling can only be applied when the target density $\\mu$ is fully normalized; if $\\mu$ is known only up to a multiplicative constant the accepted draws have the wrong distribution.",
+      "Inverse-transform sampling requires access to the target's probability density function $\\mu$, not its CDF $F$; one cannot generate $Y \\sim F$ from a uniform unless $\\mu$ is available in closed form.",
+      "In accept-reject, having drawn $Y \\sim g$ and $U \\mid Y \\sim \\mathrm{Unif}(0, M g(Y))$ and accepted whenever $0 < U < c\\,\\mu(Y)$, it is the auxiliary variable $U$ (not $Y$) whose conditional law equals the target $\\mu$.",
+      "Inverse-transform sampling: if $U \\sim \\mathrm{Unif}(0,1)$ and $F^-$ denotes the generalized inverse of a CDF $F$, then $F^-(U) \\sim F$; so any target with a (computable) CDF can be sampled by transforming a single uniform."
+    ],
+    "correct_index": 4,
+    "solution": "Correct is the inverse-transform claim: by the probability integral transform (Lemma 5.1), for $U\\sim\\mathrm{Unif}(0,1)$ and generalized inverse $F^-$, $F^-(U)\\sim F$, so a target with computable CDF is sampled from one uniform. Traps: accept--reject works up to a normalizing constant, it is the accepted $Y$ (not the auxiliary $U$) that carries the target law, and Box--Muller maps two uniforms to two normals, not the reverse.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s1-14",
+    "course": "Bayesian Statistics",
+    "set_no": 1,
+    "area": "Bayesian computation",
+    "stem": "Let $(\\theta,\\tau^2)$ have joint density $p(\\theta,\\tau^2)\\propto \\tau^{-(2a+1)}\\exp\\!\\left(-\\frac{(\\theta-m)^2+2b}{2\\tau^2}\\right)$, with $\\theta\\mid\\tau^2\\sim N(m,\\tau^2)$ and $1/\\tau^2\\sim\\Gamma(a,b)$. A two-stage Gibbs sampler alternates updates of $\\theta$ and $1/\\tau^2$ from their full conditionals. With $a=2$, $b=1$, $m=1$ and current $\\theta=3$, what is the full conditional of $1/\\tau^2$ and how is the Gibbs step drawn?",
+    "options": [
+      "$1/\\tau^2\\mid\\theta\\sim\\Gamma\\!\\left(a+\\tfrac12,\\ \\tfrac{(\\theta-m)^2}{2}+b\\right)=\\Gamma(2.5,\\,5)$, sampled directly with no accept/reject step.",
+      "$1/\\tau^2\\mid\\theta\\sim\\Gamma\\!\\left(a+1,\\ (\\theta-m)^2+b\\right)=\\Gamma(3,\\,5)$, sampled directly with no accept/reject step.",
+      "$1/\\tau^2\\mid\\theta\\sim\\Gamma\\!\\left(a+\\tfrac12,\\ \\tfrac{(\\theta-m)^2}{2}+b\\right)=\\Gamma(2.5,\\,3)$, sampled directly with no accept/reject step.",
+      "$1/\\tau^2\\mid\\theta\\sim\\Gamma\\!\\left(a+\\tfrac12,\\ \\tfrac{(\\theta-m)^2}{2}+b\\right)=\\Gamma(2.5,\\,3)$, but only after a Metropolis-Hastings accept/reject correction since Gibbs uses a proposal.",
+      "$1/\\tau^2\\mid\\theta\\sim\\Gamma(a,b)=\\Gamma(2,1)$, i.e. the marginal of $1/\\tau^2$, sampled directly."
+    ],
+    "correct_index": 2,
+    "solution": "Viewing the joint as a density in $u=1/\\tau^2$ gives the kernel $u^{(a+1/2)-1}\\exp\\{-(\\tfrac{(\\theta-m)^2}{2}+b)u\\}$, so $1/\\tau^2\\mid\\theta\\sim\\Gamma(a+\\tfrac12,\\ \\tfrac{(\\theta-m)^2}{2}+b)=\\Gamma(2.5,3)$, drawn exactly with no Metropolis-Hastings accept/reject step. Trap: the rate is $\\tfrac{(\\theta-m)^2}{2}+b=3$, not $(\\theta-m)^2+b=5$.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s1-15",
+    "course": "Bayesian Statistics",
+    "set_no": 1,
+    "area": "Bayesian computation",
+    "stem": "Let $\\mu$ be a target density on $\\mathbb{R}^p$ sampled by MCMC with transition kernel $Q$. Which of the following statements is $\\textbf{TRUE}$?",
+    "options": [
+      "For the independent Metropolis-Hastings sampler with proposal density $g$ satisfying $\\mu(y)\\le M\\,g(y)$ for all $y$, the chain is uniformly ergodic with $\\|Q^n(y,\\cdot)-\\mu\\|_{TV}\\le (1-1/M)^n$ for every starting point $y$.",
+      "The random-walk Metropolis algorithm is uniformly ergodic on $\\mathbb{R}^p$, since its symmetric proposal makes the whole state space a small set.",
+      "In the preconditioned Crank-Nicolson (pCN) algorithm with a Gaussian prior $N(0,\\Sigma)$, the acceptance probability requires evaluating the prior density at the proposal, and equals $\\min\\{1,\\ \\pi(z)/\\pi(y)\\}$.",
+      "The Metropolis-adjusted Langevin algorithm (MALA) is uniformly ergodic because it uses $\\nabla\\log\\mu$, which makes the whole space a small set.",
+      "The ergodic theorem (LLN for MCMC), $\\frac{1}{n}\\sum_{i=1}^n f(Y_i)\\to\\int f\\,d\\mu$ a.s. for $f\\in L^1(\\mu)$, holds only when the samples $Y_i$ are i.i.d.; for a genuinely dependent Markov chain such averages need not converge."
+    ],
+    "correct_index": 0,
+    "solution": "For independent Metropolis-Hastings under domination $\\mu\\le M g$, the kernel satisfies $K(y,z)\\ge\\tfrac1M\\mu(z)$, making all of $\\mathbb{R}^p$ a small set, so $\\|Q^n(y,\\cdot)-\\mu\\|_{TV}\\le(1-1/M)^n$ for every $y$ (Thm 5.9). The traps: RWM and MALA are not uniformly ergodic (Ex. 5.23); the pCN proposal preserves the Gaussian prior so acceptance uses only the likelihood ratio; and the ergodic theorem (Thm 5.16) holds for dependent Harris-recurrent chains, not only i.i.d. samples.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s2-01",
+    "course": "Bayesian Statistics",
+    "set_no": 2,
+    "area": "Foundations",
+    "stem": "A plant sources a component from three suppliers with production shares $0.5$, $0.3$, $0.2$ and respective defect probabilities $0.01$, $0.02$, $0.05$. A randomly selected component is found defective. What is the posterior probability that it came from the third supplier?",
+    "options": [
+      "$\\dfrac{2}{7}$",
+      "$\\dfrac{5}{21}$",
+      "$0.2$",
+      "$\\dfrac{10}{21}$",
+      "$0.010$"
+    ],
+    "correct_index": 3,
+    "solution": "By Bayes' rule the joint weights are $0.5\\cdot0.01=0.005$, $0.3\\cdot0.02=0.006$, $0.2\\cdot0.05=0.010$, summing to the total defect probability $0.021$. The posterior for supplier three is $0.010/0.021=10/21\\approx0.476$, well above its prior share of $0.2$ because it is the least reliable source.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s2-02",
+    "course": "Bayesian Statistics",
+    "set_no": 2,
+    "area": "Foundations",
+    "stem": "Let $\\theta \\sim \\text{Beta}(2,2)$ and, given $\\theta$, let observations be i.i.d. $\\text{Bernoulli}(\\theta)$. After observing $3$ successes in $5$ trials, what is the posterior predictive probability that the next observation is a success?",
+    "options": [
+      "$\\frac{1}{2}$",
+      "$\\frac{4}{7}$",
+      "$\\frac{5}{9}$",
+      "$\\frac{3}{5}$"
+    ],
+    "correct_index": 2,
+    "solution": "The posterior is $\\text{Beta}(2+3,\\,2+2)=\\text{Beta}(5,4)$, and the posterior predictive probability of a success equals the posterior mean $\\frac{a+k}{a+b+n}=\\frac{5}{9}$. The traps report the MLE $k/n=3/5$, the prior mean $1/2$, or the posterior mode $4/7$ instead of the posterior mean.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s2-03",
+    "course": "Bayesian Statistics",
+    "set_no": 2,
+    "area": "Foundations",
+    "stem": "Let $X_1,\\dots,X_n \\mid \\lambda$ be i.i.d. Exponential with rate $\\lambda$ (density $\\lambda e^{-\\lambda x}$), and place a $\\mathrm{Gamma}(a,b)$ prior on $\\lambda$ in the rate parametrization. With $a=2$, $b=1$, $n=3$ and $\\sum_i X_i = 5$, what is the posterior mean of $\\lambda$?",
+    "options": [
+      "$7/6$",
+      "$7/4$",
+      "$3/5$",
+      "$5/4$",
+      "$5/6$"
+    ],
+    "correct_index": 4,
+    "solution": "The Gamma prior is conjugate, giving posterior $\\mathrm{Gamma}(a+n,\\, b+\\sum_i X_i) = \\mathrm{Gamma}(5,6)$, whose mean is $(a+n)/(b+\\sum_i X_i) = 5/6$. The value $3/5$ is the MLE $n/\\sum_i X_i$, not the posterior mean.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s2-04",
+    "course": "Bayesian Statistics",
+    "set_no": 2,
+    "area": "Foundations",
+    "stem": "Let $X$ have likelihood $p_\\theta(X)$ and let $\\theta$ have prior density $\\pi$. Which statement about the posterior mode (the MAP estimator) $\\hat\\theta_{\\mathrm{MAP}}$ is correct?",
+    "options": [
+      "It maximizes $\\log p_\\theta(X)+\\log\\pi(\\theta)$, i.e. it is a penalized MLE, and it coincides with the MLE when $\\pi$ is constant.",
+      "It equals the posterior median.",
+      "It is only defined when the prior is conjugate to the likelihood.",
+      "It equals the posterior mean $\\int\\theta\\, d\\Pi(\\theta\\mid X)$.",
+      "It always equals the MLE, regardless of the prior."
+    ],
+    "correct_index": 0,
+    "solution": "The posterior mode maximizes the log-posterior $\\log p_\\theta(X)+\\log\\pi(\\theta)$, hence is a penalized MLE that reduces to the ordinary MLE exactly when the prior is flat/constant. A nonconstant prior generally shifts the maximizer away from the MLE, and the mode is distinct from the posterior mean and median.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s2-05",
+    "course": "Bayesian Statistics",
+    "set_no": 2,
+    "area": "Decision theory",
+    "stem": "Suppose the posterior for a parameter $\\theta>0$ is $\\theta\\mid X \\sim \\mathrm{Exponential}$ with rate $4$ (density $4e^{-4\\theta}$ on $\\theta>0$). We estimate $\\theta$ under the absolute-error loss $L(d,\\theta)=|d-\\theta|$. What is the Bayes estimate?",
+    "options": [
+      "$0$",
+      "$\\dfrac12 = 0.5$",
+      "$\\dfrac14 = 0.25$",
+      "$\\dfrac{\\ln 2}{4}\\approx 0.173$",
+      "$\\dfrac{\\ln 2}{2}\\approx 0.347$"
+    ],
+    "correct_index": 3,
+    "solution": "Under absolute-error loss the Bayes estimate is the posterior median. For an Exponential posterior with rate $r$ the median solves $e^{-r m}=\\tfrac12$, giving $m=\\ln 2/r=\\ln 2/4\\approx 0.173$. The mean $1/4$ and mode $0$ would be the answers under squared-error and $0$--$1$ loss respectively.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s2-06",
+    "course": "Bayesian Statistics",
+    "set_no": 2,
+    "area": "Decision theory",
+    "stem": "Consider statistical decision problems under a fixed loss. Which of the following statements holds in general?",
+    "options": [
+      "An admissible estimator whose risk is constant in $\\theta$ is minimax.",
+      "An unbiased estimator is admissible.",
+      "A constant estimator $\\delta(X)\\equiv c$ is always inadmissible.",
+      "Every minimax estimator is the unique $\\Pi$-Bayes rule for some prior $\\Pi$.",
+      "Every admissible estimator is minimax."
+    ],
+    "correct_index": 0,
+    "solution": "By Prop. 3.19, an admissible rule with constant risk attains its worst-case risk at every $\\theta$, so no rule can have smaller supremum risk and it is minimax. Admissibility alone (without constant risk) does not give minimaxity, a constant estimator is in fact admissible rather than inadmissible, and minimax rules need not be unique proper-prior Bayes rules. Unbiasedness implies neither admissibility (e.g. the MLE of a normal mean is inadmissible for $p\\ge 3$) nor minimaxity.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s2-07",
+    "course": "Bayesian Statistics",
+    "set_no": 2,
+    "area": "Decision theory",
+    "stem": "Let $X \\sim \\mathrm{Bin}(n,\\theta)$ and estimate $\\theta$ under squared-error loss. Which estimator is minimax?",
+    "options": [
+      "$\\delta(X)=\\dfrac{1}{2}$",
+      "$\\delta(X)=\\dfrac{X+1}{n+2}$",
+      "$\\delta(X)=\\dfrac{X+\\sqrt{n}/2}{n+\\sqrt{n}}$",
+      "$\\delta(X)=\\dfrac{X}{n}$"
+    ],
+    "correct_index": 2,
+    "solution": "This is the posterior mean under the $\\mathrm{Beta}(\\sqrt{n}/2,\\sqrt{n}/2)$ prior, which is the least favourable prior, and its risk $n/(4(n+\\sqrt{n})^2)$ is constant in $\\theta$. A Bayes rule with constant risk is the unique minimax estimator. The MLE $X/n$ and the uniform-prior mean $(X+1)/(n+2)$ both have $\\theta$-dependent risk, and the constant $1/2$ has risk $(2\\theta-1)^2/4$, so none is minimax.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s2-08",
+    "course": "Bayesian Statistics",
+    "set_no": 2,
+    "area": "Decision theory",
+    "stem": "Let $X_1,\\dots,X_n \\overset{iid}{\\sim} N(\\theta,1)$ with $\\theta \\in \\mathbb{R}$, and consider the MLE $\\hat\\theta = \\bar X$ under squared-error loss. Which statement is correct?",
+    "options": [
+      "$\\hat\\theta$ has constant risk $1/n$, is both admissible and minimax, and is not a Bayes rule for any prior",
+      "$\\hat\\theta$ is inadmissible, being dominated by a shrinkage estimator",
+      "$\\hat\\theta$ is admissible but biased, with risk depending on $\\theta$",
+      "$\\hat\\theta$ is the Bayes rule under the conjugate prior $\\theta\\sim N(0,1)$",
+      "$\\hat\\theta$ has constant risk $1/n$ but is not minimax"
+    ],
+    "correct_index": 0,
+    "solution": "By Thm 3.21, $\\bar X$ has constant risk $R(\\hat\\theta,\\theta)=1/n$ and is both admissible (via Cramér–Rao) and minimax; since it is unbiased it cannot be a $\\pi$-Bayes rule for any prior (Prop. 3.10). Shrinkage dominates the MLE only in dimension $p\\geq 3$ (James–Stein), not here; and the $N(0,1)$ posterior mean is $\\tfrac{n}{n+1}\\bar X\\neq\\bar X$, so $\\bar X$ is not that conjugate Bayes rule.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s2-09",
+    "course": "Bayesian Statistics",
+    "set_no": 2,
+    "area": "Frequentist guarantees",
+    "stem": "Let $p_0$ be the true density and $\\Pi$ a prior. Which statement about the Kullback-Leibler divergence $\\mathrm{KL}(p_0,p)=\\int p_0\\log\\frac{p_0}{p}\\,d\\mu$ and the KL-support condition (used in Schwartz's theorem) is correct?",
+    "options": [
+      "``$p_0$ in the KL-support'' means $\\Pi$ charges every total-variation ball $\\{p:\\|p-p_0\\|_{TV}<\\varepsilon\\}$; the KL functional itself plays no role.",
+      "$\\mathrm{KL}(p_0,p)\\ge 0$ but $\\mathrm{KL}$ is in general asymmetric; ``$p_0$ in the KL-support'' means $\\Pi(\\{p:\\mathrm{KL}(p_0,p)<\\varepsilon\\})>0$ for all $\\varepsilon>0$, which lower-bounds the Bayes evidence (denominator).",
+      "``$p_0$ in the KL-support'' means $\\Pi$ charges every Hellinger ball around $p_0$, which controls the test numerator over sets far from $p_0$.",
+      "$\\mathrm{KL}(p_0,p)$ can be negative when $p$ puts more mass than $p_0$; the KL-support condition is needed to bound the posterior numerator away from $p_0$.",
+      "$\\mathrm{KL}(p_0,p)=\\mathrm{KL}(p,p_0)$, so $\\mathrm{KL}$ is a genuine metric on densities; the KL-support condition makes it the natural distance for credible balls."
+    ],
+    "correct_index": 1,
+    "solution": "By Jensen $\\mathrm{KL}\\ge 0$, but it is an asymmetric divergence, not a metric. The KL-support condition $\\Pi(\\{p:\\mathrm{KL}(p_0,p)<\\varepsilon\\})>0$ for all $\\varepsilon>0$ is precisely what lower-bounds the evidence (denominator) in Schwartz's theorem. The traps: KL is not symmetric/not a metric, the balls are KL-balls (not TV/Hellinger), and the condition controls the denominator, not the numerator over far sets.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s2-10",
+    "course": "Bayesian Statistics",
+    "set_no": 2,
+    "area": "Frequentist guarantees",
+    "stem": "Let $X_1,\\dots,X_n$ be i.i.d. from $p_{\\theta_0}$ in a regular $p$-dimensional parametric model with MLE $\\hat\\theta_n$ and Fisher information $i(\\theta_0)$, and let the prior have a continuous, positive density near $\\theta_0$. Under the Bernstein-von Mises theorem, which of the following holds for the ellipsoid $C_\\alpha=\\{\\theta: n(\\theta-\\hat\\theta_n)^\\top i(\\theta_0)(\\theta-\\hat\\theta_n)\\le \\chi^2_{p,1-\\alpha}\\}$?",
+    "options": [
+      "The conclusion holds only if $C_\\alpha$ is centred at the prior mean rather than at $\\hat\\theta_n$.",
+      "$\\Pi(C_\\alpha\\mid X_1,\\dots,X_n)\\to 1-\\alpha$ in $P_{\\theta_0}$-probability, so $C_\\alpha$ is an asymptotic $(1-\\alpha)$ credible set.",
+      "$\\Pi(C_\\alpha\\mid X_1,\\dots,X_n)\\to \\alpha$ in $P_{\\theta_0}$-probability.",
+      "$\\Pi(C_\\alpha\\mid X_1,\\dots,X_n)\\to 1-\\alpha$ only if the quantile $\\chi^2_{p-1,1-\\alpha}$ (with $p-1$ degrees of freedom) is used.",
+      "$\\Pi(C_\\alpha\\mid X_1,\\dots,X_n)= 1-\\alpha$ exactly for every $n$."
+    ],
+    "correct_index": 1,
+    "solution": "By the BvM corollary the rescaled posterior is asymptotically $N(\\hat\\theta_n,(n\\,i(\\theta_0))^{-1})$, so $n(\\theta-\\hat\\theta_n)^\\top i(\\theta_0)(\\theta-\\hat\\theta_n)\\to\\chi^2_p$ and $\\Pi(C_\\alpha\\mid X)\\to P(\\chi^2_p\\le\\chi^2_{p,1-\\alpha})=1-\\alpha$ in $P_{\\theta_0}$-probability, an asymptotic $(1-\\alpha)$ credible set that doubles as a frequentist confidence set. The convergence is only asymptotic (not exact for finite $n$), the centre must be $\\hat\\theta_n$ (or the asymptotically equivalent posterior mean, not the prior mean), and the degrees of freedom equal the full dimension $p$.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s2-11",
+    "course": "Bayesian Statistics",
+    "set_no": 2,
+    "area": "Frequentist guarantees",
+    "stem": "Let $(P_\\theta:\\theta\\in\\Theta)$, $\\Theta\\subseteq\\mathbb{R}^p$, be a regular parametric model with prior density continuous and strictly positive near the true $\\theta_0$, and let $X_1,\\dots,X_n$ be iid $P_{\\theta_0}$. Which statement about the asymptotic behaviour of the posterior $\\Pi_n(\\cdot\\mid X^{(n)})$ is correct?",
+    "options": [
+      "The posterior contracts to $\\theta_0$ at rate $1/n$, matching the parametric efficiency bound.",
+      "The posterior contracts at rate $1/\\sqrt{\\log n}$, reflecting the slow accumulation of likelihood information.",
+      "Contraction at rate $1/\\sqrt{n}$ holds only when the prior is conjugate to the likelihood; otherwise no rate is guaranteed.",
+      "The posterior contracts to $\\theta_0$ at rate $1/\\sqrt{n}$, and the center of a smallest ball carrying posterior mass $m\\in(0,1)$ is a consistent point estimator.",
+      "The posterior contracts to $\\theta_0$, but a posterior distribution can never be used to define a point estimator."
+    ],
+    "correct_index": 3,
+    "solution": "By the Bernstein-von Mises theorem (Thm 4.8) the posterior, recentered at the MLE and rescaled by $\\sqrt{n}$, converges in total variation to $N(0,i(\\theta_0)^{-1})$, so the contraction rate is $1/\\sqrt{n}$ and only a continuous positive prior density near $\\theta_0$ is needed, not conjugacy. Posterior consistency yields a consistent point estimator via Proposition 4.2 (center of the smallest ball carrying mass $m$). The distractors give the wrong rates $1/n$ or $1/\\sqrt{\\log n}$, impose a false conjugacy requirement, or wrongly deny that a posterior defines point estimators.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s2-12",
+    "course": "Bayesian Statistics",
+    "set_no": 2,
+    "area": "Bayesian computation",
+    "stem": "A random-walk Metropolis sampler targets the unnormalized density $\\pi(\\theta) \\propto \\exp(-\\theta^2/2)$ using a symmetric Gaussian proposal. From the current state $y = 1$ it proposes $z = 2$. The probability of accepting this move equals:",
+    "options": [
+      "$e^{3/2}$",
+      "$e^{-3/2}$",
+      "$1$",
+      "$\\min\\!\\left(1,\\, e^{3/2}\\right)$",
+      "$\\frac{1}{\\sqrt{2\\pi}}\\, e^{-3/2}$"
+    ],
+    "correct_index": 1,
+    "solution": "For a symmetric proposal the acceptance probability is $\\min(1,\\pi(z)/\\pi(y))=\\min(1,\\exp(-z^2/2+y^2/2))=\\min(1,\\exp(-2+1/2))=e^{-3/2}$. The proposal moves away from the mode so the ratio is below $1$; traps include inverting the ratio (giving $e^{3/2}$, which would cap at $1$) and multiplying by the Gaussian normalizing constant, which cancels in the ratio.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s2-13",
+    "course": "Bayesian Statistics",
+    "set_no": 2,
+    "area": "Bayesian computation",
+    "stem": "You wish to generate a draw from the exponential distribution with rate $\\lambda > 0$ using a single $U \\sim \\mathrm{Unif}(0,1)$ via inverse-transform sampling. Which assignment returns a sample with the correct $\\mathrm{Exp}(\\lambda)$ law?",
+    "options": [
+      "$X = \\frac{\\ln U}{\\lambda}$",
+      "Inverse-transform sampling cannot be used here, since one must invert the density $\\lambda e^{-\\lambda x}$ rather than the CDF.",
+      "$X = -\\frac{\\ln U}{\\lambda}$",
+      "$X = -\\lambda \\ln U$",
+      "$X = \\frac{U}{\\lambda}$"
+    ],
+    "correct_index": 2,
+    "solution": "Inverting the CDF $F(x)=1-e^{-\\lambda x}$ gives $F^{-}(u)=-\\ln(1-u)/\\lambda$, and since $1-U$ is also $\\mathrm{Unif}(0,1)$ this simplifies to $X=-\\ln(U)/\\lambda$. The method inverts the CDF, not the density; dropping the logarithm, flipping the sign, or misplacing $\\lambda$ all break the law.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s2-14",
+    "course": "Bayesian Statistics",
+    "set_no": 2,
+    "area": "Bayesian computation",
+    "stem": "Consider a Gibbs sampler targeting a joint posterior $\\mu(\\theta_1,\\dots,\\theta_m)$ on a product space. Which statement about the algorithm is correct?",
+    "options": [
+      "It is valid only when all full conditionals are conjugate, so that they can be sampled in closed form.",
+      "It requires a proposal kernel $q$ and a Metropolis-Hastings acceptance ratio $\\min\\{1, \\mu(z)q(z,y)/(\\mu(y)q(y,z))\\}$ to leave $\\mu$ stationary.",
+      "It is defined only for $m=2$ coordinates and does not extend to higher dimensions.",
+      "It draws each coordinate from its marginal distribution $\\mu_i(\\theta_i)$, producing an i.i.d. sequence from $\\mu$.",
+      "It updates each coordinate from its full conditional $\\mu_i(\\theta_i \\mid \\theta_{-i})$, leaves $\\mu$ stationary, and uses no accept/reject step."
+    ],
+    "correct_index": 4,
+    "solution": "The Gibbs sampler cycles through the full conditionals $\\mu_i(\\theta_i\\mid\\theta_{-i})$, which leaves $\\mu$ stationary with no accept/reject step (the positivity condition ensures irreducibility). The traps: it uses the full conditionals, not the marginals (which would already require knowing $\\mu$), and conjugacy is merely convenient, never required.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s2-15",
+    "course": "Bayesian Statistics",
+    "set_no": 2,
+    "area": "Bayesian computation",
+    "stem": "A Markov chain $(Y_i)_{i\\ge 1}$ produced by an MCMC sampler is Harris recurrent with stationary law $\\mu$ (the target posterior), and $f$ is $\\mu$-integrable. Which statement about the ergodic average $\\frac{1}{n}\\sum_{i=1}^n f(Y_i)$ is correct?",
+    "options": [
+      "The law of large numbers requires the $Y_i$ to be independent, so the average is not guaranteed to converge for a Markov chain.",
+      "It need not converge unless the chain is uniformly ergodic with a small-set minorization.",
+      "It converges almost surely, but to the starting value $Y_1$ rather than to $\\int f\\, d\\mu$.",
+      "It converges to $\\int f\\, d\\mu$ only in probability, and almost-sure convergence fails because the draws are not i.i.d.",
+      "It converges to $\\int f\\, d\\mu$ almost surely as $n\\to\\infty$, even though the draws $Y_i$ are dependent rather than i.i.d."
+    ],
+    "correct_index": 4,
+    "solution": "The MCMC ergodic theorem (a strong law for Markov chains) states that for a Harris-recurrent chain with stationary law $\\mu$, the time average $\\frac{1}{n}\\sum_i f(Y_i)$ converges to $\\int f\\,d\\mu$ almost surely for every $f\\in L^1(\\mu)$. Independence is not needed: the stationary dependent draws still satisfy the law of large numbers, and uniform ergodicity is required only for the CLT and geometric rates, not for the basic a.s. LLN.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s3-01",
+    "course": "Bayesian Statistics",
+    "set_no": 3,
+    "area": "Foundations",
+    "stem": "A bag contains one two-headed coin and four fair coins. A coin is drawn uniformly at random, flipped $3$ times, and lands heads every time. What is the posterior probability that the drawn coin is the two-headed one?",
+    "options": [
+      "$\\frac{2}{3}$",
+      "$\\frac{8}{9}$",
+      "$\\frac{1}{5}$",
+      "$\\frac{4}{5}$",
+      "$\\frac{1}{2}$"
+    ],
+    "correct_index": 0,
+    "solution": "With prior $\\frac{1}{5}$ on the two-headed coin and likelihoods $1$ versus $(1/2)^3=\\frac{1}{8}$, Bayes' rule gives $\\frac{(1/5)\\cdot 1}{(1/5)\\cdot 1+(4/5)\\cdot(1/8)}=\\frac{1/5}{1/5+1/10}=\\frac{2}{3}$. The trap is dropping the prior and normalizing only the likelihoods, which yields $\\frac{1}{1+1/8}=\\frac{8}{9}$.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s3-02",
+    "course": "Bayesian Statistics",
+    "set_no": 3,
+    "area": "Foundations",
+    "stem": "Let $X_1,\\dots,X_n \\mid \\theta$ be iid Poisson($\\theta$) with conjugate prior $\\theta \\sim \\text{Gamma}(a,b)$ in the rate parametrization (density $\\propto \\theta^{a-1}e^{-b\\theta}$), where $a=2$, $b=3$. Having observed $n=4$ counts with $\\sum_i X_i = 6$, what is the exact posterior predictive probability $P(X_{\\text{new}}=0 \\mid \\text{data})$ of a new count?",
+    "options": [
+      "$\\tfrac{8}{7} \\approx 1.1429$",
+      "$e^{-8/7} \\approx 0.3189$",
+      "$\\left(\\tfrac{7}{8}\\right)^{8} = \\tfrac{5764801}{16777216} \\approx 0.3436$",
+      "$e^{-1.5} \\approx 0.2231$",
+      "$\\left(\\tfrac{3}{4}\\right)^{2} = \\tfrac{9}{16} = 0.5625$"
+    ],
+    "correct_index": 2,
+    "solution": "The posterior is $\\text{Gamma}(a+s,\\,b+n)=\\text{Gamma}(8,7)$, and the posterior predictive of a new count is Negative-Binomial with $P(X_{\\text{new}}=0)=\\left(\\tfrac{b+n}{b+n+1}\\right)^{a+s}=\\left(\\tfrac{7}{8}\\right)^{8}=\\tfrac{5764801}{16777216}\\approx 0.3436$. The distractors use the prior $(b/(b+1))^a=(3/4)^2$, the Poisson MLE plug-in $e^{-\\bar x}=e^{-1.5}$, the wrong exponent $e^{-(a+s)/(b+n)}=e^{-8/7}$, and the posterior mean $(a+s)/(b+n)=8/7$ (not even a probability).",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s3-03",
+    "course": "Bayesian Statistics",
+    "set_no": 3,
+    "area": "Foundations",
+    "stem": "Let $X_1,\\dots,X_8 \\mid \\theta \\sim N(\\theta, \\sigma^2)$ iid with known $\\sigma^2 = 4$, under the prior $\\theta \\sim N(1, 2)$. The observed sample mean is $\\bar X = 3$. The posterior mean of $\\theta$ equals:",
+    "options": [
+      "$5/3$",
+      "$2$",
+      "$3$",
+      "$2.6$",
+      "$1$"
+    ],
+    "correct_index": 3,
+    "solution": "The Normal-Normal posterior mean is the precision-weighted average $\\frac{(n/\\sigma^2)\\bar X + \\mu_0/\\tau^2}{n/\\sigma^2 + 1/\\tau^2} = \\frac{2\\cdot 3 + 0.5\\cdot 1}{2 + 0.5} = \\frac{6.5}{2.5} = 2.6$, with data precision $n/\\sigma^2 = 8/4 = 2$ and prior precision $1/\\tau^2 = 0.5$. The trap is using $1/\\sigma^2$ instead of $n/\\sigma^2$ (giving $5/3$), an equal weighting (giving $2$), or ignoring the prior (giving $\\bar X = 3$).",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s3-04",
+    "course": "Bayesian Statistics",
+    "set_no": 3,
+    "area": "Foundations",
+    "stem": "We update a prior with $n$ i.i.d. observations $X_1,\\dots,X_n$. Which statement about the resulting posterior is correct?",
+    "options": [
+      "Updating one observation at a time generally gives a different posterior than batch updating, since intermediate posteriors accumulate.",
+      "The posterior depends on the order in which the i.i.d. observations are processed.",
+      "Sequential one-at-a-time updating (each posterior used as the next prior) equals batch updating, and the posterior is invariant to the order of the $X_i$.",
+      "Every component of the prior is necessarily modified by the data, so no marginal can remain equal to its prior.",
+      "A parameter that does not appear in the likelihood still has its prior marginal updated by the data."
+    ],
+    "correct_index": 2,
+    "solution": "By Bayesian coherence the i.i.d. likelihood factorizes as a symmetric product $\\prod_i p_\\theta(X_i)$, so the posterior is order-invariant and sequential one-at-a-time updating equals batch updating. The distractors fail: a parameter absent from the likelihood keeps its prior marginal unchanged (non-identified), so the data need not modify every marginal.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s3-05",
+    "course": "Bayesian Statistics",
+    "set_no": 3,
+    "area": "Decision theory",
+    "stem": "A binary label $\\theta \\in \\{0,1\\}$ is to be predicted under $0$--$1$ loss. After observing $x$, the posterior is $P(\\theta=1 \\mid x) = 0.3$ and $P(\\theta=0 \\mid x) = 0.7$. What is the Bayes decision and its posterior risk?",
+    "options": [
+      "Predict $\\theta=0.3$, with posterior risk $0.21$",
+      "Predict $\\theta=1$, with posterior risk $0.7$",
+      "Predict $\\theta=1$, with posterior risk $0.3$",
+      "Predict $\\theta=0$, with posterior risk $0.7$",
+      "Predict $\\theta=0$, with posterior risk $0.3$"
+    ],
+    "correct_index": 4,
+    "solution": "Under $0$--$1$ loss the Bayes rule is the posterior mode (Bayes classifier), here the larger probability $P(\\theta=0\\mid x)=0.7$, so predict $\\theta=0$; its posterior risk is $1-\\max_k P(\\theta=k\\mid x)=1-0.7=0.3$. Traps: reporting the max $0.7$ as the risk, or returning the posterior mean $0.3$ as the decision (inadmissible since $\\theta$ is binary).",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s3-06",
+    "course": "Bayesian Statistics",
+    "set_no": 3,
+    "area": "Decision theory",
+    "stem": "Consider estimation of a parameter $\\theta$ under quadratic (squared-error) loss. Which statement is correct?",
+    "options": [
+      "The posterior mean is always an unbiased estimator of $\\theta$.",
+      "Any unbiased estimator is automatically admissible.",
+      "If an estimator is unbiased and is the Bayes rule for quadratic risk under some prior, then $\\mathbb{P}(\\hat\\theta=\\theta)=1$ jointly; consequently nontrivial Bayes estimators are biased.",
+      "Every Bayes estimator for quadratic risk is unbiased.",
+      "A biased estimator can never be a Bayes rule for quadratic risk."
+    ],
+    "correct_index": 2,
+    "solution": "For quadratic risk the Bayes rule is the posterior mean, so $\\hat\\theta=\\mathbb{E}[\\theta\\mid X]$ a.s.; the tower property gives $\\mathbb{E}[\\theta\\hat\\theta]=\\mathbb{E}[\\hat\\theta^2]$, while unbiasedness gives $\\mathbb{E}[\\theta\\hat\\theta]=\\mathbb{E}[\\theta^2]$. Subtracting yields $\\mathbb{E}[(\\hat\\theta-\\theta)^2]=0$, i.e. $\\hat\\theta=\\theta$ almost surely. Hence any nontrivial Bayes estimator must be biased; in particular the posterior mean is generally biased. The claim that every unbiased estimator is admissible fails by the Stein phenomenon: the unbiased MLE is inadmissible in dimension $\\ge 3$.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s3-07",
+    "course": "Bayesian Statistics",
+    "set_no": 3,
+    "area": "Decision theory",
+    "stem": "Consider estimation under a fixed loss, with $\\delta_\\pi$ the Bayes rule for a prior $\\pi$ and $R_\\pi(\\delta_\\pi)$ its Bayes risk. Which statement about least favourable priors is correct?",
+    "options": [
+      "$\\pi$ is least favourable if $R_\\pi(\\delta_\\pi) \\geq R_\\rho(\\delta_\\rho)$ for every prior $\\rho$; a $\\pi$-Bayes rule with constant frequentist risk is then minimax and $\\pi$ is least favourable.",
+      "$\\pi$ is least favourable precisely when it is the uniform (flat) prior on the parameter space.",
+      "Every prior is least favourable, since each one maximizes its own Bayes risk by definition.",
+      "$\\pi$ is least favourable if and only if it coincides with the Jeffreys prior $\\pi(\\theta) \\propto \\sqrt{\\det i(\\theta)}$.",
+      "$\\pi$ is least favourable if it minimizes the Bayes risk $R_\\pi(\\delta_\\pi)$ over all priors $\\rho$."
+    ],
+    "correct_index": 0,
+    "solution": "A least favourable prior maximizes the Bayes risk $R_\\rho(\\delta_\\rho)$ over all priors $\\rho$, capturing the hardest problem. Thm 3.15 gives the link: a $\\pi$-Bayes rule with constant (worst-case-attaining) frequentist risk is minimax and its prior $\\pi$ is least favourable. The traps reverse the optimization to a minimum or identify the least favourable prior with a flat or Jeffreys prior.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s3-08",
+    "course": "Bayesian Statistics",
+    "set_no": 3,
+    "area": "Decision theory",
+    "stem": "Consider a statistical decision problem in which the parameter space $\\Theta$, the sample space $\\mathcal{X}$, and the (randomized) decision space $\\mathcal{D}$ are all finite. Which statement follows from the complete class theorem proved in the course?",
+    "options": [
+      "The theorem holds only when $\\Theta$ is infinite; for finite $\\Theta$ admissible non-Bayes rules exist.",
+      "Every admissible rule is Bayes for some prior, and every Bayes rule for a full-support prior is admissible.",
+      "Bayes rules are never admissible, since nontrivial Bayes estimators are biased.",
+      "A rule is admissible if and only if it is Bayes for some prior with full support.",
+      "Every admissible rule is minimax."
+    ],
+    "correct_index": 1,
+    "solution": "By the complete class theorem (finite $\\Theta,\\mathcal{X},\\mathcal{D}$), every admissible rule is Bayes for some prior, and any rule that is Bayes for a full-support prior is admissible. The trap is the converse direction: a rule Bayes for a prior lacking full support (e.g. a point mass) can be inadmissible, so \"Bayes\" alone is not equivalent to \"admissible,\" and admissibility does not imply minimaxity.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s3-09",
+    "course": "Bayesian Statistics",
+    "set_no": 3,
+    "area": "Frequentist guarantees",
+    "stem": "In Schwartz's theorem one needs, for each alternative $H_1:d(p,p_0)>\\varepsilon$, a sequence of tests $\\phi_n$ whose type-I and type-II errors are bounded by $e^{-Cn}$ for some $C>0$. Which statement about how such exponentially consistent tests are actually constructed is TRUE?",
+    "options": [
+      "It suffices to have any tests whose two error probabilities merely tend to $0$: split the $n$ samples into $m$ disjoint blocks, run the test on each block, and take a majority vote; Hoeffding's inequality then makes both errors of the aggregated test decay like $e^{-Cn}$.",
+      "The tests must be exact level-$\\alpha$ tests for a fixed $\\alpha\\in(0,1)$; controlling the level at $\\alpha$ is what forces the type-II error down to $e^{-Cn}$.",
+      "Once $p_0$ lies in the KL-support of the prior, the required exponentially consistent tests exist automatically and need not be built separately.",
+      "One must use the Neyman--Pearson most powerful test for $H_0:p=p_0$ against $H_1$, since only the likelihood-ratio test attains errors as small as $e^{-Cn}$.",
+      "The tests must be unbiased (power at every alternative at least their level), as unbiasedness is what yields the exponential error bound."
+    ],
+    "correct_index": 0,
+    "solution": "Exponential consistency is obtained by boosting: any tests with both error probabilities going to $0$ are applied to disjoint blocks of the sample and combined by a majority vote, and Hoeffding's inequality bounds the probability that more than half the blocks err by $e^{-Cn}$. Neyman--Pearson optimality, a fixed exact level, and unbiasedness are neither used nor needed. KL-support of the prior is the separate Schwartz condition and does not by itself supply the tests.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s3-10",
+    "course": "Bayesian Statistics",
+    "set_no": 3,
+    "area": "Frequentist guarantees",
+    "stem": "Let $X_1,\\dots,X_n$ be i.i.d. from a regular one-dimensional model with $n=100$, Fisher information $i(\\theta_0)=4$, and MLE $\\hat\\theta_n=2$; the prior density is continuous and strictly positive near $\\theta_0$. By the Bernstein--von Mises theorem the posterior is approximately $N\\!\\left(\\hat\\theta_n,\\ \\tfrac{1}{n\\,i(\\theta_0)}\\right)$. What is the approximate posterior standard deviation?",
+    "options": [
+      "$0.2$",
+      "$0.05$",
+      "$0.5$",
+      "$0.0025$",
+      "$20$"
+    ],
+    "correct_index": 1,
+    "solution": "The asymptotic posterior variance is $1/(n\\,i(\\theta_0))=1/(100\\cdot 4)=1/400$, so the standard deviation is $1/\\sqrt{n\\,i(\\theta_0)}=1/\\sqrt{400}=0.05$. Dropping the $1/n$ gives $0.5$, using $\\sqrt{i/n}$ gives $0.2$, and reporting the variance instead of its square root gives $0.0025$.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s3-11",
+    "course": "Bayesian Statistics",
+    "set_no": 3,
+    "area": "Frequentist guarantees",
+    "stem": "Let $X_1,X_2,\\dots$ be i.i.d.\\ from $P_{\\theta_0}$ with posterior $\\Pi_n(\\cdot\\mid X^{(n)})$ on a metric space $(\\Theta,d)$, and consider the mode of convergence of the posterior mass outside $\\varepsilon$-balls. Which statement is TRUE?",
+    "options": [
+      "Posterior consistency at $\\theta_0$ is equivalent to the posterior mean being an unbiased estimator of $\\theta_0$ for every $n$.",
+      "Posterior consistency at $\\theta_0$ guarantees that every $(1-\\alpha)$ credible set has frequentist coverage $\\ge 1-\\alpha$ at $\\theta_0$ for all finite $n$.",
+      "Strong and weak posterior consistency are equivalent for every model and prior, because by Egorov's theorem almost-sure convergence and convergence in probability always coincide on the underlying probability space for sequences of posterior masses.",
+      "Strong posterior consistency means $\\Pi_n(d(\\theta,\\theta_0)>\\varepsilon\\mid X^{(n)})\\to 0$ $P_{\\theta_0}$-almost surely for every $\\varepsilon>0$, whereas weak consistency only requires this convergence in $P_{\\theta_0}$-probability; consistency alone does not make $(1-\\alpha)$ credible sets frequentist confidence sets.",
+      "Weak consistency means the posterior mass outside every $\\varepsilon$-ball tends to $0$ almost surely, while strong consistency only requires convergence in $P_{\\theta_0}$-probability."
+    ],
+    "correct_index": 3,
+    "solution": "Strong consistency is almost-sure convergence of the posterior mass outside every $\\varepsilon$-ball to $0$, while weak consistency is the same convergence merely in $P_{\\theta_0}$-probability; both express contraction to $\\delta_{\\theta_0}$, but a.s. is strictly stronger. Consistency only locates the posterior near $\\theta_0$; turning credible sets into valid frequentist confidence sets requires the sharper Bernstein--von Mises approximation, not consistency. Option 4 is false because Egorov gives only convergence in measure on large subsets, not equivalence of the two modes.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s3-12",
+    "course": "Bayesian Statistics",
+    "set_no": 3,
+    "area": "Bayesian computation",
+    "stem": "A Metropolis-Hastings chain targets a density $\\mu$ using proposal $q(y,z)$ and acceptance probability $\\alpha(y,z)=\\min\\left(1,\\frac{\\mu(z)q(z,y)}{\\mu(y)q(y,z)}\\right)$. By which mechanism is $\\mu$ guaranteed to be the stationary law of the resulting chain?",
+    "options": [
+      "Stationarity requires the proposals to be drawn independently of the current state, $q(y,z)=g(z)$, so that successive draws form an i.i.d. sequence with law $\\mu$.",
+      "Stationarity of $\\mu$ follows from the ergodic theorem (law of large numbers) for Harris-recurrent chains, which guarantees the invariant law equals $\\mu$.",
+      "Stationarity holds because the chain is aperiodic and irreducible; these two properties alone force any limiting law to coincide with the target $\\mu$.",
+      "The construction preserves $\\mu$ only when the proposal is symmetric, $q(y,z)=q(z,y)$; for non-symmetric $q$ the chain converges to a different stationary law.",
+      "This $\\alpha$ is chosen so that the kernel satisfies detailed balance $\\mu(y)\\,\\alpha(y,z)\\,q(y,z)=\\mu(z)\\,\\alpha(z,y)\\,q(z,y)$, i.e. it is reversible w.r.t. $\\mu$; reversibility implies $\\mu$ is invariant."
+    ],
+    "correct_index": 4,
+    "solution": "The MH acceptance rule is engineered so that $\\mu(y)\\alpha(y,z)q(y,z)=\\mu(z)\\alpha(z,y)q(z,y)$, i.e. the kernel is reversible (satisfies detailed balance) with respect to $\\mu$; integrating this identity over $y$ gives $\\int\\mu(y)P(y,z)\\,dy=\\mu(z)$, so $\\mu$ is invariant. The ergodic theorem (B) yields convergence of time averages, not the invariance property, and aperiodicity/irreducibility (C) govern convergence to the invariant law but do not by themselves identify it. The $q(z,y)/q(y,z)$ factor makes the rule work precisely for non-symmetric proposals, so neither symmetry (D) nor independence (E) is required.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s3-13",
+    "course": "Bayesian Statistics",
+    "set_no": 3,
+    "area": "Bayesian computation",
+    "stem": "You run accept-reject to sample from a target density $\\mu$, known only up to a normalizing constant, using a proposal $g$ and an envelope $\\mu \\le M\\,g$ with $M>1$ (here $\\mu$ denotes the normalized target). Which statement is correct?",
+    "options": [
+      "The expected number of proposals per accepted draw does not depend on $M$.",
+      "The output of the algorithm is the auxiliary uniform variable $U$, whose law is $\\mu$.",
+      "The method requires $\\mu$ to be fully normalized; it cannot be run knowing $\\mu$ only up to a constant.",
+      "The per-proposal acceptance probability is $1/M$, so the expected number of proposals until one is accepted is $M$, and the accepted draw $Y$ has law $\\mu$.",
+      "The per-proposal acceptance probability is $M$, and the accepted draw has law $\\mu$."
+    ],
+    "correct_index": 3,
+    "solution": "For a normalized target with envelope $\\mu \\le M\\,g$, the per-proposal acceptance probability is $\\int g(y)\\,\\mu(y)/(M g(y))\\,dy = 1/M$, so trials until acceptance are geometric with mean $M$, and the accepted proposal $Y$ (not the auxiliary $U$) has law $\\mu$. Accept-reject only needs $\\mu$ up to a constant. The traps read $M$ as the acceptance probability or output $U$.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s3-14",
+    "course": "Bayesian Statistics",
+    "set_no": 3,
+    "area": "Bayesian computation",
+    "stem": "Let $(X,Y) \\sim N(0, \\Sigma)$ be bivariate normal with unit variances and correlation $\\rho \\in (-1,1)$. A Gibbs sampler alternately draws each coordinate from its full conditional. The full conditional $X \\mid Y = y$ is:",
+    "options": [
+      "$N(\\rho y,\\, \\rho^2)$",
+      "$N(0,\\, 1)$",
+      "$N(y,\\, 1-\\rho^2)$",
+      "$N(\\rho y,\\, 1)$",
+      "$N(\\rho y,\\, 1-\\rho^2)$"
+    ],
+    "correct_index": 4,
+    "solution": "For a standard bivariate normal with correlation $\\rho$, the full conditional is $X \\mid Y=y \\sim N(\\rho y,\\, 1-\\rho^2)$, which is exactly what the Gibbs sampler draws at each step. The trap is dropping the conditioning (giving the marginal $N(0,1)$) or keeping the unconditional variance $1$ instead of the reduced variance $1-\\rho^2$.",
+    "difficulty": 2
+  },
+  {
+    "id": "bqcm-s3-15",
+    "course": "Bayesian Statistics",
+    "set_no": 3,
+    "area": "Bayesian computation",
+    "stem": "Consider gradient- and prior-based MCMC for a posterior with Gaussian prior $\\Pi = N(0,\\Sigma)$. Which statement is correct?",
+    "options": [
+      "MALA proposes an isotropic random walk $z = y + \\xi$ that ignores $\\nabla \\log \\mu$, while pCN uses the gradient to drift toward high-density regions.",
+      "MALA proposes $z \\sim N\\big(y + \\varepsilon\\, \\nabla \\log \\mu(y),\\, 2\\varepsilon I\\big)$ followed by an MH correction, and pCN's proposal $z=\\sqrt{1-\\beta^2}\\,y + \\beta\\,\\xi$ with $\\xi\\sim N(0,\\Sigma)$ preserves the prior, so its acceptance probability depends only on the likelihood ratio.",
+      "pCN's acceptance probability is $\\min\\big(1, \\pi(z)/\\pi(y)\\big)$, the prior-density ratio, since the likelihood cancels in the proposal.",
+      "pCN with $z=\\sqrt{1-\\beta^2}\\,y + \\beta\\,\\xi$ does not preserve the prior, so its acceptance ratio still contains the prior density $\\pi(z)/\\pi(y)$ together with the likelihood ratio.",
+      "MALA proposes $z \\sim N\\big(y + \\varepsilon\\, \\nabla \\log \\mu(y),\\, 2\\varepsilon I\\big)$ and requires no MH correction because the Langevin proposal is already exactly $\\mu$-reversible."
+    ],
+    "correct_index": 1,
+    "solution": "MALA's proposal mean drifts by $\\varepsilon\\,\\nabla\\log\\mu(y)$ (it uses the gradient) and needs an MH accept/reject step because the discretized Langevin proposal is not exactly $\\mu$-reversible. pCN's autoregressive proposal leaves the Gaussian prior invariant, so the prior cancels and acceptance reduces to $\\min\\big(1, p_z(x)/p_y(x)\\big)$, the likelihood ratio. The traps claim MALA is gradient-free or correction-free, or that pCN keeps a prior ratio in its acceptance.",
+    "difficulty": 2
+  }
+]

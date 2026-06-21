@@ -60,6 +60,10 @@ DUEL_WIN: float = 10.0
 DUEL_PARTICIPATE: float = 2.0
 DUEL_N: int = 6              # nb de cartes par duel
 
+# QCM (choix multiple, notation à correction négative pour décourager le hasard).
+QCM_CORRECT: float = 3.0    # +3 XP si bonne réponse
+QCM_WRONG: float = -1.0     # -1 XP si mauvaise réponse (planché à 0 XP global)
+
 # Pondération du tirage d'audit (audit plus probable si peu audité / dur /
 # raté récemment par l'adversaire) -> l'audit devient informatif, pas du bruit.
 # DÉCROISSANCE : chaque audit DÉJÀ passé sur la carte multiplie sa proba de retomber

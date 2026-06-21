@@ -149,10 +149,12 @@ def me(course: Optional[str] = None, u=Depends(current_user)):
     db = DB.get_db()
     course = course or DEFAULT_COURSE
     s = read_score(db, u["id"], course)
+    qtot, qdone = qcm_counts(db, u["id"], course)
     return {
         "name": u["name"], "course": course, "xp": s["xp"], "tokens": s["tokens"],
         "pending_audits": pending_count(db, u["id"], course),
         "next_token_in": round(S.TOKEN_EVERY - (s["xp_milestone"] % S.TOKEN_EVERY), 1),
+        "qcm_total": qtot, "qcm_done": qdone,
     }
 
 
@@ -260,6 +262,96 @@ def progress(u=Depends(current_user)):
                              "front": _snip(c["front"]),
                              "front_en": _snip(c["front_en"]) if c["front_en"] else None})
     return {course: list(cats.values()) for course, cats in out.items()}
+
+
+# ---------------------------------------------------------------------------
+# QCM (choix multiple) — une question à la fois, +3/-1 XP, puis la solution
+# ---------------------------------------------------------------------------
+
+def qcm_counts(db, uid, course):
+    """(total, déjà répondus) de QCM pour ce cours."""
+    tot = db.execute("SELECT COUNT(*) c FROM qcm WHERE course=?", (course,)).fetchone()["c"]
+    done = db.execute("SELECT COUNT(*) c FROM qcm q JOIN qcm_answers a ON a.qcm_id=q.id "
+                      "WHERE q.course=? AND a.user_id=?", (course, uid)).fetchone()["c"]
+    return tot, done
+
+
+@app.get("/qcm/next")
+def qcm_next(course: Optional[str] = None, u=Depends(current_user)):
+    """Renvoie le PROCHAIN QCM non répondu du cours (sans la bonne réponse ni la solution),
+    dans l'ordre des séries. + compteurs total/faits. {done:true} si tout est fait."""
+    db = DB.get_db()
+    course = course or DEFAULT_COURSE
+    tot, done = qcm_counts(db, u["id"], course)
+    row = db.execute(
+        "SELECT id, set_no, area, stem, options_json, difficulty FROM qcm "
+        "WHERE course=? AND id NOT IN (SELECT qcm_id FROM qcm_answers WHERE user_id=?) "
+        "ORDER BY set_no, id LIMIT 1", (course, u["id"])).fetchone()
+    if not row:
+        return {"done": True, "total": tot, "answered": done}
+    return {"done": False, "total": tot, "answered": done,
+            "qcm": {"id": row["id"], "set_no": row["set_no"], "area": row["area"],
+                    "stem": row["stem"], "options": json.loads(row["options_json"]),
+                    "difficulty": row["difficulty"]}}
+
+
+class QcmAnswerIn(BaseModel):
+    chosen_index: int
+
+
+@app.post("/qcm/{qcm_id}/answer")
+def qcm_answer(qcm_id: str, body: QcmAnswerIn, u=Depends(current_user)):
+    """Note un QCM (une seule fois) : +3 XP si juste, -1 si faux (planché à 0 XP).
+    Renvoie correct, bonne réponse, solution, XP gagné/perdu."""
+    db = DB.get_db()
+    with DB.LOCK:
+        q = db.execute("SELECT * FROM qcm WHERE id=?", (qcm_id,)).fetchone()
+        if not q:
+            raise HTTPException(404, "QCM inconnu.")
+        opts = json.loads(q["options_json"])
+        if not (0 <= body.chosen_index < len(opts)):
+            raise HTTPException(400, "Réponse hors borne.")
+        if db.execute("SELECT 1 FROM qcm_answers WHERE user_id=? AND qcm_id=?",
+                      (u["id"], qcm_id)).fetchone():
+            raise HTTPException(400, "QCM déjà répondu.")
+
+        correct = (body.chosen_index == q["correct_index"])
+        course = q["course"]
+        # planché : ne pas descendre l'XP du cours sous 0
+        cur = read_score(db, u["id"], course)["xp"]
+        delta = S.QCM_CORRECT if correct else max(S.QCM_WRONG, -cur)
+        new_xp, new_tokens, granted = apply_xp(db, u["id"], course, delta)
+        db.execute("INSERT INTO qcm_answers(user_id, qcm_id, chosen_index, correct, xp_delta) "
+                   "VALUES (?,?,?,?,?)", (u["id"], qcm_id, body.chosen_index, 1 if correct else 0, delta))
+        verb = "réussit" if correct else "rate"
+        DB.log_event(db, u["id"], "qcm",
+                     f'📝 {u["name"]} {verb} un QCM {course} ({"+" if delta >= 0 else ""}{delta:g} XP).')
+        db.commit()
+    tot, done = qcm_counts(db, u["id"], course)
+    return {"correct": correct, "correct_index": q["correct_index"], "solution": q["solution"],
+            "chosen_index": body.chosen_index, "xp_delta": delta, "xp": new_xp,
+            "total": tot, "answered": done}
+
+
+@app.get("/qcm/progress")
+def qcm_progress(course: Optional[str] = None, u=Depends(current_user)):
+    """Liste TOUS les QCM du cours avec le statut du joueur (todo/correct/wrong).
+    Pour les QCM déjà faits : énoncé+options+solution+réponse (revue) ; sinon énoncé seul."""
+    db = DB.get_db()
+    course = course or DEFAULT_COURSE
+    ans = {a["qcm_id"]: a for a in db.execute(
+        "SELECT qcm_id, chosen_index, correct FROM qcm_answers WHERE user_id=?", (u["id"],))}
+    out = []
+    for q in db.execute("SELECT * FROM qcm WHERE course=? ORDER BY set_no, id", (course,)):
+        a = ans.get(q["id"])
+        item = {"id": q["id"], "set_no": q["set_no"], "area": q["area"], "stem": q["stem"],
+                "status": "todo" if not a else ("correct" if a["correct"] else "wrong")}
+        if a:   # révélé seulement si déjà répondu
+            item.update({"options": json.loads(q["options_json"]),
+                         "correct_index": q["correct_index"], "solution": q["solution"],
+                         "chosen_index": a["chosen_index"]})
+        out.append(item)
+    return out
 
 
 # ---------------------------------------------------------------------------

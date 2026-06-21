@@ -285,6 +285,61 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
 .login .card > * + *{margin-top:14px}
 .err{color:var(--bad);font-size:13.5px;min-height:18px}
 .empty{color:var(--muted);font-size:14px;padding:6px 0}
+
+/* ---------- QCM ---------- */
+.badge.muted{background:var(--track2);color:#fff}
+.qcm-top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.qcm-prog{font-size:13px;color:var(--muted);font-weight:600}
+.qcm-meta{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:10px}
+.qcm-areachip{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.03em;color:var(--accent);background:var(--accent-soft);border-radius:999px;padding:3px 9px}
+.qcm-setlabel{font-size:12px;color:var(--muted);font-weight:600}
+.qcm-stem{font-size:15.5px;line-height:1.5;margin-bottom:14px}
+.qcm-opts{display:flex;flex-direction:column;gap:9px}
+.qcm-opt{display:flex;align-items:flex-start;gap:10px;text-align:left;width:100%;
+  border:1px solid var(--line);background:var(--btn-bg);border-radius:12px;padding:11px 13px;
+  font-size:14.5px;color:var(--ink);cursor:pointer;transition:.12s}
+.qcm-opt:hover:not(:disabled){border-color:var(--accent);background:var(--chip-bg)}
+.qcm-opt:disabled{cursor:default}
+.qcm-optletter{flex:0 0 auto;width:22px;height:22px;line-height:22px;text-align:center;border-radius:50%;
+  background:var(--chip-bg2);border:1px solid var(--line);font-weight:700;font-size:12.5px;text-transform:uppercase}
+.qcm-opttext{flex:1}
+.qcm-opt.correct{border-color:var(--good);background:rgba(26,143,90,.12)}
+.qcm-opt.correct .qcm-optletter{background:var(--good);color:#fff;border-color:var(--good)}
+.qcm-opt.wrong{border-color:var(--bad);background:rgba(210,59,59,.10)}
+.qcm-opt.wrong .qcm-optletter{background:var(--bad);color:#fff;border-color:var(--bad)}
+.qcm-opts.review .qcm-opt{cursor:default}
+.qcm-result{margin-top:14px}
+.qcm-result.hidden{display:none}
+.qcm-verdict{font-weight:800;font-size:15px;display:flex;align-items:center;gap:10px}
+.qcm-verdict.ok{color:var(--good)} .qcm-verdict.ko{color:var(--bad)}
+.qcm-xp{font-size:13px;font-weight:700;padding:2px 8px;border-radius:999px;background:var(--chip-bg2);color:var(--ink)}
+.qcm-goodans{font-size:13.5px;color:var(--muted);margin-top:4px}
+.qcm-solution{margin-top:11px;border:1px solid var(--line);background:var(--chip-bg);border-radius:12px;padding:11px 13px}
+.qcm-sol-h{font-size:11.5px;font-weight:700;text-transform:uppercase;letter-spacing:.04em;color:var(--muted);margin-bottom:5px}
+.qcm-next{margin-top:14px}
+.qcm-done{text-align:center;padding:18px 8px}
+.qcm-done-emoji{font-size:40px}
+.qcm-done h3{margin:6px 0}
+.qcm-done p{color:var(--muted);font-size:14px;margin-bottom:12px}
+.prog-qcm{margin-top:18px;border-top:1px solid var(--line);padding-top:14px}
+.prog-qcm-head{display:flex;align-items:baseline;justify-content:space-between;gap:10px;margin-bottom:10px;flex-wrap:wrap}
+.prog-qcm-stats{font-size:13px;color:var(--muted)}
+.prog-qcm-stats .ok{color:var(--good);font-weight:700} .prog-qcm-stats .ko{color:var(--bad);font-weight:700}
+.prog-qcm-set{margin-bottom:10px}
+.prog-qcm-setlabel{font-size:12px;font-weight:700;color:var(--muted);margin-bottom:5px}
+.prog-qcm-grid{display:flex;flex-wrap:wrap;gap:6px}
+.prog-qcm-cell{width:30px;height:30px;border-radius:8px;border:1px solid var(--line);font-weight:700;font-size:12.5px;
+  cursor:pointer;color:#fff;transition:.12s}
+.prog-qcm-cell:hover{transform:translateY(-1px)}
+.prog-qcm-cell.correct{background:var(--good);border-color:var(--good)}
+.prog-qcm-cell.wrong{background:var(--bad);border-color:var(--bad)}
+.prog-qcm-cell.todo{background:var(--track);border-color:var(--line);color:var(--muted)}
+.qcm-modal-ov{position:fixed;inset:0;background:rgba(0,0,0,.5);display:flex;align-items:flex-start;justify-content:center;
+  z-index:50;padding:30px 14px;overflow:auto}
+.qcm-modal{background:var(--panel);backdrop-filter:blur(var(--panel-blur));-webkit-backdrop-filter:blur(var(--panel-blur));
+  border:1px solid var(--line);border-radius:16px;max-width:680px;width:100%;padding:20px 20px 22px;position:relative}
+.qcm-modal-x{position:absolute;top:12px;right:12px;border:1px solid var(--line);background:var(--btn-bg);border-radius:8px;
+  width:30px;height:30px;cursor:pointer;color:var(--ink);font-size:14px}
 @media(max-width:560px){
   .versus{grid-template-columns:1fr;gap:8px}
   .vs{justify-self:center}
@@ -457,6 +512,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
     <button data-tab="review">Réviser</button>
     <button data-tab="progress">Progression</button>
     <button data-tab="audits">Audits <span class="badge hidden" id="tab-aud-badge">0</span></button>
+    <button data-tab="qcm" class="hidden">QCM <span class="badge muted hidden" id="tab-qcm-badge">0</span></button>
     <button data-tab="examens">Examens TS</button>
     <button data-tab="annales" class="hidden">Examens</button>
     <button data-tab="challenge">Challenge</button>
@@ -580,6 +636,19 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
     </div>
   </section>
 
+  <!-- QCM -->
+  <section data-panel="qcm" class="hidden">
+    <div class="card">
+      <div class="qcm-top">
+        <h2>QCM <span class="kindtag" id="qcm-course"></span></h2>
+        <span class="qcm-prog" id="qcm-prog"></span>
+      </div>
+      <p class="sub">Une question à la fois, une seule tentative. <b>+3 XP</b> si juste, <b>−1 XP</b> si faux
+        (l'XP ne descend pas sous 0). La solution s'affiche après ta réponse. Retrouve tout dans Progression.</p>
+      <div id="qcm-body"></div>
+    </div>
+  </section>
+
   <!-- EXAMENS TS -->
   <section data-panel="examens" class="hidden">
     <div class="card">
@@ -684,7 +753,7 @@ td.num{text-align:right;font-variant-numeric:tabular-nums}
    ================================================================= */
 // Defaut = backend Railway (URL publique, sans token) -> le site publie marche sans reglage,
 // pour toi ET ton pote. Le champ "URL de l'API" reste prioritaire (dev local : http://localhost:8000).
-const APP_VERSION = 10;   // bumpé à chaque déploiement frontend (doit = version.json) -> bandeau de MAJ
+const APP_VERSION = 11;   // bumpé à chaque déploiement frontend (doit = version.json) -> bandeau de MAJ
 const DEFAULT_API = "https://battle-production-640a.up.railway.app";
 let API_BASE = (localStorage.getItem("battle_api_url") || "").trim().replace(/\/+$/, "") || DEFAULT_API;
 function setApiBase(v){
@@ -912,6 +981,14 @@ async function refreshHeader(){
   const n = state.me.pending_audits;
   const b = $("#tab-aud-badge");
   b.textContent=n; b.classList.toggle("hidden", n===0);
+  // Onglet QCM : visible seulement si le cours en a ; badge = nombre restant.
+  const qt=$('#tabs button[data-tab="qcm"]');
+  if(qt){
+    const tot=state.me.qcm_total||0, done=state.me.qcm_done||0, left=tot-done;
+    qt.classList.toggle("hidden", tot===0);
+    const qb=$("#tab-qcm-badge"); qb.textContent=left; qb.classList.toggle("hidden", left<=0);
+    if(tot===0 && qt.classList.contains("active")) switchTab("dash");
+  }
 }
 
 /* =================================================================
@@ -925,6 +1002,7 @@ function switchTab(tab){
   if(tab==="progress")  renderProgress();
   if(tab==="review")    reviewSetupRefresh();
   if(tab==="audits")    renderAudits();
+  if(tab==="qcm")       renderQcm();
   if(tab==="examens")   renderExamens();
   if(tab==="annales")   renderAnnales();
   if(tab==="challenge") renderChallenge();
@@ -1137,6 +1215,8 @@ async function renderProgress(){
       }
     });
   });
+  // Section QCM (si le cours en a) : tous les QCM colorés par statut, cliquables pour revoir.
+  if((state.me && state.me.qcm_total||0) > 0) await renderQcmProgress(body);
   // recentrer sur la carte qu'on vient de réviser (retour depuis une révision unique)
   if(PROG_FOCUS_CARD){
     const sel = (window.CSS && CSS.escape) ? CSS.escape(PROG_FOCUS_CARD) : PROG_FOCUS_CARD;
@@ -1144,6 +1224,128 @@ async function renderProgress(){
     if(row){ row.scrollIntoView({block:"center"}); row.classList.add("just-reviewed"); setTimeout(()=>row.classList.remove("just-reviewed"),1600); }
     PROG_FOCUS_CARD=null;
   }
+}
+
+/* =================================================================
+   QCM (choix multiple : une question à la fois, +3/-1 XP, puis solution)
+   ================================================================= */
+const QCM_AREA_FR={"Foundations":"Fondements","Decision theory":"Théorie de la décision",
+  "Frequentist guarantees":"Garanties fréquentistes","Bayesian computation":"Computation"};
+const QCM_LETTERS=["a","b","c","d","e","f"];
+function qcmArea(a){ return QCM_AREA_FR[a]||a; }
+
+async function renderQcm(){
+  await refreshHeader();
+  $("#qcm-course").textContent=state.course;
+  const box=$("#qcm-body"); box.innerHTML='<p class="empty">Chargement…</p>';
+  let data;
+  try{ data=await api("/qcm/next"+cq()); }
+  catch(e){ box.innerHTML='<p class="empty">Erreur de chargement.</p>'; return; }
+  $("#qcm-prog").textContent=`${data.answered}/${data.total} faits`;
+  box.innerHTML="";
+  if(data.done){
+    const d=document.createElement("div"); d.className="qcm-done";
+    d.innerHTML=`<div class="qcm-done-emoji">🎉</div><h3>Tu as fait les ${data.total} QCM !</h3>`
+      +`<p>Retrouve-les tous (réussis et ratés) avec la solution dans Progression.</p>`;
+    const btn=document.createElement("button"); btn.className="btn primary"; btn.textContent="Voir dans Progression";
+    btn.onclick=()=>switchTab("progress"); d.appendChild(btn); box.appendChild(d); return;
+  }
+  box.appendChild(qcmCard(data.qcm));
+}
+
+function qcmCard(q){
+  const card=document.createElement("div");
+  const meta=document.createElement("div"); meta.className="qcm-meta";
+  meta.innerHTML=`<span class="qcm-areachip">${escapeHtml(qcmArea(q.area))}</span>`
+    +`<span class="qcm-setlabel">Série ${q.set_no}</span>`;
+  const stem=document.createElement("div"); stem.className="tex qcm-stem"; tex(stem,q.stem);
+  const opts=document.createElement("div"); opts.className="qcm-opts";
+  const result=document.createElement("div"); result.className="qcm-result hidden";
+  const btns=[]; let answered=false;
+  q.options.forEach((o,i)=>{
+    const b=document.createElement("button"); b.className="qcm-opt"; b.type="button";
+    b.innerHTML=`<span class="qcm-optletter">${QCM_LETTERS[i]}</span><span class="qcm-opttext tex"></span>`;
+    tex(b.querySelector(".qcm-opttext"),o);
+    b.onclick=()=>answer(i); btns.push(b); opts.appendChild(b);
+  });
+  async function answer(i){
+    if(answered) return; answered=true; btns.forEach(b=>b.disabled=true);
+    let r;
+    try{ r=await api("/qcm/"+encodeURIComponent(q.id)+"/answer",{method:"POST",body:{chosen_index:i}}); }
+    catch(e){ answered=false; btns.forEach(b=>b.disabled=false); toast("Erreur, réessaie","bad"); return; }
+    btns[r.correct_index].classList.add("correct");
+    if(!r.correct) btns[i].classList.add("wrong");
+    const ok=r.correct;
+    result.innerHTML=`<div class="qcm-verdict ${ok?'ok':'ko'}">${ok?'✅ Juste !':'❌ Faux'}`
+      +`<span class="qcm-xp">${r.xp_delta>=0?'+':''}${(+r.xp_delta).toFixed(0)} XP</span></div>`;
+    if(!ok){ const g=document.createElement("div"); g.className="qcm-goodans";
+      g.innerHTML=`Bonne réponse : <b>(${QCM_LETTERS[r.correct_index]})</b>`; result.appendChild(g); }
+    const sol=document.createElement("div"); sol.className="qcm-solution";
+    sol.innerHTML='<div class="qcm-sol-h">Solution</div>';
+    const st=document.createElement("div"); st.className="tex"; tex(st,r.solution); sol.appendChild(st);
+    result.appendChild(sol);
+    const next=document.createElement("button"); next.className="btn primary qcm-next";
+    next.textContent="Question suivante →"; next.onclick=()=>renderQcm(); result.appendChild(next);
+    result.classList.remove("hidden");
+    toast(ok?"✅ Juste ! +3 XP":"❌ Faux · −1 XP", ok?"good":"bad");
+    refreshHeader();   // met à jour XP du header + badge restant
+    next.scrollIntoView({block:"nearest"});
+  }
+  card.append(meta, stem, opts, result);
+  return card;
+}
+
+async function renderQcmProgress(body){
+  let list; try{ list=await api("/qcm/progress"+cq()); }catch(e){ return; }
+  if(!list || !list.length) return;
+  const done=list.filter(x=>x.status!=="todo").length;
+  const ok=list.filter(x=>x.status==="correct").length;
+  const ko=list.filter(x=>x.status==="wrong").length;
+  const wrap=document.createElement("div"); wrap.className="prog-qcm";
+  const h=document.createElement("div"); h.className="prog-qcm-head";
+  h.innerHTML=`<span class="prog-summary-name">QCM</span>`
+    +`<span class="prog-qcm-stats"><b>${done}</b>/${list.length} faits · `
+    +`<span class="ok">${ok} ✓</span> · <span class="ko">${ko} ✗</span></span>`;
+  wrap.appendChild(h);
+  const bySet={}; list.forEach(q=>{ (bySet[q.set_no]=bySet[q.set_no]||[]).push(q); });
+  Object.keys(bySet).sort((a,b)=>a-b).forEach(s=>{
+    const sec=document.createElement("div"); sec.className="prog-qcm-set";
+    sec.innerHTML=`<div class="prog-qcm-setlabel">Série ${s}</div>`;
+    const grid=document.createElement("div"); grid.className="prog-qcm-grid";
+    bySet[s].forEach((q,i)=>{
+      const cell=document.createElement("button"); cell.className="prog-qcm-cell "+q.status;
+      cell.textContent=i+1; cell.title=qcmArea(q.area)+(q.status==="todo"?" · pas encore fait":"");
+      cell.onclick=()=>qcmReview(q); grid.appendChild(cell);
+    });
+    sec.appendChild(grid); wrap.appendChild(sec);
+  });
+  body.appendChild(wrap);
+}
+
+function qcmReview(q){
+  if(q.status==="todo"){ toast("Pas encore fait — va dans l'onglet QCM pour y répondre",""); return; }
+  const ov=document.createElement("div"); ov.className="qcm-modal-ov";
+  const m=document.createElement("div"); m.className="qcm-modal";
+  const x=document.createElement("button"); x.className="qcm-modal-x"; x.innerHTML="✕"; x.onclick=()=>ov.remove();
+  const head=document.createElement("div"); head.className="qcm-meta";
+  head.innerHTML=`<span class="qcm-areachip">${escapeHtml(qcmArea(q.area))}</span>`
+    +`<span class="qcm-setlabel">Série ${q.set_no}</span>`
+    +`<span class="qcm-verdict ${q.status==="correct"?'ok':'ko'}">${q.status==="correct"?'✅ Réussi':'❌ Raté'}</span>`;
+  const stem=document.createElement("div"); stem.className="tex qcm-stem"; tex(stem,q.stem);
+  const opts=document.createElement("div"); opts.className="qcm-opts review";
+  q.options.forEach((o,i)=>{
+    const b=document.createElement("div"); b.className="qcm-opt";
+    if(i===q.correct_index) b.classList.add("correct");
+    if(i===q.chosen_index && i!==q.correct_index) b.classList.add("wrong");
+    b.innerHTML=`<span class="qcm-optletter">${QCM_LETTERS[i]}</span><span class="qcm-opttext tex"></span>`;
+    tex(b.querySelector(".qcm-opttext"),o); opts.appendChild(b);
+  });
+  const sol=document.createElement("div"); sol.className="qcm-solution";
+  sol.innerHTML='<div class="qcm-sol-h">Solution</div>';
+  const st=document.createElement("div"); st.className="tex"; tex(st,q.solution); sol.appendChild(st);
+  m.append(x, head, stem, opts, sol);
+  ov.appendChild(m); ov.onclick=e=>{ if(e.target===ov) ov.remove(); };
+  document.body.appendChild(ov);
 }
 
 /* =================================================================
